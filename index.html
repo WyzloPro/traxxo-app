@@ -94,6 +94,40 @@
     .ob-success-icon { font-size:48px; margin-bottom:16px; }
     .ob-success h3 { font-size:20px; font-weight:700; margin-bottom:8px; }
     .ob-success p { font-size:14px; color:var(--muted); }
+
+    /* CONEXIONES */
+    .connection-row { display:flex; align-items:center; gap:12px; padding:10px 0; border-bottom:1px solid var(--border); }
+    .connection-row:last-child { border-bottom:none; }
+    .connection-icon { width:32px; height:32px; border-radius:8px; border:1px solid; display:flex; align-items:center; justify-content:center; font-size:14px; font-weight:700; flex-shrink:0; }
+    .connection-status { font-size:11px; font-weight:700; padding:2px 8px; border-radius:20px; background:var(--border); color:var(--muted); }
+    .connection-status.connected { background:#10b98120; color:#10b981; border:1px solid #10b98130; }
+
+
+    /* PLAN SELECTOR */
+    .plan-grid { }
+    @media (max-width: 480px) { .plan-grid { grid-template-columns: 1fr !important; } }
+    .plan-card { background:var(--bg); border:2px solid var(--border); border-radius:14px; padding:20px; cursor:pointer; transition:border-color .2s; position:relative; overflow:hidden; }
+    .plan-card:hover { border-color:#3f3f46; }
+    .plan-card.selected { border-color:var(--accent); }
+    .plan-card-pro { border-color:#8b5cf640; }
+    .plan-card-pro:hover { border-color:#8b5cf6; }
+    .plan-card-pro.selected { border-color:#8b5cf6; }
+    .plan-badge { position:absolute; top:12px; right:12px; font-size:9px; font-weight:700; padding:3px 8px; border-radius:20px; background:#8b5cf620; color:#8b5cf6; border:1px solid #8b5cf640; letter-spacing:.04em; }
+    .plan-card-header { margin-bottom:16px; }
+    .plan-name { font-size:16px; font-weight:700; margin-bottom:4px; }
+    .plan-price { font-size:22px; font-weight:800; color:var(--accent); }
+    .plan-card-pro .plan-price { color:#8b5cf6; }
+    .plan-features { display:flex; flex-direction:column; gap:7px; margin-bottom:16px; }
+    .plan-feat { font-size:12px; color:var(--muted); display:flex; gap:6px; align-items:center; }
+    .plan-feat span { font-size:10px; }
+    .plan-feat.accent { color:var(--text); font-weight:500; }
+    .plan-feat.muted { opacity:.4; text-decoration:line-through; }
+    .plan-sub { font-size:11px; color:var(--muted); margin-bottom:10px; }
+    .plan-cta { text-align:center; padding:10px; border-radius:8px; font-size:13px; font-weight:600; background:var(--border); color:var(--text); transition:background .15s; }
+    .plan-card:hover .plan-cta { background:#3f3f46; }
+    .plan-cta-pro { background:#8b5cf620; color:#8b5cf6; border:1px solid #8b5cf640; }
+    .plan-card-pro:hover .plan-cta-pro { background:#8b5cf630; }
+
   </style>
 </head>
 <body>
@@ -173,10 +207,58 @@
 
     <!-- ONBOARDING WIZARD -->
     <div id="onboarding" style="display:none">
+
+      <!-- PLAN SELECTOR (paso 0) -->
+      <div id="ob-plan-selector">
+        <h3 class="ob-title" style="margin-bottom:6px">Elige tu plan</h3>
+        <p class="ob-sub">Puedes cambiar en cualquier momento.</p>
+
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:20px" class="plan-grid">
+
+          <!-- Basic -->
+          <div class="plan-card" onclick="selectPlan('basic',this)">
+            <div class="plan-card-header">
+              <div class="plan-name">Basic</div>
+              <div class="plan-price">Gratis</div>
+            </div>
+            <div class="plan-features">
+              <div class="plan-feat"><span>✓</span> Google Search Console</div>
+              <div class="plan-feat"><span>✓</span> Google Ads</div>
+              <div class="plan-feat"><span>✓</span> Google Analytics</div>
+              <div class="plan-feat muted"><span>—</span> Semrush</div>
+              <div class="plan-feat muted"><span>—</span> Google Trends</div>
+            </div>
+            <div class="plan-cta">Empezar con Basic</div>
+          </div>
+
+          <!-- Pro -->
+          <div class="plan-card plan-card-pro" onclick="selectPlan('pro',this)">
+            <div class="plan-badge">3 meses gratis</div>
+            <div class="plan-card-header">
+              <div class="plan-name">Pro</div>
+              <div class="plan-price">0€ <span style="font-size:11px;font-weight:400;opacity:.6">/ 3 meses</span></div>
+            </div>
+            <div class="plan-features">
+              <div class="plan-feat"><span>✓</span> Google Search Console</div>
+              <div class="plan-feat"><span>✓</span> Google Ads</div>
+              <div class="plan-feat"><span>✓</span> Google Analytics</div>
+              <div class="plan-feat accent"><span>✓</span> Semrush</div>
+              <div class="plan-feat accent"><span>✓</span> Google Trends</div>
+            </div>
+            <div class="plan-sub">Después: 249€/mes</div>
+            <div class="plan-cta plan-cta-pro">Empezar con Pro</div>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- STEPS (se muestran tras elegir plan) -->
+      <div id="ob-wizard" style="display:none">
       <div class="ob-steps" id="ob-steps-bar">
         <div class="ob-step active" data-step="1"><span>1</span> Tu web</div>
         <div class="ob-step" data-step="2"><span>2</span> Herramientas</div>
         <div class="ob-step" data-step="3"><span>3</span> Objetivos</div>
+        <div class="ob-step" data-step="4"><span>4</span> Conectar</div>
       </div>
 
       <!-- Step 1 -->
@@ -257,23 +339,74 @@
         <input type="text" id="ob-competitors" placeholder="competitor1.com, competitor2.com" />
         <div style="display:flex;gap:10px;margin-top:8px">
           <button class="btn" style="background:var(--border);color:var(--text);flex:1" onclick="obNext(2)">← Atrás</button>
-          <button class="btn" style="flex:2" onclick="obFinish()">Empezar →</button>
+          <button class="btn" style="flex:2" onclick="obNext(4)">Siguiente →</button>
         </div>
       </div>
+
+      <!-- Step 4 — Conectar Google -->
+      <div class="ob-panel" id="ob-4" style="display:none">
+        <h3 class="ob-title">Conecta tu cuenta de Google</h3>
+        <p class="ob-sub">Autorizamos el acceso a Search Console, Google Ads y Analytics. Seguro y revocable en cualquier momento.</p>
+
+        <div id="google-connect-status">
+          <div class="ob-tool-card" id="google-card" style="border-color:var(--border);cursor:default">
+            <div class="ob-tool-icon" style="background:#4285f420;border-color:#4285f440;font-size:18px">G</div>
+            <div style="flex:1">
+              <div class="ob-tool-name">Google Search Console · Ads · Analytics</div>
+              <div class="ob-tool-desc">Clics, posiciones, campañas y conversiones</div>
+            </div>
+            <div id="google-badge" style="font-size:11px;font-weight:700;padding:3px 10px;border-radius:20px;background:var(--border);color:var(--muted)">Sin conectar</div>
+          </div>
+
+          <button id="google-connect-btn" class="btn" style="margin-top:16px;background:#4285f4;color:#fff" onclick="connectGoogle()">
+            Conectar con Google
+          </button>
+          <p style="font-size:11px;color:var(--muted);margin-top:8px;text-align:center">Solo pedimos acceso de lectura. Nunca modificamos nada en tu cuenta.</p>
+        </div>
+
+        <div id="google-connected" style="display:none;padding:16px;background:#10b98110;border:1px solid #10b98130;border-radius:10px;margin-top:8px">
+          <div style="font-size:13px;color:#10b981;font-weight:600">✓ Google conectado correctamente</div>
+          <div id="google-email-display" style="font-size:12px;color:var(--muted);margin-top:4px"></div>
+        </div>
+
+        <div style="display:flex;gap:10px;margin-top:20px">
+          <button class="btn" style="background:var(--border);color:var(--text);flex:1" onclick="obNext(3)">← Atrás</button>
+          <button class="btn" style="flex:2" onclick="obFinish()" id="finish-btn">
+            Empezar →
+          </button>
+        </div>
+        <p style="font-size:11px;color:var(--muted);text-align:center;margin-top:8px">Puedes conectar Google después desde tu perfil.</p>
+      </div>
     </div>
+
+      </div><!-- /ob-wizard -->
 
     <!-- DASHBOARD AFTER ONBOARDING -->
     <div id="dash-main">
       <div class="dash-card">
         <h3>Tu cuenta está activa</h3>
-        <p>Configura tu primer proyecto para recibir el dashboard automatizado.</p>
+        <p>Configura tu primer proyecto para recibir el dashboard automatizado cada lunes.</p>
         <span class="badge">Early Access</span>
       </div>
+
+      <!-- Estado de conexiones -->
       <div class="dash-card" style="margin-top:12px">
-        <h3>¿Qué viene después?</h3>
-        <p>Conectar GSC · Ads · Semrush · tu tienda y recibir el primer dashboard automatizado cada lunes.</p>
+        <h3 style="margin-bottom:12px">Conexiones</h3>
+        <div id="connections-list">
+          <div class="connection-row" id="conn-google">
+            <div class="connection-icon" style="background:#4285f420;border-color:#4285f440">G</div>
+            <div style="flex:1">
+              <div style="font-size:13px;font-weight:600">Google (GSC · Ads · Analytics)</div>
+            </div>
+            <div class="connection-status" id="conn-google-status">Sin conectar</div>
+          </div>
+        </div>
+        <button class="btn" style="margin-top:14px;background:#4285f4;color:#fff;font-size:13px;padding:10px" onclick="connectGoogle()" id="dash-google-btn">
+          Conectar Google
+        </button>
       </div>
-      <button class="btn" style="margin-top:20px" onclick="startOnboarding()">+ Añadir mi primer proyecto</button>
+
+      <button class="btn" style="margin-top:16px" onclick="startOnboarding()">+ Añadir proyecto</button>
     </div>
   </div>
 </div>
@@ -359,6 +492,7 @@
     document.getElementById('auth-section').style.display = 'none';
     document.getElementById('dashboard').style.display = 'flex';
     document.getElementById('user-email').textContent = user.email;
+    checkGoogleConnection();
   }
 
   // Comprobar sesión activa al cargar
@@ -367,9 +501,24 @@
   });
 
   // ONBOARDING
+  var _selectedPlan = null;
+
   function startOnboarding() {
     document.getElementById('dash-main').style.display = 'none';
     document.getElementById('onboarding').style.display = '';
+    document.getElementById('ob-plan-selector').style.display = '';
+    document.getElementById('ob-wizard').style.display = 'none';
+  }
+
+  function selectPlan(plan, el) {
+    _selectedPlan = plan;
+    document.querySelectorAll('.plan-card').forEach(function(c){ c.classList.remove('selected'); });
+    el.classList.add('selected');
+    setTimeout(function() {
+      document.getElementById('ob-plan-selector').style.display = 'none';
+      document.getElementById('ob-wizard').style.display = '';
+      obNext(1);
+    }, 300);
   }
 
   function obNext(step) {
@@ -386,8 +535,49 @@
       else if (n < step) s.classList.add('done');
     });
     // Mostrar panel correcto
-    [1,2,3].forEach(function(n) {
-      document.getElementById('ob-' + n).style.display = n === step ? '' : 'none';
+    [1,2,3,4].forEach(function(n) {
+      var el = document.getElementById('ob-' + n);
+      if (el) el.style.display = n === step ? '' : 'none';
+    });
+  }
+
+  // Conectar Google OAuth
+  function connectGoogle() {
+    var btn = document.getElementById('google-connect-btn');
+    btn.disabled = true; btn.textContent = 'Conectando...';
+
+    // Iniciar OAuth de Google via Supabase
+    sb.auth.signInWithOAuth({
+      provider: 'google',
+      options: {
+        scopes: 'https://www.googleapis.com/auth/webmasters.readonly https://www.googleapis.com/auth/adwords https://www.googleapis.com/auth/analytics.readonly',
+        redirectTo: window.location.href,
+        queryParams: { access_type: 'offline', prompt: 'consent' }
+      }
+    }).then(function(result) {
+      if (result.error) {
+        btn.disabled = false;
+        btn.textContent = 'Conectar con Google';
+        console.error('OAuth error:', result.error);
+      }
+      // Si OK, Supabase redirige y vuelve con la sesión
+    });
+  }
+
+  // Comprobar si hay token de Google al cargar
+  function checkGoogleConnection() {
+    sb.auth.getSession().then(function(res) {
+      var session = res.data && res.data.session;
+      if (session && session.provider_token) {
+        // Tiene token de Google
+        document.getElementById('google-connected').style.display = '';
+        document.getElementById('google-connect-btn').style.display = 'none';
+        document.getElementById('google-badge').textContent = '✓ Conectado';
+        document.getElementById('google-badge').style.background = '#10b98120';
+        document.getElementById('google-badge').style.color = '#10b981';
+        var emailEl = document.getElementById('google-email-display');
+        if (emailEl && session.user) emailEl.textContent = session.user.email;
+      }
     });
   }
 
@@ -421,6 +611,7 @@
         platform:    platform || 'other',
         country:     country,
         objectives:  objectives || 'sin especificar',
+        plan: _selectedPlan || 'basic',
         active:      true
       });
       if (error) console.error('Error guardando proyecto:', error);
