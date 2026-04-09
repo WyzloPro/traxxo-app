@@ -888,38 +888,41 @@
     ].filter(Boolean).join(' | ');
 
     if (userId) {
-      await sb.from('clients').upsert({ id: userId, email: session.user.email }, { onConflict: 'id' });
-      var { error } = await sb.from('projects').insert({
-        client_id:  userId,
-        domain:     domain,
-        platform:   platform || 'other',
-        country:    country,
-        objectives: objectives || 'sin especificar',
-        plan:       _selectedPlan || 'basic',
-        active:     true
-      });
-      if (error) console.error('Error guardando proyecto:', error);
-    }
+      try {
+        await sb.from('clients').upsert({ id: userId, email: session.user.email }, { onConflict: 'id' });
+      } catch(e) { console.log('clients upsert error:', e); }
 
-    // Notificar a Daniel via Supabase (insertar en tabla leads_notify)
-    if (userId) {
-      var b2bVal = document.querySelector('input[name="b2b2c"]:checked');
-      var notifyData = {
-        client_id:   userId,
-        client_email: session.user.email,
-        client_name: (session.user.user_metadata || {}).full_name || (session.user.user_metadata || {}).name || session.user.email,
-        domain:      domain,
-        plan:        _selectedPlan || 'basic',
-        country:     country,
-        web_type:    document.getElementById('ob-type') ? document.getElementById('ob-type').value : '',
-        b2b_b2c:     b2bVal ? b2bVal.value : '',
-        platform:    document.getElementById('ob-platform') ? document.getElementById('ob-platform').value : '',
-        priority:    priority,
-        competitors: competitors,
-        budget:      budget,
-        created_at:  new Date().toISOString()
-      };
-      await sb.from('leads_notify').insert(notifyData).catch(function(e){ console.log('leads_notify error:', e); });
+      try {
+        var { error: projError } = await sb.from('projects').insert({
+          client_id:  userId,
+          domain:     domain || 'sin especificar',
+          platform:   platform || 'other',
+          country:    country || 'es',
+          objectives: objectives || 'sin especificar',
+          plan:       _selectedPlan || 'basic',
+          active:     true
+        });
+        if (projError) console.error('Error guardando proyecto:', projError);
+      } catch(e) { console.log('projects insert error:', e); }
+
+      // Notificar a Daniel
+      try {
+        var b2bVal = document.querySelector('input[name="b2b2c"]:checked');
+        await sb.from('leads_notify').insert({
+          client_id:    userId,
+          client_email: session.user.email,
+          client_name:  (session.user.user_metadata || {}).full_name || (session.user.user_metadata || {}).name || session.user.email,
+          domain:       domain || 'sin especificar',
+          plan:         _selectedPlan || 'basic',
+          country:      country || 'es',
+          web_type:     getVal('ob-type'),
+          b2b_b2c:      b2bVal ? b2bVal.value : '',
+          platform:     getVal('ob-platform'),
+          priority:     priority,
+          competitors:  competitors,
+          budget:       budget
+        });
+      } catch(e) { console.log('leads_notify error:', e); }
     }
 
     clearTimeout(safetyTimeout);
