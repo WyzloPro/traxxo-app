@@ -631,7 +631,10 @@
         <div style="display:flex;flex-direction:column;gap:8px">
           <div style="display:flex;align-items:center;justify-content:space-between;padding:12px 14px;background:var(--bg);border:1px solid var(--border);border-radius:10px">
             <div>
-              <div style="font-size:13px;font-weight:600">🌍 Añadir país objetivo</div>
+              <div style="font-size:13px;font-weight:600;display:flex;align-items:center;gap:8px">
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="7" stroke="#22d3ee" stroke-width="1.3"/><path d="M8 1c0 0-3 3-3 7s3 7 3 7" stroke="#22d3ee" stroke-width="1.3" stroke-linecap="round"/><path d="M8 1c0 0 3 3 3 7s-3 7-3 7" stroke="#22d3ee" stroke-width="1.3" stroke-linecap="round"/><path d="M1.5 6h13M1.5 10h13" stroke="#22d3ee" stroke-width="1.3" stroke-linecap="round"/></svg>
+                Añadir país objetivo
+              </div>
               <div style="font-size:11px;color:var(--muted);margin-top:2px">Análisis SEO en un mercado adicional</div>
             </div>
             <div style="display:flex;align-items:center;gap:8px;flex-shrink:0">
@@ -641,7 +644,10 @@
           </div>
           <div style="display:flex;align-items:center;justify-content:space-between;padding:12px 14px;background:var(--bg);border:1px solid var(--border);border-radius:10px">
             <div>
-              <div style="font-size:13px;font-weight:600">📱 Añadir web</div>
+              <div style="font-size:13px;font-weight:600;display:flex;align-items:center;gap:8px">
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><rect x="3" y="1" width="10" height="14" rx="2" stroke="#8b5cf6" stroke-width="1.3"/><circle cx="8" cy="12" r="1" fill="#8b5cf6"/><path d="M6 3.5h4" stroke="#8b5cf6" stroke-width="1.3" stroke-linecap="round"/></svg>
+                Añadir web
+              </div>
               <div style="font-size:11px;color:var(--muted);margin-top:2px">Monitoriza otro dominio desde tu cuenta</div>
             </div>
             <div style="display:flex;align-items:center;gap:8px;flex-shrink:0">
@@ -657,7 +663,7 @@
     <!-- MODAL: Añadir país -->
     <div id="modal-country" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:100;align-items:center;justify-content:center;padding:24px">
       <div style="background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:28px;width:100%;max-width:380px">
-        <h3 style="font-size:16px;font-weight:700;margin-bottom:6px">🌍 Añadir país objetivo</h3>
+        <h3 style="font-size:16px;font-weight:700;margin-bottom:6px;display:flex;align-items:center;gap:8px"><svg width="18" height="18" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="7" stroke="#22d3ee" stroke-width="1.3"/><path d="M8 1c0 0-3 3-3 7s3 7 3 7" stroke="#22d3ee" stroke-width="1.3" stroke-linecap="round"/><path d="M8 1c0 0 3 3 3 7s-3 7-3 7" stroke="#22d3ee" stroke-width="1.3" stroke-linecap="round"/><path d="M1.5 6h13M1.5 10h13" stroke="#22d3ee" stroke-width="1.3" stroke-linecap="round"/></svg> Añadir país objetivo</h3>
         <p style="font-size:13px;color:var(--muted);margin-bottom:20px">Traxxo analizará tu web en este mercado adicional. <strong style="color:var(--text)">+29€/mes</strong> por país.</p>
         <label style="font-size:12px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.04em">País</label>
         <select id="addon-country" style="width:100%;padding:10px 14px;background:var(--bg);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:14px;font-family:inherit;margin-bottom:16px;outline:none">
