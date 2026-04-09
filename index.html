@@ -402,23 +402,20 @@
           <!-- Datos: incluido en todos los planes -->
           <div style="font-size:11px;font-weight:700;color:var(--muted);letter-spacing:.06em;text-transform:uppercase;margin-bottom:8px">Datos — todos los planes</div>
           <div class="ob-tools" style="margin-bottom:16px">
-            <label class="ob-tool-card" style="border-color:rgba(34,211,238,.3)">
-              <input type="checkbox" id="tool-gsc" checked />
+            <label class="ob-tool-card" style="border-color:rgba(34,211,238,.3);cursor:default">
               <div class="ob-tool-icon" style="background:#4285f420;border-color:#4285f440">G</div>
               <div style="flex:1"><div class="ob-tool-name">Google Search Console</div><div class="ob-tool-desc">Clics, posiciones, keywords</div></div>
-              <div style="font-size:10px;font-weight:700;color:var(--accent);background:rgba(34,211,238,.1);padding:2px 8px;border-radius:20px;white-space:nowrap">1 clic</div>
+              <div style="font-size:10px;font-weight:700;color:var(--accent);background:rgba(34,211,238,.1);padding:2px 8px;border-radius:20px;white-space:nowrap">✓ Incluido</div>
             </label>
-            <label class="ob-tool-card" style="border-color:rgba(34,211,238,.3)">
-              <input type="checkbox" id="tool-ads" checked />
+            <label class="ob-tool-card" style="border-color:rgba(34,211,238,.3);cursor:default">
               <div class="ob-tool-icon" style="background:#fbbc0420;border-color:#fbbc0440">A</div>
               <div style="flex:1"><div class="ob-tool-name">Google Ads</div><div class="ob-tool-desc">Campañas, ROAS, conversiones</div></div>
-              <div style="font-size:10px;font-weight:700;color:var(--accent);background:rgba(34,211,238,.1);padding:2px 8px;border-radius:20px;white-space:nowrap">1 clic</div>
+              <div style="font-size:10px;font-weight:700;color:var(--accent);background:rgba(34,211,238,.1);padding:2px 8px;border-radius:20px;white-space:nowrap">✓ Incluido</div>
             </label>
-            <label class="ob-tool-card" style="border-color:rgba(34,211,238,.3)">
-              <input type="checkbox" id="tool-ga4" checked />
+            <label class="ob-tool-card" style="border-color:rgba(34,211,238,.3);cursor:default">
               <div class="ob-tool-icon" style="background:#e8710a20;border-color:#e8710a40">GA</div>
               <div style="flex:1"><div class="ob-tool-name">Google Analytics 4</div><div class="ob-tool-desc">Tráfico, sesiones, conversiones</div></div>
-              <div style="font-size:10px;font-weight:700;color:var(--accent);background:rgba(34,211,238,.1);padding:2px 8px;border-radius:20px;white-space:nowrap">1 clic</div>
+              <div style="font-size:10px;font-weight:700;color:var(--accent);background:rgba(34,211,238,.1);padding:2px 8px;border-radius:20px;white-space:nowrap">✓ Incluido</div>
             </label>
           </div>
 
@@ -895,12 +892,33 @@
       if (error) console.error('Error guardando proyecto:', error);
     }
 
+    // Notificar a Daniel via Supabase (insertar en tabla leads_notify)
+    if (userId) {
+      var b2bVal = document.querySelector('input[name="b2b2c"]:checked');
+      var notifyData = {
+        client_id:   userId,
+        client_email: session.user.email,
+        client_name: (session.user.user_metadata || {}).full_name || (session.user.user_metadata || {}).name || session.user.email,
+        domain:      domain,
+        plan:        _selectedPlan || 'basic',
+        country:     country,
+        web_type:    document.getElementById('ob-type') ? document.getElementById('ob-type').value : '',
+        b2b_b2c:     b2bVal ? b2bVal.value : '',
+        platform:    document.getElementById('ob-platform') ? document.getElementById('ob-platform').value : '',
+        priority:    priority,
+        competitors: competitors,
+        budget:      budget,
+        created_at:  new Date().toISOString()
+      };
+      await sb.from('leads_notify').insert(notifyData).catch(function(e){ console.log('leads_notify error:', e); });
+    }
+
     // Mostrar éxito
     document.getElementById('onboarding').innerHTML =
       '<div class="ob-success">' +
       '<div class="ob-success-icon">🎉</div>' +
       '<h3>¡Proyecto configurado!</h3>' +
-      '<p style="margin-bottom:16px">Hemos guardado <strong>' + domain + '</strong>.<br/>Nos pondremos en contacto con los próximos pasos.</p>' +
+      '<p style="margin-bottom:16px">Hemos guardado <strong>' + domain + '</strong>.<br/>Nos pondremos en contacto en las próximas 24 horas con los primeros pasos.</p>' +
       '<div style="padding:16px;background:var(--bg);border:1px solid var(--border);border-radius:10px;font-size:13px;color:var(--muted)">' +
       '📧 Recibirás un email en <strong>' + (session ? session.user.email : '') + '</strong> con las instrucciones para lanzar tu primer dashboard.' +
       '</div>' +
