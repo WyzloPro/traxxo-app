@@ -298,24 +298,6 @@
             <label>Plataforma</label>
             <select id="ob-platform">
               <option value="">Selecciona...</option>
-              <optgroup id="platform-ecommerce" label="E-commerce">
-                <option value="prestashop">PrestaShop</option>
-                <option value="shopify">Shopify</option>
-                <option value="woocommerce">WooCommerce</option>
-                <option value="magento">Magento</option>
-                <option value="bigcommerce">BigCommerce</option>
-              </optgroup>
-              <optgroup id="platform-web" label="Web / CMS">
-                <option value="wordpress">WordPress</option>
-                <option value="webflow">Webflow</option>
-                <option value="squarespace">Squarespace</option>
-                <option value="wix">Wix</option>
-                <option value="hubspot">HubSpot CMS</option>
-              </optgroup>
-              <optgroup label="Otras">
-                <option value="custom">Desarrollo a medida</option>
-                <option value="other">Otra</option>
-              </optgroup>
             </select>
           </div>
           <label>País principal</label>
@@ -765,20 +747,29 @@
     }, 300);
   }
 
+  var PLATFORMS = {
+    ecommerce: [
+      ['prestashop','PrestaShop'],['shopify','Shopify'],['woocommerce','WooCommerce'],
+      ['magento','Magento'],['bigcommerce','BigCommerce'],['custom','Desarrollo a medida'],['other','Otra']
+    ],
+    web: [
+      ['wordpress','WordPress'],['webflow','Webflow'],['squarespace','Squarespace'],
+      ['wix','Wix'],['hubspot','HubSpot CMS'],['custom','Desarrollo a medida'],['other','Otra']
+    ]
+  };
+
   function togglePlatform(type) {
     var row = document.getElementById('platform-row');
-    var ecomGroup = document.getElementById('platform-ecommerce');
-    var webGroup  = document.getElementById('platform-web');
+    var sel = document.getElementById('ob-platform');
     if (!type) { row.style.display = 'none'; return; }
     row.style.display = '';
-    if (type === 'ecommerce') {
-      ecomGroup.style.display = '';
-      webGroup.style.display  = 'none';
-    } else {
-      ecomGroup.style.display = 'none';
-      webGroup.style.display  = '';
-    }
-    document.getElementById('ob-platform').value = '';
+    var options = PLATFORMS[type === 'ecommerce' ? 'ecommerce' : 'web'];
+    sel.innerHTML = '<option value="">Selecciona...</option>';
+    options.forEach(function(o) {
+      var opt = document.createElement('option');
+      opt.value = o[0]; opt.textContent = o[1];
+      sel.appendChild(opt);
+    });
   }
   // Ocultar plataforma por defecto
   document.getElementById('platform-row').style.display = 'none';
