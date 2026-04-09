@@ -92,22 +92,22 @@
     .overlay-icon { margin-bottom:8px; display:flex; justify-content:center; }
     .overlay-label { font-size:12px; font-weight:600; color:var(--muted); white-space:nowrap; }
 
-    /* SVG ANIMATIONS — ecualizador (barras desde abajo) */
-    @keyframes eq1 { 0%,100%{transform:scaleY(.2)} 50%{transform:scaleY(1)} }
-    @keyframes eq2 { 0%,100%{transform:scaleY(.5)} 50%{transform:scaleY(.25)} }
-    @keyframes eq3 { 0%,100%{transform:scaleY(.3)} 50%{transform:scaleY(.9)} }
-    @keyframes eq4 { 0%,100%{transform:scaleY(.7)} 50%{transform:scaleY(.35)} }
-    @keyframes eq5 { 0%,100%{transform:scaleY(.4)} 50%{transform:scaleY(.8)} }
-    @keyframes eq6 { 0%,100%{transform:scaleY(.6)} 50%{transform:scaleY(.2)} }
-    @keyframes eq7 { 0%,100%{transform:scaleY(.25)} 50%{transform:scaleY(.75)} }
-    @keyframes eq8 { 0%,100%{transform:scaleY(.8)} 50%{transform:scaleY(.4)} }
-    @keyframes eq9 { 0%,100%{transform:scaleY(.35)} 50%{transform:scaleY(.95)} }
-    @keyframes eq10{ 0%,100%{transform:scaleY(.55)} 50%{transform:scaleY(.3)} }
-    @keyframes eq11{ 0%,100%{transform:scaleY(.2)} 50%{transform:scaleY(.7)} }
-    @keyframes eq12{ 0%,100%{transform:scaleY(.65)} 50%{transform:scaleY(.25)} }
-    /* Spinner tipo macOS — arco que gira */
+    /* SVG ANIMATIONS — ecualizador suave (variación pequeña, duración larga) */
+    @keyframes eq1  { 0%,100%{transform:scaleY(.45)} 50%{transform:scaleY(.85)} }
+    @keyframes eq2  { 0%,100%{transform:scaleY(.65)} 50%{transform:scaleY(.4)}  }
+    @keyframes eq3  { 0%,100%{transform:scaleY(.5)}  50%{transform:scaleY(.9)}  }
+    @keyframes eq4  { 0%,100%{transform:scaleY(.75)} 50%{transform:scaleY(.5)}  }
+    @keyframes eq5  { 0%,100%{transform:scaleY(.55)} 50%{transform:scaleY(.8)}  }
+    @keyframes eq6  { 0%,100%{transform:scaleY(.7)}  50%{transform:scaleY(.45)} }
+    @keyframes eq7  { 0%,100%{transform:scaleY(.4)}  50%{transform:scaleY(.75)} }
+    @keyframes eq8  { 0%,100%{transform:scaleY(.8)}  50%{transform:scaleY(.55)} }
+    @keyframes eq9  { 0%,100%{transform:scaleY(.5)}  50%{transform:scaleY(.9)}  }
+    @keyframes eq10 { 0%,100%{transform:scaleY(.6)}  50%{transform:scaleY(.4)}  }
+    @keyframes eq11 { 0%,100%{transform:scaleY(.45)} 50%{transform:scaleY(.7)}  }
+    @keyframes eq12 { 0%,100%{transform:scaleY(.7)}  50%{transform:scaleY(.45)} }
+    /* Spinner tipo macOS — giro suave */
     @keyframes spin { to { transform: rotate(360deg); } }
-    .spinner-anim { animation: spin 1s linear infinite; transform-origin: center; }
+    .spinner-anim { animation: spin 1.8s linear infinite; transform-origin: center; }
 
     /* TASKS */
     .task-row { display:flex; align-items:flex-start; gap:12px; padding:12px 0; border-bottom:1px solid var(--border); position:relative; z-index:0; }
@@ -189,7 +189,7 @@
         <div class="sk sk-h sm"></div>
       </div>
       <div class="overlay-text">
-        <div class="overlay-icon"><svg width="100%" height="40" viewBox="0 0 120 40" preserveAspectRatio="none" fill="none" style="display:block;margin-bottom:8px"><rect x="0" y="0" width="16" height="40" rx="3" fill="#22d3ee" opacity=".8" style="transform-origin:8px 40px;animation:eq1 1.2s ease-in-out infinite 0s"/><rect x="20" y="0" width="16" height="40" rx="3" fill="#22d3ee" opacity=".8" style="transform-origin:28px 40px;animation:eq2 1.2s ease-in-out infinite 0.15s"/><rect x="40" y="0" width="16" height="40" rx="3" fill="#22d3ee" opacity=".8" style="transform-origin:48px 40px;animation:eq3 1.2s ease-in-out infinite 0.3s"/><rect x="60" y="0" width="16" height="40" rx="3" fill="#22d3ee" opacity=".8" style="transform-origin:68px 40px;animation:eq4 1.2s ease-in-out infinite 0.1s"/><rect x="80" y="0" width="16" height="40" rx="3" fill="#22d3ee" opacity=".8" style="transform-origin:88px 40px;animation:eq5 1.2s ease-in-out infinite 0.25s"/><rect x="100" y="0" width="16" height="40" rx="3" fill="#22d3ee" opacity=".8" style="transform-origin:108px 40px;animation:eq6 1.2s ease-in-out infinite 0.05s"/></svg></div>
+        <div class="overlay-icon"><svg width="100%" height="40" viewBox="0 0 120 40" preserveAspectRatio="none" fill="none" style="display:block;margin-bottom:8px"><rect x="0" y="0" width="16" height="40" rx="3" fill="#22d3ee" opacity=".3" style="transform-origin:8px 40px;animation:eq1 2s ease-in-out infinite 0s"/><rect x="20" y="0" width="16" height="40" rx="3" fill="#22d3ee" opacity=".3" style="transform-origin:28px 40px;animation:eq2 2s ease-in-out infinite 0.15s"/><rect x="40" y="0" width="16" height="40" rx="3" fill="#22d3ee" opacity=".3" style="transform-origin:48px 40px;animation:eq3 2s ease-in-out infinite 0.3s"/><rect x="60" y="0" width="16" height="40" rx="3" fill="#22d3ee" opacity=".3" style="transform-origin:68px 40px;animation:eq4 2s ease-in-out infinite 0.1s"/><rect x="80" y="0" width="16" height="40" rx="3" fill="#22d3ee" opacity=".3" style="transform-origin:88px 40px;animation:eq5 2s ease-in-out infinite 0.25s"/><rect x="100" y="0" width="16" height="40" rx="3" fill="#22d3ee" opacity=".3" style="transform-origin:108px 40px;animation:eq6 2s ease-in-out infinite 0.05s"/></svg></div>
         <div class="overlay-label">Cargando datos GSC</div>
       </div>
     </div>
@@ -200,7 +200,7 @@
         <div class="sk sk-h sm"></div>
       </div>
       <div class="overlay-text">
-        <div class="overlay-icon"><svg width="44" height="44" viewBox="0 0 44 44" fill="none" style="display:block;margin:0 auto 8px"><circle cx="22" cy="22" r="18" stroke="#1f1f23" stroke-width="4"/><circle cx="22" cy="22" r="18" stroke="#22d3ee" stroke-width="4" stroke-linecap="round" stroke-dasharray="113.1" stroke-dashoffset="84.8" class="spinner-anim"/></svg></div>
+        <div class="overlay-icon"><svg width="44" height="44" viewBox="0 0 44 44" fill="none" style="display:block;margin:0 auto 8px"><circle cx="22" cy="22" r="18" stroke="#1f1f23" stroke-width="4"/><circle cx="22" cy="22" r="18" stroke="#22d3ee" stroke-width="4" stroke-linecap="round" opacity=".4" stroke-dasharray="113.1" stroke-dashoffset="84.8" class="spinner-anim"/></svg></div>
         <div class="overlay-label">Cargando datos GSC</div>
       </div>
     </div>
@@ -211,7 +211,7 @@
         <div class="sk sk-h sm"></div>
       </div>
       <div class="overlay-text">
-        <div class="overlay-icon"><svg width="44" height="44" viewBox="0 0 44 44" fill="none" style="display:block;margin:0 auto 8px"><circle cx="22" cy="22" r="18" stroke="#1f1f23" stroke-width="4"/><circle cx="22" cy="22" r="18" stroke="#22d3ee" stroke-width="4" stroke-linecap="round" stroke-dasharray="113.1" stroke-dashoffset="84.8" class="spinner-anim"/></svg></div>
+        <div class="overlay-icon"><svg width="44" height="44" viewBox="0 0 44 44" fill="none" style="display:block;margin:0 auto 8px"><circle cx="22" cy="22" r="18" stroke="#1f1f23" stroke-width="4"/><circle cx="22" cy="22" r="18" stroke="#22d3ee" stroke-width="4" stroke-linecap="round" opacity=".4" stroke-dasharray="113.1" stroke-dashoffset="84.8" class="spinner-anim"/></svg></div>
         <div class="overlay-label">Cargando datos GSC</div>
       </div>
     </div>
@@ -226,19 +226,19 @@
       </div>
             <div class="overlay-text" style="width:90%;transform:translate(-50%,-50%)">
         <svg width="100%" height="90" viewBox="0 0 300 90" preserveAspectRatio="none" fill="none" style="display:block;margin-bottom:8px">
-          <rect x="0"   y="0" width="20" height="90" rx="3" fill="#22d3ee" opacity=".8" style="transform-origin:10px 90px;animation:eq1 1.2s ease-in-out infinite 0s"/>
-          <rect x="24"  y="0" width="20" height="90" rx="3" fill="#22d3ee" opacity=".8" style="transform-origin:34px 90px;animation:eq2 1.2s ease-in-out infinite .15s"/>
-          <rect x="48"  y="0" width="20" height="90" rx="3" fill="#22d3ee" opacity=".8" style="transform-origin:58px 90px;animation:eq3 1.2s ease-in-out infinite .3s"/>
-          <rect x="72"  y="0" width="20" height="90" rx="3" fill="#22d3ee" opacity=".8" style="transform-origin:82px 90px;animation:eq4 1.2s ease-in-out infinite .1s"/>
-          <rect x="96"  y="0" width="20" height="90" rx="3" fill="#22d3ee" opacity=".8" style="transform-origin:106px 90px;animation:eq5 1.2s ease-in-out infinite .25s"/>
-          <rect x="120" y="0" width="20" height="90" rx="3" fill="#22d3ee" opacity=".9" style="transform-origin:130px 90px;animation:eq6 1.2s ease-in-out infinite .05s"/>
-          <rect x="144" y="0" width="20" height="90" rx="3" fill="#22d3ee" opacity=".8" style="transform-origin:154px 90px;animation:eq7 1.2s ease-in-out infinite .2s"/>
-          <rect x="168" y="0" width="20" height="90" rx="3" fill="#22d3ee" opacity=".8" style="transform-origin:178px 90px;animation:eq8 1.2s ease-in-out infinite .35s"/>
-          <rect x="192" y="0" width="20" height="90" rx="3" fill="#22d3ee" opacity=".8" style="transform-origin:202px 90px;animation:eq9 1.2s ease-in-out infinite .12s"/>
-          <rect x="216" y="0" width="20" height="90" rx="3" fill="#22d3ee" opacity=".8" style="transform-origin:226px 90px;animation:eq10 1.2s ease-in-out infinite .28s"/>
-          <rect x="240" y="0" width="20" height="90" rx="3" fill="#22d3ee" opacity=".9" style="transform-origin:250px 90px;animation:eq11 1.2s ease-in-out infinite .18s"/>
-          <rect x="264" y="0" width="20" height="90" rx="3" fill="#22d3ee" opacity=".8" style="transform-origin:274px 90px;animation:eq12 1.2s ease-in-out infinite .08s"/>
-          <rect x="288" y="0" width="12" height="90" rx="3" fill="#22d3ee" opacity=".7" style="transform-origin:294px 90px;animation:eq1 1.2s ease-in-out infinite .22s"/>
+          <rect x="0"   y="0" width="20" height="90" rx="3" fill="#22d3ee" opacity=".3" style="transform-origin:10px 90px;animation:eq1 2s ease-in-out infinite 0s"/>
+          <rect x="24"  y="0" width="20" height="90" rx="3" fill="#22d3ee" opacity=".3" style="transform-origin:34px 90px;animation:eq2 2s ease-in-out infinite .15s"/>
+          <rect x="48"  y="0" width="20" height="90" rx="3" fill="#22d3ee" opacity=".3" style="transform-origin:58px 90px;animation:eq3 2s ease-in-out infinite .3s"/>
+          <rect x="72"  y="0" width="20" height="90" rx="3" fill="#22d3ee" opacity=".3" style="transform-origin:82px 90px;animation:eq4 2s ease-in-out infinite .1s"/>
+          <rect x="96"  y="0" width="20" height="90" rx="3" fill="#22d3ee" opacity=".3" style="transform-origin:106px 90px;animation:eq5 2s ease-in-out infinite .25s"/>
+          <rect x="120" y="0" width="20" height="90" rx="3" fill="#22d3ee" opacity=".35" style="transform-origin:130px 90px;animation:eq6 2s ease-in-out infinite .05s"/>
+          <rect x="144" y="0" width="20" height="90" rx="3" fill="#22d3ee" opacity=".3" style="transform-origin:154px 90px;animation:eq7 2s ease-in-out infinite .2s"/>
+          <rect x="168" y="0" width="20" height="90" rx="3" fill="#22d3ee" opacity=".3" style="transform-origin:178px 90px;animation:eq8 2s ease-in-out infinite .35s"/>
+          <rect x="192" y="0" width="20" height="90" rx="3" fill="#22d3ee" opacity=".3" style="transform-origin:202px 90px;animation:eq9 2s ease-in-out infinite .12s"/>
+          <rect x="216" y="0" width="20" height="90" rx="3" fill="#22d3ee" opacity=".3" style="transform-origin:226px 90px;animation:eq10 2s ease-in-out infinite .28s"/>
+          <rect x="240" y="0" width="20" height="90" rx="3" fill="#22d3ee" opacity=".35" style="transform-origin:250px 90px;animation:eq11 2s ease-in-out infinite .18s"/>
+          <rect x="264" y="0" width="20" height="90" rx="3" fill="#22d3ee" opacity=".3" style="transform-origin:274px 90px;animation:eq12 2s ease-in-out infinite .08s"/>
+          <rect x="288" y="0" width="12" height="90" rx="3" fill="#22d3ee" opacity=".25" style="transform-origin:294px 90px;animation:eq1 2s ease-in-out infinite .22s"/>
         </svg>
         <div class="overlay-label">Procesando 18 semanas</div>
       </div>
@@ -254,7 +254,7 @@
             <div class="overlay-text">
         <svg width="56" height="56" viewBox="0 0 56 56" fill="none" style="display:block;margin:0 auto 8px">
           <circle cx="28" cy="28" r="24" stroke="#1f1f23" stroke-width="4"/>
-          <circle cx="28" cy="28" r="24" stroke="#22d3ee" stroke-width="4" stroke-linecap="round" stroke-dasharray="150.8" stroke-dashoffset="113.1" class="spinner-anim"/>
+          <circle cx="28" cy="28" r="24" stroke="#22d3ee" stroke-width="4" stroke-linecap="round" opacity=".4" stroke-dasharray="150.8" stroke-dashoffset="113.1" class="spinner-anim"/>
         </svg>
         <div class="overlay-label">Analizando páginas</div>
       </div>
@@ -276,11 +276,11 @@
       </div>
             <div class="overlay-text" style="width:90%;transform:translate(-50%,-50%)">
         <svg width="100%" height="80" viewBox="0 0 280 80" preserveAspectRatio="none" fill="none" style="display:block;margin-bottom:8px">
-          <rect x="0"   y="0" width="48" height="80" rx="3" fill="#8b5cf6" opacity=".9" style="transform-origin:24px 80px;animation:eq1 1.2s ease-in-out infinite 0s"/>
-          <rect x="56"  y="0" width="48" height="80" rx="3" fill="#8b5cf6" opacity=".75" style="transform-origin:80px 80px;animation:eq3 1.2s ease-in-out infinite .2s"/>
-          <rect x="112" y="0" width="48" height="80" rx="3" fill="#8b5cf6" opacity=".6" style="transform-origin:136px 80px;animation:eq5 1.2s ease-in-out infinite .4s"/>
-          <rect x="168" y="0" width="48" height="80" rx="3" fill="#8b5cf6" opacity=".45" style="transform-origin:192px 80px;animation:eq7 1.2s ease-in-out infinite .1s"/>
-          <rect x="224" y="0" width="48" height="80" rx="3" fill="#8b5cf6" opacity=".3" style="transform-origin:248px 80px;animation:eq9 1.2s ease-in-out infinite .3s"/>
+          <rect x="0"   y="0" width="48" height="80" rx="3" fill="#8b5cf6" opacity=".35" style="transform-origin:24px 80px;animation:eq1 2s ease-in-out infinite 0s"/>
+          <rect x="56"  y="0" width="48" height="80" rx="3" fill="#8b5cf6" opacity=".28" style="transform-origin:80px 80px;animation:eq3 2s ease-in-out infinite .2s"/>
+          <rect x="112" y="0" width="48" height="80" rx="3" fill="#8b5cf6" opacity=".22" style="transform-origin:136px 80px;animation:eq5 2s ease-in-out infinite .4s"/>
+          <rect x="168" y="0" width="48" height="80" rx="3" fill="#8b5cf6" opacity=".18" style="transform-origin:192px 80px;animation:eq7 2s ease-in-out infinite .1s"/>
+          <rect x="224" y="0" width="48" height="80" rx="3" fill="#8b5cf6" opacity=".14" style="transform-origin:248px 80px;animation:eq9 2s ease-in-out infinite .3s"/>
         </svg>
         <div class="overlay-label">Procesando keywords</div>
       </div>
@@ -295,7 +295,7 @@
       <div class="overlay-text">
         <svg width="56" height="56" viewBox="0 0 56 56" fill="none" style="display:block;margin:0 auto 8px">
           <circle cx="28" cy="28" r="24" stroke="#1f1f23" stroke-width="4"/>
-          <circle cx="28" cy="28" r="24" stroke="#8b5cf6" stroke-width="4" stroke-linecap="round" stroke-dasharray="150.8" stroke-dashoffset="113.1" class="spinner-anim"/>
+          <circle cx="28" cy="28" r="24" stroke="#8b5cf6" stroke-width="4" stroke-linecap="round" opacity=".4" stroke-dasharray="150.8" stroke-dashoffset="113.1" class="spinner-anim"/>
         </svg>
         <div class="overlay-label">Analizando competencia</div>
       </div>
@@ -322,7 +322,7 @@
         <div class="overlay-text" style="top:55%">
       <svg width="56" height="56" viewBox="0 0 56 56" fill="none" style="display:block;margin:0 auto 8px">
         <circle cx="28" cy="28" r="24" stroke="#1f1f23" stroke-width="4"/>
-        <circle cx="28" cy="28" r="24" stroke="#10b981" stroke-width="4" stroke-linecap="round" stroke-dasharray="150.8" stroke-dashoffset="113.1" class="spinner-anim"/>
+        <circle cx="28" cy="28" r="24" stroke="#10b981" stroke-width="4" stroke-linecap="round" opacity=".4" stroke-dasharray="150.8" stroke-dashoffset="113.1" class="spinner-anim"/>
       </svg>
       <div class="overlay-label">Generando tus primeras tareas accionables</div>
     </div>
