@@ -231,40 +231,77 @@
         <h3 class="ob-title" style="margin-bottom:6px">Elige tu plan</h3>
         <p class="ob-sub">Puedes cambiar en cualquier momento.</p>
 
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:20px" class="plan-grid">
+        <!-- 3 planes en columna -->
+        <div style="display:flex;flex-direction:column;gap:12px;margin-bottom:20px">
 
           <!-- Basic -->
           <div class="plan-card" onclick="selectPlan('basic',this)">
-            <div class="plan-card-header">
-              <div class="plan-name">Basic</div>
-              <div class="plan-price">Gratis</div>
+            <div class="plan-badge" style="background:rgba(34,211,238,.1);color:var(--accent);border-color:rgba(34,211,238,.2)">Pre-lanzamiento · 2 meses gratis</div>
+            <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:4px;margin-top:8px">
+              <div>
+                <div class="plan-name">Basic</div>
+                <div style="font-size:12px;color:var(--muted);margin-top:2px">Para quien necesita que su web crezca semana a semana</div>
+              </div>
+              <div style="text-align:right;flex-shrink:0;margin-left:12px">
+                <div class="plan-price" style="font-size:18px">49€<span style="font-size:11px;font-weight:400;opacity:.6">/mes</span></div>
+              </div>
             </div>
-            <div class="plan-features">
-              <div class="plan-feat"><span>✓</span> Google Search Console</div>
-              <div class="plan-feat"><span>✓</span> Google Ads</div>
-              <div class="plan-feat"><span>✓</span> Google Analytics</div>
-              <div class="plan-feat muted"><span>—</span> Semrush</div>
-              <div class="plan-feat muted"><span>—</span> Google Trends</div>
+            <div class="plan-features" style="margin-top:12px">
+              <div class="plan-feat"><span>✓</span> GSC · Google Ads · GA4</div>
+              <div class="plan-feat"><span>✓</span> Motor de análisis Traxxo IA</div>
+              <div class="plan-feat"><span>✓</span> 3 tareas semanales accionables</div>
+              <div class="plan-feat"><span>✓</span> 1 web · 1 país · 100 keywords</div>
+              <div class="plan-feat"><span>✓</span> Notion + Slack</div>
+              <div class="plan-feat muted"><span>—</span> Semrush · Trends · Tienda</div>
             </div>
-            <div class="plan-cta">Empezar con Basic</div>
+            <div class="plan-cta" style="margin-top:14px">Empezar con Basic</div>
           </div>
 
           <!-- Pro -->
           <div class="plan-card plan-card-pro" onclick="selectPlan('pro',this)">
-            <div class="plan-badge">3 meses gratis</div>
-            <div class="plan-card-header">
-              <div class="plan-name">Pro</div>
-              <div class="plan-price">0€ <span style="font-size:11px;font-weight:400;opacity:.6">/ 3 meses</span></div>
+            <div class="plan-badge">Pre-lanzamiento · 3 meses gratis</div>
+            <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:4px;margin-top:8px">
+              <div>
+                <div class="plan-name">Pro</div>
+                <div style="font-size:12px;color:var(--muted);margin-top:2px">Para quien quiere dominar su nicho, tema a tema</div>
+              </div>
+              <div style="text-align:right;flex-shrink:0;margin-left:12px">
+                <div class="plan-price" style="font-size:18px;color:#8b5cf6">149€<span style="font-size:11px;font-weight:400;opacity:.6">/mes</span></div>
+              </div>
             </div>
-            <div class="plan-features">
-              <div class="plan-feat"><span>✓</span> Google Search Console</div>
-              <div class="plan-feat"><span>✓</span> Google Ads</div>
-              <div class="plan-feat"><span>✓</span> Google Analytics</div>
-              <div class="plan-feat accent"><span>✓</span> Semrush</div>
-              <div class="plan-feat accent"><span>✓</span> Google Trends</div>
+            <div class="plan-features" style="margin-top:12px">
+              <div class="plan-feat"><span>✓</span> Todo lo de Basic</div>
+              <div class="plan-feat accent"><span>✓</span> Semrush · Google Trends · Tienda</div>
+              <div class="plan-feat accent"><span>✓</span> 8 tareas semanales accionables</div>
+              <div class="plan-feat accent"><span>✓</span> 3 webs · 5 países · 500 keywords</div>
+              <div class="plan-feat accent"><span>✓</span> Diagnóstico automático de caídas</div>
+              <div class="plan-feat accent"><span>✓</span> Análisis mensual de competidores</div>
+              <div class="plan-feat accent"><span>✓</span> Soporte prioritario</div>
             </div>
-            <div class="plan-sub">Después: 249€/mes</div>
-            <div class="plan-cta plan-cta-pro">Empezar con Pro</div>
+            <div class="plan-sub">Después: 149€/mes · Add-ons disponibles para más webs, países y keywords</div>
+            <div class="plan-cta plan-cta-pro" style="margin-top:14px">Empezar con Pro</div>
+          </div>
+
+          <!-- Agency -->
+          <div class="plan-card" style="border-color:#f59e0b40" onclick="selectPlan('agency',this)">
+            <div class="plan-badge" style="background:#f59e0b10;color:#f59e0b;border-color:#f59e0b30">Para agencias</div>
+            <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:4px;margin-top:8px">
+              <div>
+                <div class="plan-name">Agency</div>
+                <div style="font-size:12px;color:var(--muted);margin-top:2px">Para agencias que gestionan múltiples clientes</div>
+              </div>
+              <div style="text-align:right;flex-shrink:0;margin-left:12px">
+                <div class="plan-price" style="font-size:18px;color:#f59e0b">Custom</div>
+              </div>
+            </div>
+            <div class="plan-features" style="margin-top:12px">
+              <div class="plan-feat"><span>✓</span> Todo lo de Pro</div>
+              <div class="plan-feat" style="color:#f59e0b"><span>✓</span> 20 webs · 20 países · 5.000 keywords</div>
+              <div class="plan-feat" style="color:#f59e0b"><span>✓</span> White label + reportes exportables</div>
+              <div class="plan-feat" style="color:#f59e0b"><span>✓</span> Gestión multi-cuenta</div>
+              <div class="plan-feat" style="color:#f59e0b"><span>✓</span> Add-ons ilimitados</div>
+            </div>
+            <div class="plan-cta" style="margin-top:14px;background:#f59e0b20;color:#f59e0b;border:1px solid #f59e0b40">Contactar con nosotros</div>
           </div>
 
         </div>
@@ -285,13 +322,25 @@
           <p class="ob-sub">Esto nos ayuda a configurar tu dashboard correctamente.</p>
           <label>Dominio</label>
           <input type="text" id="ob-domain" placeholder="tutienda.com" />
+          <label>Tipo de negocio</label>
+          <div style="display:flex;gap:8px;margin-bottom:16px">
+            <label style="flex:1;display:flex;align-items:center;gap:8px;padding:10px 14px;background:var(--bg);border:1px solid var(--border);border-radius:8px;cursor:pointer;transition:border-color .15s;text-transform:none;letter-spacing:0;font-size:13px;font-weight:500;color:var(--text)" id="b2c-label">
+              <input type="radio" name="b2b2c" value="b2c" id="ob-b2c" style="width:auto;margin:0;padding:0" onchange="toggleB2B(this.value)" /> B2C
+            </label>
+            <label style="flex:1;display:flex;align-items:center;gap:8px;padding:10px 14px;background:var(--bg);border:1px solid var(--border);border-radius:8px;cursor:pointer;transition:border-color .15s;text-transform:none;letter-spacing:0;font-size:13px;font-weight:500;color:var(--text)" id="b2b-label">
+              <input type="radio" name="b2b2c" value="b2b" id="ob-b2b" style="width:auto;margin:0;padding:0" onchange="toggleB2B(this.value)" /> B2B
+            </label>
+            <label style="flex:1;display:flex;align-items:center;gap:8px;padding:10px 14px;background:var(--bg);border:1px solid var(--border);border-radius:8px;cursor:pointer;transition:border-color .15s;text-transform:none;letter-spacing:0;font-size:13px;font-weight:500;color:var(--text)" id="b2b2c-label">
+              <input type="radio" name="b2b2c" value="b2b2c" id="ob-b2b2c" style="width:auto;margin:0;padding:0" onchange="toggleB2B(this.value)" /> Ambos
+            </label>
+          </div>
+
           <label>Tipo de web</label>
           <select id="ob-type" onchange="togglePlatform(this.value)">
             <option value="">Selecciona...</option>
             <option value="ecommerce">Tienda online (e-commerce)</option>
-            <option value="services">Web de servicios o SaaS</option>
+            <option value="services">Web de servicios, SaaS o leads</option>
             <option value="blog">Blog o contenidos</option>
-            <option value="lead">Generación de leads</option>
             <option value="other">Otra</option>
           </select>
           <div id="platform-row">
@@ -740,6 +789,15 @@
     _selectedPlan = plan;
     document.querySelectorAll('.plan-card').forEach(function(c){ c.classList.remove('selected'); });
     el.classList.add('selected');
+    if (plan === 'agency') {
+      setTimeout(function() {
+        document.getElementById('ob-plan-selector').innerHTML =
+          '<div class="ob-success"><div class="ob-success-icon">📩</div><h3>Hablemos</h3><p style="margin-bottom:20px">El plan Agency se configura de forma personalizada.<br/>Envíanos un mensaje y lo preparamos para ti.</p>' +
+          '<a href="mailto:hola@traxxo.ai" class="btn" style="display:block;text-decoration:none;text-align:center;line-height:1">Contactar con nosotros</a>' +
+          '<button class="btn" style="margin-top:10px;background:var(--border);color:var(--text)" onclick="document.getElementById(\"ob-plan-selector\").style.display=\"\";location.reload()">← Volver a los planes</button></div>';
+      }, 300);
+      return;
+    }
     setTimeout(function() {
       document.getElementById('ob-plan-selector').style.display = 'none';
       document.getElementById('ob-wizard').style.display = '';
@@ -757,6 +815,13 @@
       ['wix','Wix'],['hubspot','HubSpot CMS'],['custom','Desarrollo a medida'],['other','Otra']
     ]
   };
+
+  function toggleB2B(val) {
+    ['b2c','b2b','b2b2c'].forEach(function(v) {
+      var el = document.getElementById(v + '-label');
+      if (el) el.style.borderColor = (val === v) ? 'rgba(34,211,238,.4)' : 'var(--border)';
+    });
+  }
 
   function togglePlatform(type) {
     var row = document.getElementById('platform-row');
