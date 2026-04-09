@@ -367,51 +367,99 @@
           <h3 class="ob-title">¿Qué herramientas tienes?</h3>
           <p class="ob-sub">Selecciona las que usas. Las marcadas en azul se conectan con un solo clic.</p>
 
-          <div style="font-size:11px;font-weight:700;color:var(--muted);letter-spacing:.06em;text-transform:uppercase;margin-bottom:8px">Incluidas en todos los planes</div>
+          <!-- Datos: incluido en todos los planes -->
+          <div style="font-size:11px;font-weight:700;color:var(--muted);letter-spacing:.06em;text-transform:uppercase;margin-bottom:8px">Datos — todos los planes</div>
           <div class="ob-tools" style="margin-bottom:16px">
             <label class="ob-tool-card" style="border-color:rgba(34,211,238,.3)">
               <input type="checkbox" id="tool-gsc" checked />
               <div class="ob-tool-icon" style="background:#4285f420;border-color:#4285f440">G</div>
-              <div style="flex:1"><div class="ob-tool-name">Google Search Console</div><div class="ob-tool-desc">Clics, posiciones, keywords — conexión OAuth</div></div>
+              <div style="flex:1"><div class="ob-tool-name">Google Search Console</div><div class="ob-tool-desc">Clics, posiciones, keywords</div></div>
               <div style="font-size:10px;font-weight:700;color:var(--accent);background:rgba(34,211,238,.1);padding:2px 8px;border-radius:20px;white-space:nowrap">1 clic</div>
             </label>
             <label class="ob-tool-card" style="border-color:rgba(34,211,238,.3)">
               <input type="checkbox" id="tool-ads" checked />
               <div class="ob-tool-icon" style="background:#fbbc0420;border-color:#fbbc0440">A</div>
-              <div style="flex:1"><div class="ob-tool-name">Google Ads</div><div class="ob-tool-desc">Campañas, ROAS, conversiones — conexión OAuth</div></div>
+              <div style="flex:1"><div class="ob-tool-name">Google Ads</div><div class="ob-tool-desc">Campañas, ROAS, conversiones</div></div>
               <div style="font-size:10px;font-weight:700;color:var(--accent);background:rgba(34,211,238,.1);padding:2px 8px;border-radius:20px;white-space:nowrap">1 clic</div>
             </label>
             <label class="ob-tool-card" style="border-color:rgba(34,211,238,.3)">
               <input type="checkbox" id="tool-ga4" checked />
               <div class="ob-tool-icon" style="background:#e8710a20;border-color:#e8710a40">GA</div>
-              <div style="flex:1"><div class="ob-tool-name">Google Analytics 4</div><div class="ob-tool-desc">Tráfico, sesiones, conversiones — conexión OAuth</div></div>
+              <div style="flex:1"><div class="ob-tool-name">Google Analytics 4</div><div class="ob-tool-desc">Tráfico, sesiones, conversiones</div></div>
               <div style="font-size:10px;font-weight:700;color:var(--accent);background:rgba(34,211,238,.1);padding:2px 8px;border-radius:20px;white-space:nowrap">1 clic</div>
             </label>
           </div>
 
-          <div style="font-size:11px;font-weight:700;color:var(--muted);letter-spacing:.06em;text-transform:uppercase;margin-bottom:8px">Solo en plan Pro</div>
-          <div class="ob-tools">
+          <!-- Datos: solo Pro -->
+          <div style="font-size:11px;font-weight:700;color:var(--muted);letter-spacing:.06em;text-transform:uppercase;margin-bottom:8px">Datos — plan Pro</div>
+          <div class="ob-tools" style="margin-bottom:16px">
             <label class="ob-tool-card">
               <input type="checkbox" id="tool-semrush" />
               <div class="ob-tool-icon" style="background:#ff634720;border-color:#ff634740">S</div>
-              <div style="flex:1"><div class="ob-tool-name">Semrush</div><div class="ob-tool-desc">Posiciones orgánicas, competidores, keyword gaps</div></div>
+              <div style="flex:1"><div class="ob-tool-name">Semrush</div><div class="ob-tool-desc">Posiciones orgánicas, competidores, gaps</div></div>
               <div style="font-size:10px;font-weight:700;color:#8b5cf6;background:#8b5cf610;padding:2px 8px;border-radius:20px;white-space:nowrap">Pro</div>
             </label>
             <label class="ob-tool-card">
               <input type="checkbox" id="tool-trends" />
               <div class="ob-tool-icon" style="background:#34d39920;border-color:#34d39940">T</div>
-              <div style="flex:1"><div class="ob-tool-name">Google Trends</div><div class="ob-tool-desc">Estacionalidad y tendencias de búsqueda</div></div>
+              <div style="flex:1"><div class="ob-tool-name">Google Trends</div><div class="ob-tool-desc">Estacionalidad y tendencias</div></div>
               <div style="font-size:10px;font-weight:700;color:#8b5cf6;background:#8b5cf610;padding:2px 8px;border-radius:20px;white-space:nowrap">Pro</div>
             </label>
             <label class="ob-tool-card">
               <input type="checkbox" id="tool-store" />
               <div class="ob-tool-icon" style="background:#22d3ee20;border-color:#22d3ee40">🛒</div>
-              <div style="flex:1"><div class="ob-tool-name">Tu tienda (PrestaShop / Shopify)</div><div class="ob-tool-desc">Revenue, pedidos, productos más vendidos</div></div>
+              <div style="flex:1"><div class="ob-tool-name">Tu tienda (PrestaShop / Shopify)</div><div class="ob-tool-desc">Revenue, pedidos, productos</div></div>
               <div style="font-size:10px;font-weight:700;color:#8b5cf6;background:#8b5cf610;padding:2px 8px;border-radius:20px;white-space:nowrap">Pro</div>
             </label>
           </div>
 
-          <div style="display:flex;gap:10px;margin-top:16px">
+          <!-- Tareas: integraciones disponibles -->
+          <div style="font-size:11px;font-weight:700;color:var(--muted);letter-spacing:.06em;text-transform:uppercase;margin-bottom:8px">¿Dónde envíamos tus tareas?</div>
+          <div class="ob-tools" style="margin-bottom:16px">
+            <label class="ob-tool-card" style="border-color:rgba(34,211,238,.3)">
+              <input type="checkbox" id="tool-notion" checked />
+              <div class="ob-tool-icon" style="background:#ffffff15;border-color:#ffffff25;color:#fff;font-size:13px">N</div>
+              <div style="flex:1"><div class="ob-tool-name">Notion</div><div class="ob-tool-desc">Tareas en tu workspace de Notion</div></div>
+              <div style="font-size:10px;font-weight:700;color:var(--accent);background:rgba(34,211,238,.1);padding:2px 8px;border-radius:20px;white-space:nowrap">1 clic</div>
+            </label>
+            <label class="ob-tool-card" style="border-color:rgba(34,211,238,.3)">
+              <input type="checkbox" id="tool-slack" />
+              <div class="ob-tool-icon" style="background:#4a154b20;border-color:#4a154b40;font-size:13px">📢</div>
+              <div style="flex:1"><div class="ob-tool-name">Slack</div><div class="ob-tool-desc">Resumen semanal en tu canal</div></div>
+              <div style="font-size:10px;font-weight:700;color:var(--accent);background:rgba(34,211,238,.1);padding:2px 8px;border-radius:20px;white-space:nowrap">1 clic</div>
+            </label>
+          </div>
+
+          <!-- Próximamente -->
+          <div style="font-size:11px;font-weight:700;color:var(--muted);letter-spacing:.06em;text-transform:uppercase;margin-bottom:8px">Próximamente</div>
+          <div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:16px">
+            <div style="display:flex;align-items:center;gap:6px;padding:6px 12px;background:var(--bg);border:1px solid var(--border);border-radius:8px;opacity:.5">
+              <span style="font-size:12px;font-weight:700">T</span><span style="font-size:12px;color:var(--muted)">Trello</span>
+            </div>
+            <div style="display:flex;align-items:center;gap:6px;padding:6px 12px;background:var(--bg);border:1px solid var(--border);border-radius:8px;opacity:.5">
+              <span style="font-size:12px;font-weight:700">A</span><span style="font-size:12px;color:var(--muted)">Asana</span>
+            </div>
+            <div style="display:flex;align-items:center;gap:6px;padding:6px 12px;background:var(--bg);border:1px solid var(--border);border-radius:8px;opacity:.5">
+              <span style="font-size:12px;font-weight:700">CU</span><span style="font-size:12px;color:var(--muted)">ClickUp</span>
+            </div>
+            <div style="display:flex;align-items:center;gap:6px;padding:6px 12px;background:var(--bg);border:1px solid var(--border);border-radius:8px;opacity:.5">
+              <span style="font-size:12px;font-weight:700">HS</span><span style="font-size:12px;color:var(--muted)">HubSpot</span>
+            </div>
+            <div style="display:flex;align-items:center;gap:6px;padding:6px 12px;background:var(--bg);border:1px solid var(--border);border-radius:8px;opacity:.5">
+              <span style="font-size:12px;font-weight:700">M</span><span style="font-size:12px;color:var(--muted)">Monday</span>
+            </div>
+            <div style="display:flex;align-items:center;gap:6px;padding:6px 12px;background:var(--bg);border:1px solid var(--border);border-radius:8px;opacity:.5">
+              <span style="font-size:12px;font-weight:700">L</span><span style="font-size:12px;color:var(--muted)">Linear</span>
+            </div>
+            <div style="display:flex;align-items:center;gap:6px;padding:6px 12px;background:var(--bg);border:1px solid var(--border);border-radius:8px;opacity:.5">
+              <span style="font-size:12px;font-weight:700">Z</span><span style="font-size:12px;color:var(--muted)">Zapier</span>
+            </div>
+            <div style="display:flex;align-items:center;gap:6px;padding:6px 12px;background:var(--bg);border:1px solid var(--border);border-radius:8px;opacity:.5">
+              <span style="font-size:12px;font-weight:700">SF</span><span style="font-size:12px;color:var(--muted)">Salesforce</span>
+            </div>
+          </div>
+
+          <div style="display:flex;gap:10px;margin-top:4px">
             <button class="btn" style="background:var(--border);color:var(--text);flex:1" onclick="obNext(1)">← Atrás</button>
             <button class="btn" style="flex:2" onclick="obNext(3)">Siguiente →</button>
           </div>
