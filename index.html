@@ -614,7 +614,70 @@
       </div>
 
       <button class="btn" style="margin-top:12px" onclick="goToDashboardApp()">Ver mi dashboard →</button>
+
+      <!-- Add-ons -->
+      <div class="dash-card" style="margin-top:12px">
+        <h3 style="margin-bottom:4px;font-size:13px">Ampliar tu plan</h3>
+        <p style="font-size:12px;color:var(--muted);margin-bottom:14px">Añade capacidades extra a tu proyecto actual.</p>
+        <div style="display:flex;flex-direction:column;gap:8px">
+          <div style="display:flex;align-items:center;justify-content:space-between;padding:12px 14px;background:var(--bg);border:1px solid var(--border);border-radius:10px">
+            <div>
+              <div style="font-size:13px;font-weight:600">🌍 Añadir país objetivo</div>
+              <div style="font-size:11px;color:var(--muted);margin-top:2px">Análisis SEO en un mercado adicional</div>
+            </div>
+            <div style="display:flex;align-items:center;gap:8px;flex-shrink:0">
+              <span style="font-size:12px;font-weight:700;color:var(--accent)">+29€/mes</span>
+              <button class="btn" style="padding:6px 12px;font-size:12px;margin:0" onclick="showAddCountryModal()">Añadir</button>
+            </div>
+          </div>
+          <div style="display:flex;align-items:center;justify-content:space-between;padding:12px 14px;background:var(--bg);border:1px solid var(--border);border-radius:10px">
+            <div>
+              <div style="font-size:13px;font-weight:600">📱 Añadir web</div>
+              <div style="font-size:11px;color:var(--muted);margin-top:2px">Monitoriza otro dominio desde tu cuenta</div>
+            </div>
+            <div style="display:flex;align-items:center;gap:8px;flex-shrink:0">
+              <span style="font-size:12px;font-weight:700;color:#8b5cf6">Plan Pro</span>
+              <button class="btn" style="padding:6px 12px;font-size:12px;margin:0;background:#8b5cf620;color:#8b5cf6;border:1px solid #8b5cf640" onclick="showUpgradeMsg()">Ver Pro</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
       <button class="btn" style="margin-top:8px;background:var(--border);color:var(--text)" onclick="startOnboarding()">+ Añadir proyecto</button>
+    </div>
+
+    <!-- MODAL: Añadir país -->
+    <div id="modal-country" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:100;align-items:center;justify-content:center;padding:24px">
+      <div style="background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:28px;width:100%;max-width:380px">
+        <h3 style="font-size:16px;font-weight:700;margin-bottom:6px">🌍 Añadir país objetivo</h3>
+        <p style="font-size:13px;color:var(--muted);margin-bottom:20px">Traxxo analizará tu web en este mercado adicional. <strong style="color:var(--text)">+29€/mes</strong> por país.</p>
+        <label style="font-size:12px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.04em">País</label>
+        <select id="addon-country" style="width:100%;padding:10px 14px;background:var(--bg);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:14px;font-family:inherit;margin-bottom:16px;outline:none">
+          <optgroup label="Europa">
+            <option value="pt">🇵🇹 Portugal</option>
+            <option value="fr">🇫🇷 Francia</option>
+            <option value="de">🇩🇪 Alemania</option>
+            <option value="it">🇮🇹 Italia</option>
+            <option value="gb">🇬🇧 Reino Unido</option>
+          </optgroup>
+          <optgroup label="Latinoamérica">
+            <option value="mx">🇲🇽 México</option>
+            <option value="ar">🇦🇷 Argentina</option>
+            <option value="co">🇨🇴 Colombia</option>
+            <option value="cl">🇨🇱 Chile</option>
+            <option value="pe">🇵🇪 Perú</option>
+          </optgroup>
+          <optgroup label="Otros">
+            <option value="us">🇺🇸 Estados Unidos</option>
+            <option value="br">🇧🇷 Brasil</option>
+          </optgroup>
+        </select>
+        <div style="display:flex;gap:10px">
+          <button class="btn" style="flex:1;background:var(--border);color:var(--text)" onclick="hideAddCountryModal()">Cancelar</button>
+          <button class="btn" style="flex:2" id="addon-country-btn" onclick="submitAddCountry()">Solicitar add-on →</button>
+        </div>
+        <p style="font-size:11px;color:var(--muted);text-align:center;margin-top:10px">Te contactaremos en 24h para activarlo.</p>
+      </div>
     </div>
   </div>
 </div>
@@ -979,6 +1042,47 @@
 
   function goToDashboardApp() {
     window.location.href = '/dashboard.html';
+  }
+
+  function showAddCountryModal() {
+    var m = document.getElementById('modal-country');
+    m.style.display = 'flex';
+  }
+  function hideAddCountryModal() {
+    document.getElementById('modal-country').style.display = 'none';
+  }
+
+  async function submitAddCountry() {
+    var country = document.getElementById('addon-country').value;
+    var btn = document.getElementById('addon-country-btn');
+    btn.disabled = true; btn.textContent = 'Enviando...';
+    var { data: { session } } = await sb.auth.getSession();
+    if (session) {
+      try {
+        await sb.from('leads_notify').insert({
+          client_id: session.user.id,
+          client_email: session.user.email,
+          client_name: (session.user.user_metadata||{}).full_name || session.user.email,
+          domain: 'add-on',
+          plan: 'addon-country',
+          country: country,
+          web_type: 'addon',
+          objectives: 'Solicitud add-on pais: ' + country
+        });
+      } catch(e) { console.log(e); }
+    }
+    btn.disabled = false;
+    document.getElementById('modal-country').innerHTML =
+      '<div style="background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:28px;width:100%;max-width:380px;text-align:center">' +
+      '<div style="font-size:36px;margin-bottom:12px">✅</div>' +
+      '<h3 style="font-size:16px;font-weight:700;margin-bottom:8px">Solicitud recibida</h3>' +
+      '<p style="font-size:13px;color:var(--muted);margin-bottom:20px">Te contactaremos en menos de 24 horas para activar tu nuevo país.</p>' +
+      '<button class="btn" onclick="hideAddCountryModal()">Cerrar</button>' +
+      '</div>';
+  }
+
+  function showUpgradeMsg() {
+    alert('El plan Pro incluye hasta 3 webs + 5 países. Escríbenos a hola@traxxo.ai para actualizar tu plan.');
   }
 
   // ─── INIT ────────────────────────────────────────────────
