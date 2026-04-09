@@ -580,12 +580,28 @@
         <h3 style="margin-bottom:14px">Conexiones</h3>
         <div id="connections-list">
           <div class="connection-row">
-            <div class="connection-icon" style="background:#4285f420;border-color:#4285f440">G</div>
+            <div class="connection-icon" style="background:#4285f420;border-color:#4285f440;font-size:11px;font-weight:700">GSC</div>
             <div class="connection-info">
-              <div class="connection-name">Google (GSC · Ads · Analytics)</div>
-              <div class="connection-detail" id="conn-google-detail"></div>
+              <div class="connection-name">Google Search Console</div>
+              <div class="connection-detail" id="conn-gsc-detail"></div>
             </div>
-            <div class="connection-status" id="conn-google-status">Sin conectar</div>
+            <div class="connection-status" id="conn-gsc-status">Sin conectar</div>
+          </div>
+          <div class="connection-row">
+            <div class="connection-icon" style="background:#fbbc0420;border-color:#fbbc0440;font-size:11px;font-weight:700">ADS</div>
+            <div class="connection-info">
+              <div class="connection-name">Google Ads</div>
+              <div class="connection-detail" id="conn-ads-detail"></div>
+            </div>
+            <div class="connection-status" id="conn-ads-status">Sin conectar</div>
+          </div>
+          <div class="connection-row">
+            <div class="connection-icon" style="background:#e8710a20;border-color:#e8710a40;font-size:11px;font-weight:700">GA4</div>
+            <div class="connection-info">
+              <div class="connection-name">Google Analytics 4</div>
+              <div class="connection-detail" id="conn-ga4-detail"></div>
+            </div>
+            <div class="connection-status" id="conn-ga4-status">Sin conectar</div>
           </div>
         </div>
 
@@ -597,7 +613,8 @@
         </div>
       </div>
 
-      <button class="btn" style="margin-top:16px;background:var(--border);color:var(--text)" onclick="startOnboarding()">+ Añadir proyecto</button>
+      <button class="btn" style="margin-top:12px" onclick="goToDashboardApp()">Ver mi dashboard →</button>
+      <button class="btn" style="margin-top:8px;background:var(--border);color:var(--text)" onclick="startOnboarding()">+ Añadir proyecto</button>
     </div>
   </div>
 </div>
@@ -736,12 +753,14 @@
   }
 
   function markGoogleConnected(email) {
-    // En el dashboard principal
-    var statusEl = document.getElementById('conn-google-status');
-    var detailEl = document.getElementById('conn-google-detail');
+    // Marcar GSC, Ads y GA4 como conectados
+    ['gsc','ads','ga4'].forEach(function(key) {
+      var statusEl = document.getElementById('conn-' + key + '-status');
+      var detailEl = document.getElementById('conn-' + key + '-detail');
+      if (statusEl) { statusEl.textContent = 'Conectado'; statusEl.className = 'connection-status connected'; }
+      if (detailEl && email) detailEl.textContent = email;
+    });
     var connectArea = document.getElementById('dash-connect-area');
-    if (statusEl) { statusEl.textContent = 'Conectado'; statusEl.className = 'connection-status connected'; }
-    if (detailEl && email) detailEl.textContent = email;
     if (connectArea) connectArea.style.display = 'none';
 
     // En el onboarding paso 4
@@ -944,6 +963,10 @@
     document.getElementById('onboarding').style.display = 'none';
     document.getElementById('dash-main').style.display = '';
     checkGoogleConnection();
+  }
+
+  function goToDashboardApp() {
+    window.location.href = '/dashboard.html';
   }
 
   // ─── INIT ────────────────────────────────────────────────

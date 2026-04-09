@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Traxxo — Dashboard</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --bg: #09090b; --surface: #111113; --border: #1f1f23;
+      --text: #fafafa; --muted: #71717a; --accent: #22d3ee;
+      --font: 'Inter', system-ui, sans-serif;
+    }
+    body { background: var(--bg); color: var(--text); font-family: var(--font); min-height: 100vh; -webkit-font-smoothing: antialiased; }
+
+    /* HEADER */
+    .header { display:flex; align-items:center; justify-content:space-between; padding:16px 24px; border-bottom:1px solid var(--border); background:var(--surface); position:sticky; top:0; z-index:10; }
+    .header-left { display:flex; align-items:center; gap:16px; }
+    .logo { display:flex; align-items:center; gap:8px; font-size:16px; font-weight:700; }
+    .logo svg { flex-shrink:0; }
+    .divider { width:1px; height:20px; background:var(--border); }
+    .domain-badge { font-size:13px; color:var(--muted); background:var(--bg); border:1px solid var(--border); padding:4px 12px; border-radius:20px; }
+    .header-right { display:flex; align-items:center; gap:12px; }
+    .plan-badge { font-size:11px; font-weight:700; padding:3px 10px; border-radius:20px; background:rgba(34,211,238,.1); color:var(--accent); border:1px solid rgba(34,211,238,.2); }
+    .back-btn { font-size:12px; color:var(--muted); text-decoration:none; padding:6px 12px; border:1px solid var(--border); border-radius:8px; transition:color .15s; }
+    .back-btn:hover { color:var(--text); }
+
+    /* LAYOUT */
+    .container { max-width:1100px; margin:0 auto; padding:24px; }
+
+    /* PROGRESS BAR */
+    .audit-card { background:var(--surface); border:1px solid var(--border); border-radius:14px; padding:24px; margin-bottom:24px; }
+    .audit-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:16px; }
+    .audit-title { font-size:15px; font-weight:600; display:flex; align-items:center; gap:8px; }
+    .pulse-dot { width:8px; height:8px; border-radius:50%; background:var(--accent); animation:pulse 1.5s ease-in-out infinite; }
+    @keyframes pulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:.4;transform:scale(.8)} }
+    .audit-eta { font-size:12px; color:var(--muted); }
+    .progress-steps { display:flex; gap:0; margin-bottom:16px; }
+    .progress-step { flex:1; display:flex; flex-direction:column; align-items:center; gap:6px; position:relative; }
+    .progress-step::after { content:''; position:absolute; top:12px; left:50%; width:100%; height:1.5px; background:var(--border); z-index:0; }
+    .progress-step:last-child::after { display:none; }
+    .step-dot { width:24px; height:24px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:10px; font-weight:700; position:relative; z-index:1; flex-shrink:0; }
+    .step-dot.done { background:#10b981; color:#000; }
+    .step-dot.active { background:var(--accent); color:#000; animation:pulse 1.5s ease-in-out infinite; }
+    .step-dot.pending { background:var(--border); color:var(--muted); }
+    .step-label { font-size:10px; color:var(--muted); text-align:center; line-height:1.3; }
+    .step-label.active { color:var(--accent); }
+    .step-label.done { color:#10b981; }
+    .progress-bar-wrap { background:var(--border); border-radius:20px; height:4px; overflow:hidden; }
+    .progress-bar-fill { height:100%; border-radius:20px; background:linear-gradient(90deg, var(--accent), #8b5cf6); animation:progress 3s ease-in-out infinite alternate; }
+    @keyframes progress { from{width:15%} to{width:75%} }
+    .audit-msg { font-size:13px; color:var(--muted); margin-top:12px; text-align:center; }
+    .audit-msg strong { color:var(--text); }
+
+    /* GRID */
+    .grid-2 { display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-bottom:16px; }
+    .grid-3 { display:grid; grid-template-columns:1fr 1fr 1fr; gap:16px; margin-bottom:16px; }
+    @media(max-width:768px) { .grid-2,.grid-3 { grid-template-columns:1fr; } }
+
+    /* CARDS */
+    .card { background:var(--surface); border:1px solid var(--border); border-radius:14px; padding:20px; position:relative; overflow:hidden; }
+    .card::before { content:''; position:absolute; inset:0; background:rgba(9,9,11,.5); z-index:1; }
+    .card-title { font-size:12px; font-weight:600; color:var(--muted); text-transform:uppercase; letter-spacing:.06em; margin-bottom:16px; }
+    .card-inner { position:relative; z-index:0; }
+
+    /* SKELETON */
+    @keyframes shimmer { 0%{background-position:-200% 0} 100%{background-position:200% 0} }
+    .sk { background:linear-gradient(90deg, #1f1f23 25%, #2a2a2e 50%, #1f1f23 75%); background-size:200% 100%; animation:shimmer 1.8s infinite; border-radius:6px; }
+    .sk-h { height:12px; margin-bottom:8px; }
+    .sk-h.lg { height:32px; width:60%; margin-bottom:4px; }
+    .sk-h.sm { height:10px; width:40%; }
+    .sk-h.full { width:100%; }
+    .sk-h.w80 { width:80%; }
+    .sk-h.w60 { width:60%; }
+    .sk-h.w40 { width:40%; }
+    .sk-chart { height:120px; border-radius:8px; }
+    .sk-row { display:flex; align-items:center; gap:10px; margin-bottom:10px; }
+    .sk-circle { width:32px; height:32px; border-radius:50%; flex-shrink:0; }
+    .sk-col { flex:1; }
+    .sk-bar-wrap { display:flex; flex-direction:column; gap:6px; }
+    .sk-bar { height:10px; border-radius:4px; }
+
+    /* KPI CARDS */
+    .kpi-value { font-size:28px; font-weight:700; margin-bottom:4px; }
+    .kpi-label { font-size:12px; color:var(--muted); }
+    .kpi-delta { font-size:11px; margin-top:6px; color:var(--muted); }
+
+    /* OVERLAY TEXT */
+    .overlay-text { position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); z-index:2; text-align:center; pointer-events:none; }
+    .overlay-icon { font-size:28px; margin-bottom:6px; }
+    .overlay-label { font-size:12px; font-weight:600; color:var(--muted); white-space:nowrap; }
+
+    /* TASKS */
+    .task-row { display:flex; align-items:flex-start; gap:12px; padding:12px 0; border-bottom:1px solid var(--border); position:relative; z-index:0; }
+    .task-row:last-child { border-bottom:none; }
+    .task-num { width:22px; height:22px; border-radius:50%; background:var(--border); display:flex; align-items:center; justify-content:center; font-size:10px; font-weight:700; flex-shrink:0; }
+
+    /* FOOTER NOTE */
+    .footer-note { text-align:center; padding:32px 24px; font-size:13px; color:var(--muted); }
+    .footer-note strong { color:var(--text); }
+  </style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-left">
+    <div class="logo">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
+        <rect width="24" height="24" rx="7" fill="#22d3ee" fill-opacity=".12"/>
+        <path d="M5 12h4l2-5 2 10 2-5h2" stroke="#22d3ee" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+      traxxo
+    </div>
+    <div class="divider"></div>
+    <div class="domain-badge" id="header-domain">Cargando...</div>
+  </div>
+  <div class="header-right">
+    <span class="plan-badge" id="header-plan">Basic</span>
+    <a href="/" class="back-btn">← Mi cuenta</a>
+  </div>
+</div>
+
+<div class="container">
+
+  <!-- AUDIT PROGRESS -->
+  <div class="audit-card">
+    <div class="audit-header">
+      <div class="audit-title">
+        <div class="pulse-dot"></div>
+        Auditando tu web
+      </div>
+      <div class="audit-eta">Listo en 24-48h</div>
+    </div>
+
+    <div class="progress-steps">
+      <div class="progress-step">
+        <div class="step-dot done">✓</div>
+        <div class="step-label done">Conectado</div>
+      </div>
+      <div class="progress-step">
+        <div class="step-dot active">2</div>
+        <div class="step-label active">Analizando<br/>keywords</div>
+      </div>
+      <div class="progress-step">
+        <div class="step-dot pending">3</div>
+        <div class="step-label">Auditando<br/>competidores</div>
+      </div>
+      <div class="progress-step">
+        <div class="step-dot pending">4</div>
+        <div class="step-label">Generando<br/>tareas</div>
+      </div>
+      <div class="progress-step">
+        <div class="step-dot pending">5</div>
+        <div class="step-label">Dashboard<br/>listo</div>
+      </div>
+    </div>
+
+    <div class="progress-bar-wrap">
+      <div class="progress-bar-fill"></div>
+    </div>
+    <div class="audit-msg">Estamos procesando los datos de tu web. <strong>Te avisaremos por email cuando tu primer análisis esté listo.</strong></div>
+  </div>
+
+  <!-- KPIs -->
+  <div class="grid-3">
+    <div class="card">
+      <div class="card-inner">
+        <div class="card-title">Clics orgánicos</div>
+        <div class="sk sk-h lg"></div>
+        <div class="sk sk-h sm"></div>
+      </div>
+      <div class="overlay-text">
+        <div class="overlay-icon">📊</div>
+        <div class="overlay-label">Cargando datos GSC</div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-inner">
+        <div class="card-title">Impresiones</div>
+        <div class="sk sk-h lg"></div>
+        <div class="sk sk-h sm"></div>
+      </div>
+      <div class="overlay-text">
+        <div class="overlay-icon">👁</div>
+        <div class="overlay-label">Cargando datos GSC</div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-inner">
+        <div class="card-title">Posición media</div>
+        <div class="sk sk-h lg"></div>
+        <div class="sk sk-h sm"></div>
+      </div>
+      <div class="overlay-text">
+        <div class="overlay-icon">📍</div>
+        <div class="overlay-label">Cargando datos GSC</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- EVOLUCIÓN + TOP PÁGINAS -->
+  <div class="grid-2">
+    <div class="card">
+      <div class="card-inner">
+        <div class="card-title">Evolución de tráfico</div>
+        <div class="sk sk-chart"></div>
+      </div>
+      <div class="overlay-text">
+        <div class="overlay-icon">📈</div>
+        <div class="overlay-label">Procesando 18 semanas</div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-inner">
+        <div class="card-title">Top páginas</div>
+        <div class="sk-row"><div class="sk sk-circle"></div><div class="sk-col"><div class="sk sk-h full"></div><div class="sk sk-h w60"></div></div></div>
+        <div class="sk-row"><div class="sk sk-circle"></div><div class="sk-col"><div class="sk sk-h full"></div><div class="sk sk-h w80"></div></div></div>
+        <div class="sk-row"><div class="sk sk-circle"></div><div class="sk-col"><div class="sk sk-h w80"></div><div class="sk sk-h w40"></div></div></div>
+        <div class="sk-row"><div class="sk sk-circle"></div><div class="sk-col"><div class="sk sk-h w60"></div><div class="sk sk-h w40"></div></div></div>
+      </div>
+      <div class="overlay-text">
+        <div class="overlay-icon">🔍</div>
+        <div class="overlay-label">Analizando páginas</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- KEYWORDS + COMPETIDORES -->
+  <div class="grid-2">
+    <div class="card">
+      <div class="card-inner">
+        <div class="card-title">Keywords principales</div>
+        <div class="sk-bar-wrap">
+          <div class="sk sk-bar" style="width:90%"></div>
+          <div class="sk sk-bar" style="width:75%"></div>
+          <div class="sk sk-bar" style="width:65%"></div>
+          <div class="sk sk-bar" style="width:55%"></div>
+          <div class="sk sk-bar" style="width:40%"></div>
+        </div>
+      </div>
+      <div class="overlay-text">
+        <div class="overlay-icon">🗝️</div>
+        <div class="overlay-label">Procesando keywords</div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-inner">
+        <div class="card-title">Competidores</div>
+        <div class="sk-row"><div class="sk sk-circle"></div><div class="sk-col"><div class="sk sk-h full"></div><div class="sk sk-h w60"></div></div></div>
+        <div class="sk-row"><div class="sk sk-circle"></div><div class="sk-col"><div class="sk sk-h w80"></div><div class="sk sk-h w40"></div></div></div>
+        <div class="sk-row"><div class="sk sk-circle"></div><div class="sk-col"><div class="sk sk-h w60"></div><div class="sk sk-h w40"></div></div></div>
+      </div>
+      <div class="overlay-text">
+        <div class="overlay-icon">🏆</div>
+        <div class="overlay-label">Analizando competencia</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TAREAS -->
+  <div class="card" style="margin-bottom:24px">
+    <div class="card-inner">
+      <div class="card-title">Tareas de esta semana</div>
+      <div class="task-row">
+        <div class="task-num">1</div>
+        <div class="sk-col"><div class="sk sk-h w80"></div><div class="sk sk-h w60" style="margin-top:4px"></div></div>
+      </div>
+      <div class="task-row">
+        <div class="task-num">2</div>
+        <div class="sk-col"><div class="sk sk-h full"></div><div class="sk sk-h w40" style="margin-top:4px"></div></div>
+      </div>
+      <div class="task-row">
+        <div class="task-num">3</div>
+        <div class="sk-col"><div class="sk sk-h w60"></div><div class="sk sk-h w80" style="margin-top:4px"></div></div>
+      </div>
+    </div>
+    <div class="overlay-text" style="top:55%">
+      <div class="overlay-icon">✅</div>
+      <div class="overlay-label">Generando tus primeras tareas accionables</div>
+    </div>
+  </div>
+
+  <div class="footer-note">
+    Tu dashboard completo estará listo en <strong>24-48 horas</strong>.<br/>
+    Recibirás un email en cuanto esté disponible.
+  </div>
+
+</div>
+
+<script>
+  const SUPABASE_URL  = 'https://ghqttckqvjptxhihojey.supabase.co';
+  const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdocXR0Y2txdmpwdHhoaWhvamV5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU2NDU1OTYsImV4cCI6MjA5MTIyMTU5Nn0.KlPDplMIIWQwx5oafvkfxbsm0dzPb0cbTJpCM83cqK4';
+  const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
+
+  sb.auth.getSession().then(async function({ data: { session } }) {
+    if (!session) { window.location.href = '/'; return; }
+
+    // Mostrar dominio y plan del cliente
+    var { data: projects } = await sb.from('projects').select('domain, plan').eq('client_id', session.user.id).limit(1);
+    if (projects && projects.length > 0) {
+      document.getElementById('header-domain').textContent = projects[0].domain;
+      var plan = projects[0].plan || 'basic';
+      var planEl = document.getElementById('header-plan');
+      planEl.textContent = plan.charAt(0).toUpperCase() + plan.slice(1);
+      if (plan === 'pro') { planEl.style.background = '#8b5cf620'; planEl.style.color = '#8b5cf6'; planEl.style.borderColor = '#8b5cf640'; }
+    } else {
+      document.getElementById('header-domain').textContent = session.user.email;
+    }
+  });
+</script>
+</body>
+</html>
