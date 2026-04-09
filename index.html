@@ -737,19 +737,31 @@
     var { data: { session } } = await sb.auth.getSession();
     if (!session) return;
 
-    var hasGoogle = session.provider_token || (session.user && session.user.app_metadata && session.user.app_metadata.provider === 'google');
+    var hasGoogle = session.provider_token ||
+      (session.user && session.user.app_metadata && session.user.app_metadata.provider === 'google');
 
     if (hasGoogle) {
-      markGoogleConnected(session.user.email);
-
-      // Guardar en Supabase si no estaba ya
+      // Guardar en Supabase
       await sb.from('clients').upsert({
         id: session.user.id,
         email: session.user.email,
         google_connected: true,
         google_email: session.user.email
       }, { onConflict: 'id' });
+      markGoogleConnected(session.user.email);
+      return;
     }
+
+    // Si no hay token activo, leer de Supabase
+    try {
+      var { data: client } = await sb.from('clients')
+        .select('google_connected, google_email')
+        .eq('id', session.user.id)
+        .single();
+      if (client && client.google_connected) {
+        markGoogleConnected(client.google_email || session.user.email);
+      }
+    } catch(e) { console.log('clients read error:', e); }
   }
 
   function markGoogleConnected(email) {
