@@ -285,52 +285,122 @@
           <p class="ob-sub">Esto nos ayuda a configurar tu dashboard correctamente.</p>
           <label>Dominio</label>
           <input type="text" id="ob-domain" placeholder="tutienda.com" />
-          <label>Plataforma de tienda</label>
-          <select id="ob-platform">
+          <label>Tipo de web</label>
+          <select id="ob-type" onchange="togglePlatform(this.value)">
             <option value="">Selecciona...</option>
-            <option value="prestashop">PrestaShop</option>
-            <option value="shopify">Shopify</option>
-            <option value="woocommerce">WooCommerce</option>
-            <option value="other">Otra / Sin tienda</option>
+            <option value="ecommerce">Tienda online (e-commerce)</option>
+            <option value="services">Web de servicios o SaaS</option>
+            <option value="blog">Blog o contenidos</option>
+            <option value="lead">Generación de leads</option>
+            <option value="other">Otra</option>
           </select>
+          <div id="platform-row">
+            <label>Plataforma</label>
+            <select id="ob-platform">
+              <option value="">Selecciona...</option>
+              <option value="prestashop">PrestaShop</option>
+              <option value="shopify">Shopify</option>
+              <option value="woocommerce">WooCommerce</option>
+              <option value="magento">Magento</option>
+              <option value="wordpress">WordPress</option>
+              <option value="custom">Desarrollo a medida</option>
+              <option value="other">Otra</option>
+            </select>
+          </div>
           <label>País principal</label>
           <select id="ob-country">
-            <option value="es">España</option>
-            <option value="mx">México</option>
-            <option value="ar">Argentina</option>
-            <option value="co">Colombia</option>
-            <option value="other">Otro</option>
+            <optgroup label="Europa">
+              <option value="es">🇪🇸 España</option>
+              <option value="pt">🇵🇹 Portugal</option>
+              <option value="fr">🇫🇷 Francia</option>
+              <option value="de">🇩🇪 Alemania</option>
+              <option value="it">🇮🇹 Italia</option>
+              <option value="gb">🇬🇧 Reino Unido</option>
+              <option value="nl">🇳🇱 Países Bajos</option>
+              <option value="be">🇧🇪 Bélgica</option>
+              <option value="pl">🇵🇱 Polonia</option>
+              <option value="se">🇸🇪 Suecia</option>
+              <option value="ch">🇨🇭 Suiza</option>
+            </optgroup>
+            <optgroup label="Latinoamérica">
+              <option value="mx">🇲🇽 México</option>
+              <option value="ar">🇦🇷 Argentina</option>
+              <option value="co">🇨🇴 Colombia</option>
+              <option value="cl">🇨🇱 Chile</option>
+              <option value="pe">🇵🇪 Perú</option>
+              <option value="ve">🇻🇪 Venezuela</option>
+              <option value="ec">🇪🇨 Ecuador</option>
+              <option value="bo">🇧🇴 Bolivia</option>
+              <option value="uy">🇺🇾 Uruguay</option>
+              <option value="py">🇵🇾 Paraguay</option>
+              <option value="cr">🇨🇷 Costa Rica</option>
+              <option value="do">🇩🇴 Rep. Dominicana</option>
+              <option value="gt">🇬🇹 Guatemala</option>
+              <option value="br">🇧🇷 Brasil</option>
+            </optgroup>
+            <optgroup label="Norteamérica">
+              <option value="us">🇺🇸 Estados Unidos</option>
+              <option value="ca">🇨🇦 Canadá</option>
+            </optgroup>
+            <optgroup label="Resto del mundo">
+              <option value="au">🇦🇺 Australia</option>
+              <option value="jp">🇯🇵 Japón</option>
+              <option value="other">Otro</option>
+            </optgroup>
           </select>
           <button class="btn" style="margin-top:8px" onclick="obNext(2)">Siguiente →</button>
         </div>
 
         <!-- Step 2 -->
         <div class="ob-panel" id="ob-2" style="display:none">
-          <h3 class="ob-title">¿Qué herramientas usas?</h3>
-          <p class="ob-sub">Conectaremos estas fuentes para tu dashboard.</p>
-          <div class="ob-tools">
-            <label class="ob-tool-card">
+          <h3 class="ob-title">¿Qué herramientas tienes?</h3>
+          <p class="ob-sub">Selecciona las que usas. Las marcadas en azul se conectan con un solo clic.</p>
+
+          <div style="font-size:11px;font-weight:700;color:var(--muted);letter-spacing:.06em;text-transform:uppercase;margin-bottom:8px">Incluidas en todos los planes</div>
+          <div class="ob-tools" style="margin-bottom:16px">
+            <label class="ob-tool-card" style="border-color:rgba(34,211,238,.3)">
               <input type="checkbox" id="tool-gsc" checked />
               <div class="ob-tool-icon" style="background:#4285f420;border-color:#4285f440">G</div>
-              <div><div class="ob-tool-name">Google Search Console</div><div class="ob-tool-desc">Clics, posiciones, keywords</div></div>
+              <div style="flex:1"><div class="ob-tool-name">Google Search Console</div><div class="ob-tool-desc">Clics, posiciones, keywords — conexión OAuth</div></div>
+              <div style="font-size:10px;font-weight:700;color:var(--accent);background:rgba(34,211,238,.1);padding:2px 8px;border-radius:20px;white-space:nowrap">1 clic</div>
             </label>
-            <label class="ob-tool-card">
+            <label class="ob-tool-card" style="border-color:rgba(34,211,238,.3)">
               <input type="checkbox" id="tool-ads" checked />
               <div class="ob-tool-icon" style="background:#fbbc0420;border-color:#fbbc0440">A</div>
-              <div><div class="ob-tool-name">Google Ads</div><div class="ob-tool-desc">Campañas, ROAS, conversiones</div></div>
+              <div style="flex:1"><div class="ob-tool-name">Google Ads</div><div class="ob-tool-desc">Campañas, ROAS, conversiones — conexión OAuth</div></div>
+              <div style="font-size:10px;font-weight:700;color:var(--accent);background:rgba(34,211,238,.1);padding:2px 8px;border-radius:20px;white-space:nowrap">1 clic</div>
             </label>
+            <label class="ob-tool-card" style="border-color:rgba(34,211,238,.3)">
+              <input type="checkbox" id="tool-ga4" checked />
+              <div class="ob-tool-icon" style="background:#e8710a20;border-color:#e8710a40">GA</div>
+              <div style="flex:1"><div class="ob-tool-name">Google Analytics 4</div><div class="ob-tool-desc">Tráfico, sesiones, conversiones — conexión OAuth</div></div>
+              <div style="font-size:10px;font-weight:700;color:var(--accent);background:rgba(34,211,238,.1);padding:2px 8px;border-radius:20px;white-space:nowrap">1 clic</div>
+            </label>
+          </div>
+
+          <div style="font-size:11px;font-weight:700;color:var(--muted);letter-spacing:.06em;text-transform:uppercase;margin-bottom:8px">Solo en plan Pro</div>
+          <div class="ob-tools">
             <label class="ob-tool-card">
               <input type="checkbox" id="tool-semrush" />
               <div class="ob-tool-icon" style="background:#ff634720;border-color:#ff634740">S</div>
-              <div><div class="ob-tool-name">Semrush</div><div class="ob-tool-desc">Posiciones, competidores, gaps</div></div>
+              <div style="flex:1"><div class="ob-tool-name">Semrush</div><div class="ob-tool-desc">Posiciones orgánicas, competidores, keyword gaps</div></div>
+              <div style="font-size:10px;font-weight:700;color:#8b5cf6;background:#8b5cf610;padding:2px 8px;border-radius:20px;white-space:nowrap">Pro</div>
+            </label>
+            <label class="ob-tool-card">
+              <input type="checkbox" id="tool-trends" />
+              <div class="ob-tool-icon" style="background:#34d39920;border-color:#34d39940">T</div>
+              <div style="flex:1"><div class="ob-tool-name">Google Trends</div><div class="ob-tool-desc">Estacionalidad y tendencias de búsqueda</div></div>
+              <div style="font-size:10px;font-weight:700;color:#8b5cf6;background:#8b5cf610;padding:2px 8px;border-radius:20px;white-space:nowrap">Pro</div>
             </label>
             <label class="ob-tool-card">
               <input type="checkbox" id="tool-store" />
               <div class="ob-tool-icon" style="background:#22d3ee20;border-color:#22d3ee40">🛒</div>
-              <div><div class="ob-tool-name">Tu tienda</div><div class="ob-tool-desc">Revenue, pedidos, productos</div></div>
+              <div style="flex:1"><div class="ob-tool-name">Tu tienda (PrestaShop / Shopify)</div><div class="ob-tool-desc">Revenue, pedidos, productos más vendidos</div></div>
+              <div style="font-size:10px;font-weight:700;color:#8b5cf6;background:#8b5cf610;padding:2px 8px;border-radius:20px;white-space:nowrap">Pro</div>
             </label>
           </div>
-          <div style="display:flex;gap:10px;margin-top:8px">
+
+          <div style="display:flex;gap:10px;margin-top:16px">
             <button class="btn" style="background:var(--border);color:var(--text);flex:1" onclick="obNext(1)">← Atrás</button>
             <button class="btn" style="flex:2" onclick="obNext(3)">Siguiente →</button>
           </div>
@@ -523,7 +593,9 @@
   function showDashboard(user) {
     document.getElementById('auth-section').style.display = 'none';
     document.getElementById('dashboard').style.display = 'flex';
-    document.getElementById('user-email').textContent = user.email;
+    var meta = user.user_metadata || {};
+    var displayName = meta.full_name || meta.name || user.email.split('@')[0];
+    document.getElementById('user-email').textContent = displayName;
     // Comprobar si tiene onboarding pendiente o proyecto guardado
     checkOnboardingStatus(user);
     checkGoogleConnection();
@@ -633,6 +705,13 @@
       obNext(1);
     }, 300);
   }
+
+  function togglePlatform(type) {
+    var row = document.getElementById('platform-row');
+    row.style.display = (type === 'ecommerce') ? '' : 'none';
+  }
+  // Ocultar plataforma por defecto
+  document.getElementById('platform-row').style.display = 'none';
 
   function obNext(step) {
     if (step === 2) {
