@@ -396,8 +396,8 @@
 
         <!-- Step 2 -->
         <div class="ob-panel" id="ob-2" style="display:none">
-          <h3 class="ob-title">¿Qué herramientas tienes?</h3>
-          <p class="ob-sub">Selecciona las que usas. Las marcadas en azul se conectan con un solo clic.</p>
+          <h3 class="ob-title">Herramientas de tu plan</h3>
+          <p class="ob-sub">Estas son las fuentes que Traxxo conectará para tu análisis. Las verás activas en tu dashboard una vez configuradas.</p>
 
           <!-- Datos: incluido en todos los planes -->
           <div style="font-size:11px;font-weight:700;color:var(--muted);letter-spacing:.06em;text-transform:uppercase;margin-bottom:8px">Datos — todos los planes</div>
@@ -445,17 +445,15 @@
           <!-- Tareas: integraciones disponibles -->
           <div style="font-size:11px;font-weight:700;color:var(--muted);letter-spacing:.06em;text-transform:uppercase;margin-bottom:8px">¿Dónde envíamos tus tareas?</div>
           <div class="ob-tools" style="margin-bottom:16px">
-            <label class="ob-tool-card" style="border-color:rgba(34,211,238,.3)">
-              <input type="checkbox" id="tool-notion" checked />
+            <label class="ob-tool-card" style="border-color:rgba(34,211,238,.3);cursor:default">
               <div class="ob-tool-icon" style="background:#ffffff15;border-color:#ffffff25;color:#fff;font-size:13px">N</div>
               <div style="flex:1"><div class="ob-tool-name">Notion</div><div class="ob-tool-desc">Tareas en tu workspace de Notion</div></div>
-              <div style="font-size:10px;font-weight:700;color:var(--accent);background:rgba(34,211,238,.1);padding:2px 8px;border-radius:20px;white-space:nowrap">1 clic</div>
+              <div style="font-size:10px;font-weight:700;color:var(--accent);background:rgba(34,211,238,.1);padding:2px 8px;border-radius:20px;white-space:nowrap">✓ Incluido</div>
             </label>
-            <label class="ob-tool-card" style="border-color:rgba(34,211,238,.3)">
-              <input type="checkbox" id="tool-slack" />
+            <label class="ob-tool-card" style="border-color:rgba(34,211,238,.3);cursor:default">
               <div class="ob-tool-icon" style="background:#4a154b20;border-color:#4a154b40;font-size:13px">📢</div>
               <div style="flex:1"><div class="ob-tool-name">Slack</div><div class="ob-tool-desc">Resumen semanal en tu canal</div></div>
-              <div style="font-size:10px;font-weight:700;color:var(--accent);background:rgba(34,211,238,.1);padding:2px 8px;border-radius:20px;white-space:nowrap">1 clic</div>
+              <div style="font-size:10px;font-weight:700;color:var(--accent);background:rgba(34,211,238,.1);padding:2px 8px;border-radius:20px;white-space:nowrap">✓ Incluido</div>
             </label>
           </div>
 
@@ -857,16 +855,24 @@
   }
 
   async function obFinish() {
-    var domain      = document.getElementById('ob-domain').value.trim();
-    var platform    = document.getElementById('ob-platform').value;
-    var country     = document.getElementById('ob-country').value;
-    var competitors = document.getElementById('ob-competitors').value.trim();
-    var priority    = document.getElementById('ob-priority').value.trim();
-    var peaks       = document.getElementById('ob-peaks').value.trim();
-    var budget      = document.getElementById('ob-budget').value;
+    function getVal(id) { var el = document.getElementById(id); return el ? el.value.trim() : ''; }
+
+    var domain      = getVal('ob-domain');
+    var platform    = getVal('ob-platform');
+    var country     = getVal('ob-country');
+    var competitors = getVal('ob-competitors');
+    var priority    = getVal('ob-priority');
+    var peaks       = getVal('ob-peaks');
+    var budget      = getVal('ob-budget');
 
     var btn = document.getElementById('ob-finish-btn');
     btn.disabled = true; btn.textContent = 'Guardando...';
+    // Timeout de seguridad — si algo falla, el botón no se queda bloqueado
+    var safetyTimeout = setTimeout(function() {
+      if (btn.textContent === 'Guardando...') {
+        btn.disabled = false; btn.textContent = 'Empezar →';
+      }
+    }, 8000);
 
     var { data: { session } } = await sb.auth.getSession();
     var userId = session ? session.user.id : null;
@@ -912,6 +918,8 @@
       };
       await sb.from('leads_notify').insert(notifyData).catch(function(e){ console.log('leads_notify error:', e); });
     }
+
+    clearTimeout(safetyTimeout);
 
     // Mostrar éxito
     document.getElementById('onboarding').innerHTML =
