@@ -11,26 +11,34 @@
     :root {
       --bg: #09090b; --surface: #111113; --border: #1f1f23;
       --text: #fafafa; --muted: #71717a; --accent: #22d3ee;
+      --green: #10b981; --purple: #8b5cf6; --red: #ef4444;
       --font: 'Inter', system-ui, sans-serif;
     }
     body { background: var(--bg); color: var(--text); font-family: var(--font); min-height: 100vh; -webkit-font-smoothing: antialiased; }
 
     /* HEADER */
-    .header { display:flex; align-items:center; justify-content:space-between; padding:16px 24px; border-bottom:1px solid var(--border); background:var(--surface); position:sticky; top:0; z-index:10; }
+    .header { display:flex; align-items:center; justify-content:space-between; padding:12px 24px; border-bottom:1px solid var(--border); background:var(--surface); position:sticky; top:0; z-index:100; }
     .header-left { display:flex; align-items:center; gap:16px; }
     .logo { display:flex; align-items:center; gap:8px; font-size:16px; font-weight:700; }
-    .logo svg { flex-shrink:0; }
     .divider { width:1px; height:20px; background:var(--border); }
-    .domain-badge { font-size:13px; color:var(--muted); background:var(--bg); border:1px solid var(--border); padding:4px 12px; border-radius:20px; }
-    .header-right { display:flex; align-items:center; gap:12px; }
+    .domain-badge { font-size:12px; color:var(--muted); background:var(--bg); border:1px solid var(--border); padding:4px 10px; border-radius:20px; }
+    .header-right { display:flex; align-items:center; gap:10px; }
     .plan-badge { font-size:11px; font-weight:700; padding:3px 10px; border-radius:20px; background:rgba(34,211,238,.1); color:var(--accent); border:1px solid rgba(34,211,238,.2); }
-    .back-btn { font-size:12px; color:var(--muted); text-decoration:none; padding:6px 12px; border:1px solid var(--border); border-radius:8px; transition:color .15s; }
-    .back-btn:hover { color:var(--text); }
+    .btn { padding:7px 14px; border-radius:8px; font-size:12px; font-weight:600; font-family:var(--font); cursor:pointer; border:none; transition:opacity .15s; white-space:nowrap; }
+    .btn-ghost { background:none; border:1px solid var(--border); color:var(--muted); }
+    .btn-ghost:hover { color:var(--text); border-color:var(--muted); }
+    .btn-accent { background:var(--accent); color:#000; }
+    .btn-accent:hover { opacity:.85; }
+    .btn-accent:disabled { opacity:.5; cursor:not-allowed; }
+    #refresh-btn { display:flex; align-items:center; gap:6px; }
+    #refresh-btn svg { transition:transform .3s; }
+    #refresh-btn.spinning svg { animation:spin 1s linear infinite; }
+    @keyframes spin { to { transform:rotate(360deg); } }
 
     /* LAYOUT */
     .container { max-width:1100px; margin:0 auto; padding:24px; }
 
-    /* PROGRESS BAR */
+    /* ESTADO AUDITORÍA (solo cuando no hay datos) */
     .audit-card { background:var(--surface); border:1px solid var(--border); border-radius:14px; padding:24px; margin-bottom:24px; }
     .audit-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:16px; }
     .audit-title { font-size:15px; font-weight:600; display:flex; align-items:center; gap:8px; }
@@ -42,82 +50,140 @@
     .progress-step::after { content:''; position:absolute; top:12px; left:50%; width:100%; height:1.5px; background:var(--border); z-index:0; }
     .progress-step:last-child::after { display:none; }
     .step-dot { width:24px; height:24px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:10px; font-weight:700; position:relative; z-index:1; flex-shrink:0; }
-    .step-dot.done { background:#10b981; color:#000; }
+    .step-dot.done { background:var(--green); color:#000; }
     .step-dot.active { background:var(--accent); color:#000; animation:pulse 1.5s ease-in-out infinite; }
     .step-dot.pending { background:var(--border); color:var(--muted); }
     .step-label { font-size:10px; color:var(--muted); text-align:center; line-height:1.3; }
     .step-label.active { color:var(--accent); }
-    .step-label.done { color:#10b981; }
+    .step-label.done { color:var(--green); }
     .progress-bar-wrap { background:var(--border); border-radius:20px; height:4px; overflow:hidden; }
-    .progress-bar-fill { height:100%; border-radius:20px; background:linear-gradient(90deg, var(--accent), #8b5cf6); animation:progress 3s ease-in-out infinite alternate; }
-    @keyframes progress { from{width:15%} to{width:75%} }
+    .progress-bar-fill { height:100%; border-radius:20px; background:linear-gradient(90deg, var(--accent), var(--purple)); animation:pb 3s ease-in-out infinite alternate; }
+    @keyframes pb { from{width:15%} to{width:75%} }
     .audit-msg { font-size:13px; color:var(--muted); margin-top:12px; text-align:center; }
     .audit-msg strong { color:var(--text); }
+
+    /* SEMANAS NAV */
+    .week-nav { display:flex; align-items:center; justify-content:space-between; margin-bottom:20px; }
+    .week-label { font-size:14px; font-weight:600; }
+    .week-sub { font-size:12px; color:var(--muted); margin-top:2px; }
+    .week-arrows { display:flex; gap:6px; }
+    .arrow-btn { width:30px; height:30px; border-radius:8px; border:1px solid var(--border); background:var(--surface); color:var(--muted); cursor:pointer; display:flex; align-items:center; justify-content:center; font-size:14px; transition:all .15s; }
+    .arrow-btn:hover { border-color:var(--accent); color:var(--accent); }
+    .arrow-btn:disabled { opacity:.3; cursor:not-allowed; }
 
     /* GRID */
     .grid-2 { display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-bottom:16px; }
     .grid-3 { display:grid; grid-template-columns:1fr 1fr 1fr; gap:16px; margin-bottom:16px; }
-    @media(max-width:768px) { .grid-2,.grid-3 { grid-template-columns:1fr; } }
+    .grid-4 { display:grid; grid-template-columns:repeat(4,1fr); gap:16px; margin-bottom:16px; }
+    @media(max-width:900px) { .grid-4 { grid-template-columns:1fr 1fr; } }
+    @media(max-width:768px) { .grid-2,.grid-3,.grid-4 { grid-template-columns:1fr; } }
 
     /* CARDS */
-    .card { background:var(--surface); border:1px solid var(--border); border-radius:14px; padding:20px; position:relative; overflow:hidden; }
-    .card::before { content:''; position:absolute; inset:0; background:rgba(9,9,11,.5); z-index:1; }
-    .card-title { font-size:12px; font-weight:600; color:var(--muted); text-transform:uppercase; letter-spacing:.06em; margin-bottom:16px; }
-    .card-inner { position:relative; z-index:0; }
+    .card { background:var(--surface); border:1px solid var(--border); border-radius:14px; padding:20px; }
+    .card-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:16px; }
+    .card-title { font-size:12px; font-weight:600; color:var(--muted); text-transform:uppercase; letter-spacing:.06em; }
+    .card-badge { font-size:10px; font-weight:700; padding:2px 8px; border-radius:10px; }
+    .badge-green { background:rgba(16,185,129,.1); color:var(--green); border:1px solid rgba(16,185,129,.2); }
+    .badge-red { background:rgba(239,68,68,.1); color:var(--red); border:1px solid rgba(239,68,68,.2); }
+    .badge-muted { background:var(--bg); color:var(--muted); border:1px solid var(--border); }
+
+    /* KPI */
+    .kpi-value { font-size:30px; font-weight:700; line-height:1; margin-bottom:4px; }
+    .kpi-label { font-size:12px; color:var(--muted); }
+    .kpi-delta { font-size:11px; margin-top:8px; display:flex; align-items:center; gap:4px; }
+    .delta-up { color:var(--green); }
+    .delta-down { color:var(--red); }
+    .delta-flat { color:var(--muted); }
+
+    /* CHART BARS */
+    .bar-chart { display:flex; align-items:flex-end; gap:3px; height:80px; padding-top:8px; }
+    .bar { flex:1; border-radius:3px 3px 0 0; min-height:2px; transition:height .3s; cursor:pointer; position:relative; }
+    .bar:hover::after { content:attr(data-val); position:absolute; bottom:calc(100% + 4px); left:50%; transform:translateX(-50%); background:#1f1f23; color:var(--text); font-size:10px; padding:2px 6px; border-radius:4px; white-space:nowrap; }
+    .bar-labels { display:flex; gap:3px; margin-top:4px; }
+    .bar-label { flex:1; font-size:8px; color:var(--muted); text-align:center; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+
+    /* TOPIC BARS */
+    .topic-row { display:flex; align-items:center; gap:10px; margin-bottom:10px; }
+    .topic-row:last-child { margin-bottom:0; }
+    .topic-dot { width:8px; height:8px; border-radius:50%; flex-shrink:0; }
+    .topic-name { font-size:13px; flex:1; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+    .topic-bar-wrap { width:120px; background:var(--bg); border-radius:4px; height:6px; flex-shrink:0; }
+    .topic-bar-fill { height:6px; border-radius:4px; transition:width .4s; }
+    .topic-val { font-size:12px; font-weight:600; min-width:36px; text-align:right; }
+    .topic-pos { font-size:11px; color:var(--muted); min-width:28px; text-align:right; }
+
+    /* TABLE */
+    .table { width:100%; border-collapse:collapse; }
+    .table th { font-size:11px; color:var(--muted); font-weight:600; text-align:left; padding:6px 8px; border-bottom:1px solid var(--border); text-transform:uppercase; letter-spacing:.04em; }
+    .table td { font-size:13px; padding:8px; border-bottom:1px solid rgba(255,255,255,.04); }
+    .table tr:last-child td { border-bottom:none; }
+    .table tr:hover td { background:rgba(255,255,255,.02); }
+    .pos-chip { display:inline-block; padding:2px 7px; border-radius:6px; font-size:11px; font-weight:700; }
+    .pos-top3 { background:rgba(16,185,129,.12); color:var(--green); }
+    .pos-top10 { background:rgba(34,211,238,.12); color:var(--accent); }
+    .pos-top30 { background:rgba(245,158,11,.12); color:#f59e0b; }
+    .pos-low { background:var(--bg); color:var(--muted); }
+
+    /* SEMRUSH SUMMARY */
+    .sem-stats { display:grid; grid-template-columns:repeat(3,1fr); gap:12px; margin-bottom:20px; }
+    .sem-stat { background:var(--bg); border:1px solid var(--border); border-radius:10px; padding:12px; text-align:center; }
+    .sem-stat-val { font-size:20px; font-weight:700; color:var(--accent); }
+    .sem-stat-lbl { font-size:10px; color:var(--muted); margin-top:2px; }
+
+    /* NOTIF BANNER */
+    .notif-banner { background:rgba(34,211,238,.06); border:1px solid rgba(34,211,238,.15); border-radius:10px; padding:12px 16px; display:flex; align-items:center; justify-content:space-between; margin-bottom:16px; font-size:13px; }
+    .notif-banner span { color:var(--muted); }
+    .notif-banner strong { color:var(--text); }
+
+    /* FEEDBACK */
+    .feedback-section { background:var(--surface); border:1px solid var(--border); border-radius:14px; padding:20px; margin-bottom:24px; }
+    .feedback-title { font-size:14px; font-weight:600; margin-bottom:4px; }
+    .feedback-sub { font-size:13px; color:var(--muted); margin-bottom:12px; }
+    .feedback-form { display:flex; gap:10px; }
+    .feedback-input { flex:1; background:var(--bg); border:1px solid var(--border); border-radius:8px; padding:10px 14px; color:var(--text); font-size:13px; font-family:var(--font); outline:none; transition:border-color .15s; resize:none; height:42px; }
+    .feedback-input:focus { border-color:rgba(34,211,238,.4); }
+    .feedback-input::placeholder { color:var(--muted); }
+    .feedback-sent { font-size:13px; color:var(--green); display:none; padding:10px 0; }
+
+    /* ADS CARD */
+    .ads-row { display:flex; justify-content:space-between; align-items:center; padding:8px 0; border-bottom:1px solid rgba(255,255,255,.04); }
+    .ads-row:last-child { border-bottom:none; }
+    .ads-camp-name { font-size:13px; flex:1; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+    .ads-metrics { display:flex; gap:20px; flex-shrink:0; }
+    .ads-metric { text-align:right; }
+    .ads-metric-val { font-size:13px; font-weight:600; }
+    .ads-metric-lbl { font-size:10px; color:var(--muted); }
+    .roas-good { color:var(--green); }
+    .roas-ok { color:#f59e0b; }
+    .roas-bad { color:var(--red); }
+
+    /* ADS ADDON UPSELL */
+    .addon-card { background:linear-gradient(135deg, rgba(34,211,238,.06), rgba(139,92,246,.06)); border:1px solid rgba(34,211,238,.2); border-radius:14px; padding:24px; text-align:center; margin-bottom:16px; }
+    .addon-title { font-size:15px; font-weight:700; margin-bottom:8px; }
+    .addon-sub { font-size:13px; color:var(--muted); margin-bottom:16px; max-width:340px; margin-left:auto; margin-right:auto; }
+    .addon-price { font-size:24px; font-weight:800; color:var(--accent); margin-bottom:4px; }
+    .addon-per { font-size:12px; color:var(--muted); margin-bottom:16px; }
 
     /* SKELETON */
     @keyframes shimmer { 0%{background-position:-200% 0} 100%{background-position:200% 0} }
-    .sk { background:linear-gradient(90deg, #1f1f23 25%, #2a2a2e 50%, #1f1f23 75%); background-size:200% 100%; animation:shimmer 1.8s infinite; border-radius:6px; }
+    .sk { background:linear-gradient(90deg, #1f1f23 25%, #2a2a2e 50%, #1f1f23 75%); background-size:200% 100%; animation:shimmer 1.8s infinite; border-radius:6px; display:block; }
     .sk-h { height:12px; margin-bottom:8px; }
-    .sk-h.lg { height:32px; width:60%; margin-bottom:4px; }
-    .sk-h.sm { height:10px; width:40%; }
-    .sk-h.full { width:100%; }
-    .sk-h.w80 { width:80%; }
-    .sk-h.w60 { width:60%; }
-    .sk-h.w40 { width:40%; }
-    .sk-chart { height:180px; border-radius:8px; position:relative; overflow:hidden; }
-    .sk-bar-wrap { position:relative; min-height:80px; }
-    .sk-row { display:flex; align-items:center; gap:10px; margin-bottom:10px; }
-    .sk-circle { width:32px; height:32px; border-radius:50%; flex-shrink:0; }
-    .sk-col { flex:1; }
-    .sk-bar-wrap { display:flex; flex-direction:column; gap:6px; }
-    .sk-bar { height:10px; border-radius:4px; }
+    .sk-h.lg { height:28px; width:50%; }
+    .sk-h.sm { height:10px; width:35%; }
 
-    /* KPI CARDS */
-    .kpi-value { font-size:28px; font-weight:700; margin-bottom:4px; }
-    .kpi-label { font-size:12px; color:var(--muted); }
-    .kpi-delta { font-size:11px; margin-top:6px; color:var(--muted); }
+    /* FOOTER */
+    .footer-note { text-align:center; padding:32px 24px; font-size:12px; color:var(--muted); border-top:1px solid var(--border); margin-top:8px; }
+    .last-update { font-size:11px; color:var(--muted); text-align:right; margin-bottom:20px; }
 
-    /* OVERLAY TEXT */
-    .overlay-text { position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); z-index:2; text-align:center; pointer-events:none; }
-    .overlay-icon { margin-bottom:8px; display:flex; justify-content:center; }
-    .overlay-label { font-size:12px; font-weight:600; color:var(--muted); white-space:nowrap; }
-
-    /* SVG ANIMATIONS — ecualizador suave (variación pequeña, duración larga) */
+    /* SKELETON anims */
     @keyframes eq1  { 0%,100%{transform:scaleY(.45)} 50%{transform:scaleY(.85)} }
     @keyframes eq2  { 0%,100%{transform:scaleY(.65)} 50%{transform:scaleY(.4)}  }
     @keyframes eq3  { 0%,100%{transform:scaleY(.5)}  50%{transform:scaleY(.9)}  }
     @keyframes eq4  { 0%,100%{transform:scaleY(.75)} 50%{transform:scaleY(.5)}  }
     @keyframes eq5  { 0%,100%{transform:scaleY(.55)} 50%{transform:scaleY(.8)}  }
     @keyframes eq6  { 0%,100%{transform:scaleY(.7)}  50%{transform:scaleY(.45)} }
-    @keyframes eq7  { 0%,100%{transform:scaleY(.4)}  50%{transform:scaleY(.75)} }
-    @keyframes eq8  { 0%,100%{transform:scaleY(.8)}  50%{transform:scaleY(.55)} }
-    @keyframes eq9  { 0%,100%{transform:scaleY(.5)}  50%{transform:scaleY(.9)}  }
-    @keyframes eq10 { 0%,100%{transform:scaleY(.6)}  50%{transform:scaleY(.4)}  }
-    @keyframes eq11 { 0%,100%{transform:scaleY(.45)} 50%{transform:scaleY(.7)}  }
-    @keyframes eq12 { 0%,100%{transform:scaleY(.7)}  50%{transform:scaleY(.45)} }
-    /* Spinner tipo macOS — giro suave */
-    @keyframes spin { to { transform: rotate(360deg); } }
-    .spinner-anim { animation: spin 1.8s linear infinite; transform-origin: center; }
-
-    /* TASKS */
-    .task-row { display:flex; align-items:flex-start; gap:12px; padding:12px 0; border-bottom:1px solid var(--border); position:relative; z-index:0; }
-    .task-row:last-child { border-bottom:none; }
-    .task-num { width:22px; height:22px; border-radius:50%; background:var(--border); display:flex; align-items:center; justify-content:center; font-size:10px; font-weight:700; flex-shrink:0; }
-
-    /* FOOTER NOTE */
-    .footer-note { text-align:center; padding:32px 24px; font-size:13px; color:var(--muted); }
-    .footer-note strong { color:var(--text); }
+    @keyframes spinner { to { transform: rotate(360deg); } }
+    .spinner-anim { animation: spinner 1.8s linear infinite; transform-origin: center; }
   </style>
 </head>
 <body>
@@ -136,230 +202,418 @@
   </div>
   <div class="header-right">
     <span class="plan-badge" id="header-plan">Basic</span>
-    <a href="/" class="back-btn">← Mi cuenta</a>
+    <button class="btn btn-accent" id="refresh-btn" onclick="refreshData()">
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
+        <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/>
+      </svg>
+      Actualizar
+    </button>
+    <a href="/" class="btn btn-ghost">← Mi cuenta</a>
   </div>
 </div>
 
-<div class="container">
-
-  <!-- AUDIT PROGRESS -->
-  <div class="audit-card">
-    <div class="audit-header">
-      <div class="audit-title">
-        <div class="pulse-dot"></div>
-        Auditando tu web
-      </div>
-      <div class="audit-eta">Listo en 24-48h</div>
-    </div>
-
-    <div class="progress-steps">
-      <div class="progress-step">
-        <div class="step-dot done">✓</div>
-        <div class="step-label done">Conectado</div>
-      </div>
-      <div class="progress-step">
-        <div class="step-dot active">2</div>
-        <div class="step-label active">Analizando<br/>keywords</div>
-      </div>
-      <div class="progress-step">
-        <div class="step-dot pending">3</div>
-        <div class="step-label">Auditando<br/>competidores</div>
-      </div>
-      <div class="progress-step">
-        <div class="step-dot pending">4</div>
-        <div class="step-label">Generando<br/>tareas</div>
-      </div>
-      <div class="progress-step">
-        <div class="step-dot pending">5</div>
-        <div class="step-label">Dashboard<br/>listo</div>
-      </div>
-    </div>
-
-    <div class="progress-bar-wrap">
-      <div class="progress-bar-fill"></div>
-    </div>
-    <div class="audit-msg">Estamos procesando los datos de tu web. <strong>Te avisaremos por email cuando tu primer análisis esté listo.</strong></div>
+<div class="container" id="main-container">
+  <!-- Se rellena dinámicamente -->
+  <div style="text-align:center;padding:80px 24px;color:var(--muted)">
+    <svg width="44" height="44" viewBox="0 0 44 44" fill="none" style="display:block;margin:0 auto 16px">
+      <circle cx="22" cy="22" r="18" stroke="#1f1f23" stroke-width="4"/>
+      <circle cx="22" cy="22" r="18" stroke="#22d3ee" stroke-width="4" stroke-linecap="round" opacity=".4" stroke-dasharray="113.1" stroke-dashoffset="84.8" class="spinner-anim"/>
+    </svg>
+    Cargando tu dashboard...
   </div>
-
-  <!-- KPIs -->
-  <div class="grid-3">
-    <div class="card">
-      <div class="card-inner">
-        <div class="card-title">Clics orgánicos</div>
-        <div class="sk sk-h lg"></div>
-        <div class="sk sk-h sm"></div>
-      </div>
-      <div class="overlay-text">
-        <div class="overlay-icon"><svg width="100%" height="40" viewBox="0 0 120 40" preserveAspectRatio="xMidYMax meet" fill="none" style="display:block;margin-bottom:8px"><rect x="0" y="0" width="16" height="40" rx="3" fill="#22d3ee" opacity=".3" style="transform-origin:8px 40px;animation:eq1 2s ease-in-out infinite 0s"/><rect x="20" y="0" width="16" height="40" rx="3" fill="#22d3ee" opacity=".3" style="transform-origin:28px 40px;animation:eq2 2s ease-in-out infinite 0.15s"/><rect x="40" y="0" width="16" height="40" rx="3" fill="#22d3ee" opacity=".3" style="transform-origin:48px 40px;animation:eq3 2s ease-in-out infinite 0.3s"/><rect x="60" y="0" width="16" height="40" rx="3" fill="#22d3ee" opacity=".3" style="transform-origin:68px 40px;animation:eq4 2s ease-in-out infinite 0.1s"/><rect x="80" y="0" width="16" height="40" rx="3" fill="#22d3ee" opacity=".3" style="transform-origin:88px 40px;animation:eq5 2s ease-in-out infinite 0.25s"/><rect x="100" y="0" width="16" height="40" rx="3" fill="#22d3ee" opacity=".3" style="transform-origin:108px 40px;animation:eq6 2s ease-in-out infinite 0.05s"/></svg></div>
-        <div class="overlay-label">Cargando datos GSC</div>
-      </div>
-    </div>
-    <div class="card">
-      <div class="card-inner">
-        <div class="card-title">Impresiones</div>
-        <div class="sk sk-h lg"></div>
-        <div class="sk sk-h sm"></div>
-      </div>
-      <div class="overlay-text">
-        <div class="overlay-icon"><svg width="44" height="44" viewBox="0 0 44 44" fill="none" style="display:block;margin:0 auto 8px"><circle cx="22" cy="22" r="18" stroke="#1f1f23" stroke-width="4"/><circle cx="22" cy="22" r="18" stroke="#22d3ee" stroke-width="4" stroke-linecap="round" opacity=".4" stroke-dasharray="113.1" stroke-dashoffset="84.8" class="spinner-anim"/></svg></div>
-        <div class="overlay-label">Cargando datos GSC</div>
-      </div>
-    </div>
-    <div class="card">
-      <div class="card-inner">
-        <div class="card-title">Posición media</div>
-        <div class="sk sk-h lg"></div>
-        <div class="sk sk-h sm"></div>
-      </div>
-      <div class="overlay-text">
-        <div class="overlay-icon"><svg width="44" height="44" viewBox="0 0 44 44" fill="none" style="display:block;margin:0 auto 8px"><circle cx="22" cy="22" r="18" stroke="#1f1f23" stroke-width="4"/><circle cx="22" cy="22" r="18" stroke="#22d3ee" stroke-width="4" stroke-linecap="round" opacity=".4" stroke-dasharray="113.1" stroke-dashoffset="84.8" class="spinner-anim"/></svg></div>
-        <div class="overlay-label">Cargando datos GSC</div>
-      </div>
-    </div>
-  </div>
-
-  <!-- EVOLUCIÓN + TOP PÁGINAS -->
-  <div class="grid-2">
-    <div class="card">
-      <div class="card-inner">
-        <div class="card-title">Evolución de tráfico</div>
-        <div class="sk sk-chart" style="position:relative;padding:0">
-          <svg viewBox="0 0 292 100" fill="none" style="display:block;width:100%;height:100%;position:absolute;inset:0">
-            <rect x="0"   y="0" width="18" height="100" rx="3" fill="#22d3ee" opacity=".28" style="transform-origin:9px 100px;animation:eq1 2s ease-in-out infinite 0s"/>
-            <rect x="22"  y="0" width="18" height="100" rx="3" fill="#22d3ee" opacity=".28" style="transform-origin:31px 100px;animation:eq2 2s ease-in-out infinite .15s"/>
-            <rect x="44"  y="0" width="18" height="100" rx="3" fill="#22d3ee" opacity=".28" style="transform-origin:53px 100px;animation:eq3 2s ease-in-out infinite .3s"/>
-            <rect x="66"  y="0" width="18" height="100" rx="3" fill="#22d3ee" opacity=".28" style="transform-origin:75px 100px;animation:eq4 2s ease-in-out infinite .1s"/>
-            <rect x="88"  y="0" width="18" height="100" rx="3" fill="#22d3ee" opacity=".28" style="transform-origin:97px 100px;animation:eq5 2s ease-in-out infinite .25s"/>
-            <rect x="110" y="0" width="18" height="100" rx="3" fill="#22d3ee" opacity=".28" style="transform-origin:119px 100px;animation:eq6 2s ease-in-out infinite .05s"/>
-            <rect x="132" y="0" width="18" height="100" rx="3" fill="#22d3ee" opacity=".28" style="transform-origin:141px 100px;animation:eq7 2s ease-in-out infinite .2s"/>
-            <rect x="154" y="0" width="18" height="100" rx="3" fill="#22d3ee" opacity=".28" style="transform-origin:163px 100px;animation:eq8 2s ease-in-out infinite .35s"/>
-            <rect x="176" y="0" width="18" height="100" rx="3" fill="#22d3ee" opacity=".28" style="transform-origin:185px 100px;animation:eq9 2s ease-in-out infinite .12s"/>
-            <rect x="198" y="0" width="18" height="100" rx="3" fill="#22d3ee" opacity=".28" style="transform-origin:207px 100px;animation:eq10 2s ease-in-out infinite .28s"/>
-            <rect x="220" y="0" width="18" height="100" rx="3" fill="#22d3ee" opacity=".28" style="transform-origin:229px 100px;animation:eq11 2s ease-in-out infinite .18s"/>
-            <rect x="242" y="0" width="18" height="100" rx="3" fill="#22d3ee" opacity=".28" style="transform-origin:251px 100px;animation:eq12 2s ease-in-out infinite .08s"/>
-            <rect x="264" y="0" width="18" height="100" rx="3" fill="#22d3ee" opacity=".28" style="transform-origin:273px 100px;animation:eq1 2s ease-in-out infinite .22s"/>
-          </svg>
-        </div>
-      </div>
-      <div class="overlay-text">
-        <div class="overlay-label" style="font-size:13px">Procesando 18 semanas</div>
-      </div>
-    </div>
-    <div class="card">
-      <div class="card-inner">
-        <div class="card-title">Top páginas</div>
-        <div class="sk-row"><div class="sk sk-circle"></div><div class="sk-col"><div class="sk sk-h full"></div><div class="sk sk-h w60"></div></div></div>
-        <div class="sk-row"><div class="sk sk-circle"></div><div class="sk-col"><div class="sk sk-h full"></div><div class="sk sk-h w80"></div></div></div>
-        <div class="sk-row"><div class="sk sk-circle"></div><div class="sk-col"><div class="sk sk-h w80"></div><div class="sk sk-h w40"></div></div></div>
-        <div class="sk-row"><div class="sk sk-circle"></div><div class="sk-col"><div class="sk sk-h w60"></div><div class="sk sk-h w40"></div></div></div>
-      </div>
-            <div class="overlay-text">
-        <svg width="56" height="56" viewBox="0 0 56 56" fill="none" style="display:block;margin:0 auto 8px">
-          <circle cx="28" cy="28" r="24" stroke="#1f1f23" stroke-width="4"/>
-          <circle cx="28" cy="28" r="24" stroke="#22d3ee" stroke-width="4" stroke-linecap="round" opacity=".4" stroke-dasharray="150.8" stroke-dashoffset="113.1" class="spinner-anim"/>
-        </svg>
-        <div class="overlay-label">Analizando páginas</div>
-      </div>
-    </div>
-  </div>
-
-  <!-- KEYWORDS + COMPETIDORES -->
-  <div class="grid-2">
-    <div class="card">
-      <div class="card-inner">
-        <div class="card-title">Keywords principales</div>
-        <div class="sk-bar-wrap" style="position:relative;height:180px">
-          <svg viewBox="0 0 292 100" fill="none" style="display:block;width:100%;height:100%;position:absolute;inset:0">
-            <rect x="0"   y="0" width="18" height="100" rx="3" fill="#8b5cf6" opacity=".28" style="transform-origin:9px 100px;animation:eq1 2s ease-in-out infinite 0s"/>
-            <rect x="22"  y="0" width="18" height="100" rx="3" fill="#8b5cf6" opacity=".28" style="transform-origin:31px 100px;animation:eq2 2s ease-in-out infinite .15s"/>
-            <rect x="44"  y="0" width="18" height="100" rx="3" fill="#8b5cf6" opacity=".28" style="transform-origin:53px 100px;animation:eq3 2s ease-in-out infinite .3s"/>
-            <rect x="66"  y="0" width="18" height="100" rx="3" fill="#8b5cf6" opacity=".28" style="transform-origin:75px 100px;animation:eq4 2s ease-in-out infinite .1s"/>
-            <rect x="88"  y="0" width="18" height="100" rx="3" fill="#8b5cf6" opacity=".28" style="transform-origin:97px 100px;animation:eq5 2s ease-in-out infinite .25s"/>
-            <rect x="110" y="0" width="18" height="100" rx="3" fill="#8b5cf6" opacity=".28" style="transform-origin:119px 100px;animation:eq6 2s ease-in-out infinite .05s"/>
-            <rect x="132" y="0" width="18" height="100" rx="3" fill="#8b5cf6" opacity=".28" style="transform-origin:141px 100px;animation:eq7 2s ease-in-out infinite .2s"/>
-            <rect x="154" y="0" width="18" height="100" rx="3" fill="#8b5cf6" opacity=".28" style="transform-origin:163px 100px;animation:eq8 2s ease-in-out infinite .35s"/>
-            <rect x="176" y="0" width="18" height="100" rx="3" fill="#8b5cf6" opacity=".28" style="transform-origin:185px 100px;animation:eq9 2s ease-in-out infinite .12s"/>
-            <rect x="198" y="0" width="18" height="100" rx="3" fill="#8b5cf6" opacity=".28" style="transform-origin:207px 100px;animation:eq10 2s ease-in-out infinite .28s"/>
-            <rect x="220" y="0" width="18" height="100" rx="3" fill="#8b5cf6" opacity=".28" style="transform-origin:229px 100px;animation:eq11 2s ease-in-out infinite .18s"/>
-            <rect x="242" y="0" width="18" height="100" rx="3" fill="#8b5cf6" opacity=".28" style="transform-origin:251px 100px;animation:eq12 2s ease-in-out infinite .08s"/>
-            <rect x="264" y="0" width="18" height="100" rx="3" fill="#8b5cf6" opacity=".28" style="transform-origin:273px 100px;animation:eq1 2s ease-in-out infinite .22s"/>
-          </svg>
-        </div>
-      </div>
-      <div class="overlay-text">
-        <div class="overlay-label" style="font-size:13px">Procesando keywords</div>
-      </div>
-    </div>
-    <div class="card">
-      <div class="card-inner">
-        <div class="card-title">Competidores</div>
-        <div class="sk-row"><div class="sk sk-circle"></div><div class="sk-col"><div class="sk sk-h full"></div><div class="sk sk-h w60"></div></div></div>
-        <div class="sk-row"><div class="sk sk-circle"></div><div class="sk-col"><div class="sk sk-h w80"></div><div class="sk sk-h w40"></div></div></div>
-        <div class="sk-row"><div class="sk sk-circle"></div><div class="sk-col"><div class="sk sk-h w60"></div><div class="sk sk-h w40"></div></div></div>
-      </div>
-      <div class="overlay-text">
-        <svg width="56" height="56" viewBox="0 0 56 56" fill="none" style="display:block;margin:0 auto 8px">
-          <circle cx="28" cy="28" r="24" stroke="#1f1f23" stroke-width="4"/>
-          <circle cx="28" cy="28" r="24" stroke="#8b5cf6" stroke-width="4" stroke-linecap="round" opacity=".4" stroke-dasharray="150.8" stroke-dashoffset="113.1" class="spinner-anim"/>
-        </svg>
-        <div class="overlay-label">Analizando competencia</div>
-      </div>
-    </div>
-  </div>
-
-  <!-- TAREAS -->
-  <div class="card" style="margin-bottom:24px">
-    <div class="card-inner">
-      <div class="card-title">Tareas de esta semana</div>
-      <div class="task-row">
-        <div class="task-num">1</div>
-        <div class="sk-col"><div class="sk sk-h w80"></div><div class="sk sk-h w60" style="margin-top:4px"></div></div>
-      </div>
-      <div class="task-row">
-        <div class="task-num">2</div>
-        <div class="sk-col"><div class="sk sk-h full"></div><div class="sk sk-h w40" style="margin-top:4px"></div></div>
-      </div>
-      <div class="task-row">
-        <div class="task-num">3</div>
-        <div class="sk-col"><div class="sk sk-h w60"></div><div class="sk sk-h w80" style="margin-top:4px"></div></div>
-      </div>
-    </div>
-        <div class="overlay-text" style="top:55%">
-      <svg width="56" height="56" viewBox="0 0 56 56" fill="none" style="display:block;margin:0 auto 8px">
-        <circle cx="28" cy="28" r="24" stroke="#1f1f23" stroke-width="4"/>
-        <circle cx="28" cy="28" r="24" stroke="#10b981" stroke-width="4" stroke-linecap="round" opacity=".4" stroke-dasharray="150.8" stroke-dashoffset="113.1" class="spinner-anim"/>
-      </svg>
-      <div class="overlay-label">Generando tus primeras tareas accionables</div>
-    </div>
-  </div>
-
-  <div class="footer-note">
-    Tu dashboard completo estará listo en <strong>24-48 horas</strong>.<br/>
-    Recibirás un email en cuanto esté disponible.
-  </div>
-
 </div>
 
 <script>
-  const SUPABASE_URL  = 'https://ghqttckqvjptxhihojey.supabase.co';
-  const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdocXR0Y2txdmpwdHhoaWhvamV5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU2NDU1OTYsImV4cCI6MjA5MTIyMTU5Nn0.KlPDplMIIWQwx5oafvkfxbsm0dzPb0cbTJpCM83cqK4';
-  const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
+const SUPABASE_URL  = 'https://ghqttckqvjptxhihojey.supabase.co';
+const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdocXR0Y2txdmpwdHhoaWhvamV5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU2NDU1OTYsImV4cCI6MjA5MTIyMTU5Nn0.KlPDplMIIWQwx5oafvkfxbsm0dzPb0cbTJpCM83cqK4';
+const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
 
-  sb.auth.getSession().then(async function({ data: { session } }) {
-    if (!session) { window.location.href = '/'; return; }
+let currentProject = null;
+let allSnapshots = [];
+let currentWeekIdx = 0;
+let currentSession = null;
 
-    // Mostrar dominio y plan del cliente
-    var { data: projects } = await sb.from('projects').select('domain, plan').eq('client_id', session.user.id).limit(1);
-    if (projects && projects.length > 0) {
-      document.getElementById('header-domain').textContent = projects[0].domain;
-      var plan = projects[0].plan || 'basic';
-      var planEl = document.getElementById('header-plan');
-      planEl.textContent = plan.charAt(0).toUpperCase() + plan.slice(1);
-      if (plan === 'pro') { planEl.style.background = '#8b5cf620'; planEl.style.color = '#8b5cf6'; planEl.style.borderColor = '#8b5cf640'; }
-    } else {
-      document.getElementById('header-domain').textContent = session.user.email;
+// ── INIT ─────────────────────────────────────────────────────
+sb.auth.getSession().then(async function({ data: { session } }) {
+  if (!session) { window.location.href = '/'; return; }
+  currentSession = session;
+
+  // Cargar proyecto del cliente
+  var { data: projects } = await sb.from('projects')
+    .select('*')
+    .eq('client_id', session.user.id)
+    .eq('active', true)
+    .limit(1);
+
+  if (!projects || projects.length === 0) {
+    renderNoProject();
+    return;
+  }
+
+  currentProject = projects[0];
+  document.getElementById('header-domain').textContent = currentProject.domain;
+
+  // Cargar plan del cliente
+  var { data: client } = await sb.from('clients')
+    .select('plan, stripe_status')
+    .eq('id', session.user.id)
+    .single();
+
+  var plan = client?.plan || 'basic';
+  var planEl = document.getElementById('header-plan');
+  planEl.textContent = plan.charAt(0).toUpperCase() + plan.slice(1);
+  if (plan === 'pro') { planEl.style.background='#8b5cf620'; planEl.style.color='#8b5cf6'; planEl.style.borderColor='#8b5cf640'; }
+  if (plan === 'agency') { planEl.style.background='rgba(245,158,11,.1)'; planEl.style.color='#f59e0b'; planEl.style.borderColor='rgba(245,158,11,.2)'; }
+
+  // Cargar snapshots
+  var { data: snapshots } = await sb.from('weekly_snapshots')
+    .select('*')
+    .eq('project_id', currentProject.id)
+    .order('week_start', { ascending: false })
+    .limit(26);
+
+  allSnapshots = snapshots || [];
+
+  if (allSnapshots.length === 0) {
+    renderAuditState();
+  } else {
+    currentWeekIdx = 0;
+    renderDashboard(plan);
+  }
+});
+
+// ── RENDER: SIN DATOS (AUDITORÍA) ────────────────────────────
+function renderAuditState() {
+  document.getElementById('main-container').innerHTML = `
+    <div class="audit-card">
+      <div class="audit-header">
+        <div class="audit-title"><div class="pulse-dot"></div>Preparando tu dashboard</div>
+        <div class="audit-eta">Listo en 24-48h</div>
+      </div>
+      <div class="progress-steps">
+        <div class="progress-step"><div class="step-dot done">✓</div><div class="step-label done">Conectado</div></div>
+        <div class="progress-step"><div class="step-dot active">2</div><div class="step-label active">Analizando<br/>keywords</div></div>
+        <div class="progress-step"><div class="step-dot pending">3</div><div class="step-label">Auditando<br/>competidores</div></div>
+        <div class="progress-step"><div class="step-dot pending">4</div><div class="step-label">Generando<br/>tareas</div></div>
+        <div class="progress-step"><div class="step-dot pending">5</div><div class="step-label">Dashboard<br/>listo</div></div>
+      </div>
+      <div class="progress-bar-wrap"><div class="progress-bar-fill"></div></div>
+      <div class="audit-msg">Estamos analizando tu web. <strong>Te avisaremos por email cuando esté listo.</strong></div>
+    </div>
+    ${renderFeedbackSection()}
+    <div class="footer-note">Primer análisis listo en <strong>24-48 horas</strong>.</div>
+  `;
+  bindFeedback();
+}
+
+// ── RENDER: DASHBOARD REAL ────────────────────────────────────
+function renderDashboard(plan) {
+  var snap = allSnapshots[currentWeekIdx];
+  var prevSnap = allSnapshots[currentWeekIdx + 1] || null;
+
+  var weekLabel = formatWeek(snap.week_start);
+  var lastUpdateStr = snap.created_at ? new Date(snap.created_at).toLocaleDateString('es-ES', {day:'numeric',month:'long'}) : '';
+
+  var hasAds = currentProject.has_ads_addon;
+  var hasSemrush = snap.semrush_keywords > 0;
+
+  document.getElementById('main-container').innerHTML = `
+
+    <!-- SEMANA NAV -->
+    <div class="week-nav">
+      <div>
+        <div class="week-label">Semana del ${weekLabel}</div>
+        <div class="week-sub">Última actualización: ${lastUpdateStr}</div>
+      </div>
+      <div class="week-arrows">
+        <button class="arrow-btn" onclick="changeWeek(1)" ${currentWeekIdx >= allSnapshots.length - 1 ? 'disabled' : ''}>←</button>
+        <button class="arrow-btn" onclick="changeWeek(-1)" ${currentWeekIdx <= 0 ? 'disabled' : ''}>→</button>
+      </div>
+    </div>
+
+    <!-- KPIs GSC -->
+    <div class="grid-4">
+      ${renderKPI('Clics orgánicos', fmtNum(snap.gsc_clicks), delta(snap.gsc_clicks, prevSnap?.gsc_clicks), '#22d3ee')}
+      ${renderKPI('Impresiones', fmtNum(snap.gsc_impressions), delta(snap.gsc_impressions, prevSnap?.gsc_impressions), '#8b5cf6')}
+      ${renderKPI('CTR', (snap.gsc_ctr||0).toFixed(2)+'%', deltaInv(snap.gsc_ctr, prevSnap?.gsc_ctr), '#10b981')}
+      ${renderKPI('Posición media', (snap.gsc_position||0).toFixed(1), deltaPos(snap.gsc_position, prevSnap?.gsc_position), '#f59e0b')}
+    </div>
+
+    <!-- EVOLUCIÓN TRÁFICO + TEMAS GSC -->
+    <div class="grid-2">
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">Evolución de clics</div>
+          <span class="card-badge badge-muted">${allSnapshots.length} semanas</span>
+        </div>
+        ${renderBarChart(allSnapshots.slice().reverse(), 'gsc_clicks', '#22d3ee')}
+      </div>
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">Tráfico por tema</div>
+        </div>
+        ${renderTopicBars(snap.gsc_by_topic || [], 'clicks')}
+      </div>
+    </div>
+
+    <!-- SEMRUSH -->
+    ${hasSemrush ? `
+    <div class="card" style="margin-bottom:16px">
+      <div class="card-header">
+        <div class="card-title">Posicionamiento orgánico</div>
+        <span class="card-badge badge-muted">Semrush</span>
+      </div>
+      <div class="sem-stats">
+        <div class="sem-stat"><div class="sem-stat-val">${fmtNum(snap.semrush_keywords)}</div><div class="sem-stat-lbl">Keywords totales</div></div>
+        <div class="sem-stat"><div class="sem-stat-val" style="color:var(--green)">${snap.semrush_top3||0}</div><div class="sem-stat-lbl">Top 3</div></div>
+        <div class="sem-stat"><div class="sem-stat-val">${snap.semrush_top10||0}</div><div class="sem-stat-lbl">Top 10</div></div>
+      </div>
+      ${renderTopicBarsSem(snap.semrush_by_topic || [])}
+    </div>
+    ` : `
+    <div class="card" style="margin-bottom:16px;text-align:center;padding:32px">
+      <div class="card-title" style="margin-bottom:8px">Posicionamiento Semrush</div>
+      <p style="font-size:13px;color:var(--muted);margin-bottom:16px">Conecta tu API key de Semrush para ver tus posiciones orgánicas por tema.</p>
+      <button class="btn btn-accent" onclick="window.location.href='/'">Añadir Semrush</button>
+    </div>
+    `}
+
+    <!-- ADS -->
+    ${hasAds ? renderAdsSection(snap) : renderAdsUpsell()}
+
+    <!-- FEEDBACK -->
+    ${renderFeedbackSection()}
+
+    <div class="footer-note">Datos actualizados cada lunes · <a href="/" style="color:var(--muted)">Gestionar plan</a></div>
+  `;
+
+  bindFeedback();
+}
+
+// ── COMPONENTES ───────────────────────────────────────────────
+function renderKPI(label, value, deltaHtml, color) {
+  return `
+    <div class="card">
+      <div class="card-title">${label}</div>
+      <div class="kpi-value" style="color:${color}">${value}</div>
+      <div class="kpi-delta">${deltaHtml}</div>
+    </div>`;
+}
+
+function renderBarChart(snaps, field, color) {
+  if (!snaps.length) return '<div style="height:80px;display:flex;align-items:center;justify-content:center;color:var(--muted);font-size:12px">Sin datos</div>';
+  var max = Math.max(...snaps.map(s => s[field] || 0), 1);
+  var bars = snaps.slice(-16).map(s => {
+    var h = Math.max(2, Math.round(((s[field]||0) / max) * 72));
+    var lbl = s.week_start ? s.week_start.slice(5) : '';
+    return `<div class="bar" style="height:${h}px;background:${color};opacity:.7" data-val="${fmtNum(s[field]||0)}" title="${lbl}: ${fmtNum(s[field]||0)}"></div>`;
+  }).join('');
+  var labels = snaps.slice(-16).map(s => `<div class="bar-label">${s.week_start ? s.week_start.slice(5,10) : ''}</div>`).join('');
+  return `<div class="bar-chart">${bars}</div><div class="bar-labels">${labels}</div>`;
+}
+
+function renderTopicBars(topics, field) {
+  if (!topics || !topics.length) return '<div style="font-size:13px;color:var(--muted);padding:8px 0">Sin datos de temas todavía</div>';
+  var max = Math.max(...topics.map(t => t[field]||0), 1);
+  return topics.map(t => `
+    <div class="topic-row">
+      <div class="topic-dot" style="background:${t.color||'#6366f1'}"></div>
+      <div class="topic-name">${t.name}</div>
+      <div class="topic-bar-wrap"><div class="topic-bar-fill" style="width:${Math.round(((t[field]||0)/max)*100)}%;background:${t.color||'#6366f1'}"></div></div>
+      <div class="topic-val">${fmtNum(t[field]||0)}</div>
+    </div>`).join('');
+}
+
+function renderTopicBarsSem(topics) {
+  if (!topics || !topics.length) return '';
+  var max = Math.max(...topics.map(t => t.keywords||0), 1);
+  return `<div style="margin-top:4px">${topics.map(t => `
+    <div class="topic-row">
+      <div class="topic-dot" style="background:${t.color||'#6366f1'}"></div>
+      <div class="topic-name">${t.name}</div>
+      <div class="topic-bar-wrap"><div class="topic-bar-fill" style="width:${Math.round(((t.keywords||0)/max)*100)}%;background:${t.color||'#6366f1'}"></div></div>
+      <div class="topic-val">${t.keywords||0}</div>
+      <div class="topic-pos">pos ${t.avg_position||'—'}</div>
+    </div>`).join('')}</div>`;
+}
+
+function renderAdsSection(snap) {
+  if (!snap.ads_spend || snap.ads_spend === 0) {
+    return `<div class="card" style="margin-bottom:16px">
+      <div class="card-title" style="margin-bottom:12px">Google Ads</div>
+      <div style="font-size:13px;color:var(--muted)">Sin datos de campañas esta semana.</div>
+    </div>`;
+  }
+  var roasColor = snap.ads_roas >= 3 ? 'roas-good' : snap.ads_roas >= 1.5 ? 'roas-ok' : 'roas-bad';
+  var campaigns = snap.ads_by_campaign || [];
+  return `
+    <div class="card" style="margin-bottom:16px">
+      <div class="card-header">
+        <div class="card-title">Google Ads</div>
+        <span class="card-badge ${roasColor === 'roas-good' ? 'badge-green' : roasColor === 'roas-bad' ? 'badge-red' : 'badge-muted'}">ROAS ${(snap.ads_roas||0).toFixed(2)}x</span>
+      </div>
+      <div class="grid-4" style="margin-bottom:16px">
+        ${renderKPI('Gasto', '€'+fmtNum(snap.ads_spend), '', '#f59e0b')}
+        ${renderKPI('Clics Ads', fmtNum(snap.ads_clicks), '', '#8b5cf6')}
+        ${renderKPI('Conversiones', (snap.ads_conversions||0).toFixed(1), '', '#10b981')}
+        ${renderKPI('ROAS', (snap.ads_roas||0).toFixed(2)+'x', '', snap.ads_roas >= 3 ? '#10b981' : snap.ads_roas >= 1.5 ? '#f59e0b' : '#ef4444')}
+      </div>
+      ${campaigns.length ? `
+      <table class="table">
+        <thead><tr><th>Campaña</th><th>Gasto</th><th>Conv.</th><th>ROAS</th></tr></thead>
+        <tbody>${campaigns.map(c => `
+          <tr>
+            <td>${c.name||'—'}</td>
+            <td>€${(c.cost||0).toFixed(0)}</td>
+            <td>${(c.conversions||0).toFixed(1)}</td>
+            <td class="${c.roas >= 3 ? 'roas-good' : c.roas >= 1.5 ? 'roas-ok' : 'roas-bad'}">${(c.roas||0).toFixed(2)}x</td>
+          </tr>`).join('')}
+        </tbody>
+      </table>` : ''}
+    </div>`;
+}
+
+function renderAdsUpsell() {
+  return `
+    <div class="addon-card">
+      <div class="addon-title">Añade Google Ads a tu dashboard</div>
+      <div class="addon-sub">Conecta tus campañas y ve gasto, conversiones y ROAS junto a tu SEO orgánico. Todo en un solo lugar.</div>
+      <div class="addon-price">+29€</div>
+      <div class="addon-per">al mes · se cancela cuando quieras</div>
+      <button class="btn btn-accent" onclick="addAdsAddon()">Activar Google Ads</button>
+    </div>`;
+}
+
+function renderFeedbackSection() {
+  return `
+    <div class="feedback-section">
+      <div class="feedback-title">¿Falta algo en tu dashboard?</div>
+      <div class="feedback-sub">Cuéntanos qué dato o métrica echarías de menos — lo revisamos cada semana.</div>
+      <div class="feedback-form">
+        <textarea class="feedback-input" id="feedback-text" placeholder="Ej: me gustaría ver las keywords de mi competidor directo..." rows="1"></textarea>
+        <button class="btn btn-accent" onclick="sendFeedback()">Enviar</button>
+      </div>
+      <div class="feedback-sent" id="feedback-sent">✓ Recibido, lo revisamos esta semana.</div>
+    </div>`;
+}
+
+function renderNoProject() {
+  document.getElementById('main-container').innerHTML = `
+    <div style="text-align:center;padding:80px 24px">
+      <div style="font-size:15px;font-weight:600;margin-bottom:8px">No hay proyectos configurados</div>
+      <div style="font-size:13px;color:var(--muted);margin-bottom:24px">Completa el onboarding para ver tu dashboard.</div>
+      <a href="/" class="btn btn-accent">Ir al onboarding</a>
+    </div>`;
+}
+
+// ── ACCIONES ──────────────────────────────────────────────────
+function changeWeek(dir) {
+  currentWeekIdx = Math.max(0, Math.min(allSnapshots.length - 1, currentWeekIdx + dir));
+  renderDashboard(document.getElementById('header-plan').textContent.toLowerCase());
+}
+
+async function refreshData() {
+  var btn = document.getElementById('refresh-btn');
+  btn.disabled = true;
+  btn.classList.add('spinning');
+  btn.querySelector('svg').style.animationDuration = '0.8s';
+
+  try {
+    var res = await fetch(`${SUPABASE_URL}/functions/v1/collect-gsc`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer ' + SUPABASE_ANON
+      },
+      body: JSON.stringify({ project_id: currentProject.id })
+    });
+    var data = await res.json();
+    if (data.ok) {
+      // Recargar snapshots
+      var { data: snapshots } = await sb.from('weekly_snapshots')
+        .select('*')
+        .eq('project_id', currentProject.id)
+        .order('week_start', { ascending: false })
+        .limit(26);
+      allSnapshots = snapshots || [];
+      currentWeekIdx = 0;
+      renderDashboard(document.getElementById('header-plan').textContent.toLowerCase());
     }
+  } catch(e) {
+    console.error(e);
+  }
+
+  btn.disabled = false;
+  btn.classList.remove('spinning');
+}
+
+async function sendFeedback() {
+  var msg = document.getElementById('feedback-text')?.value?.trim();
+  if (!msg) return;
+
+  await sb.from('feedback').insert({
+    client_id: currentSession?.user?.id,
+    project_id: currentProject?.id,
+    message: msg
   });
+
+  document.getElementById('feedback-text').value = '';
+  document.getElementById('feedback-sent').style.display = 'block';
+  setTimeout(() => { var el = document.getElementById('feedback-sent'); if(el) el.style.display='none'; }, 4000);
+}
+
+function bindFeedback() {
+  var textarea = document.getElementById('feedback-text');
+  if (textarea) {
+    textarea.addEventListener('input', function() {
+      this.style.height = 'auto';
+      this.style.height = Math.min(this.scrollHeight, 120) + 'px';
+    });
+  }
+}
+
+async function addAdsAddon() {
+  // Redirigir a gestión de plan (donde estará Stripe)
+  window.location.href = '/?addon=ads';
+}
+
+// ── HELPERS ───────────────────────────────────────────────────
+function fmtNum(n) {
+  if (n >= 1000000) return (n/1000000).toFixed(1) + 'M';
+  if (n >= 1000) return (n/1000).toFixed(1) + 'K';
+  return (n||0).toString();
+}
+
+function formatWeek(dateStr) {
+  if (!dateStr) return '—';
+  var d = new Date(dateStr + 'T00:00:00');
+  return d.toLocaleDateString('es-ES', { day: 'numeric', month: 'long', year: 'numeric' });
+}
+
+function delta(curr, prev) {
+  if (prev == null || prev === 0) return '<span class="delta-flat">—</span>';
+  var pct = ((curr - prev) / prev * 100).toFixed(1);
+  var cls = curr >= prev ? 'delta-up' : 'delta-down';
+  var arrow = curr >= prev ? '↑' : '↓';
+  return `<span class="${cls}">${arrow} ${Math.abs(pct)}% vs semana ant.</span>`;
+}
+
+function deltaInv(curr, prev) {
+  if (prev == null || prev === 0) return '<span class="delta-flat">—</span>';
+  var pct = ((curr - prev) / prev * 100).toFixed(1);
+  var cls = curr >= prev ? 'delta-up' : 'delta-down';
+  var arrow = curr >= prev ? '↑' : '↓';
+  return `<span class="${cls}">${arrow} ${Math.abs(pct)}% vs semana ant.</span>`;
+}
+
+function deltaPos(curr, prev) {
+  // Posición: menor es mejor
+  if (prev == null || prev === 0) return '<span class="delta-flat">—</span>';
+  var diff = (curr - prev).toFixed(1);
+  var cls = curr <= prev ? 'delta-up' : 'delta-down';
+  var arrow = curr <= prev ? '↑' : '↓';
+  return `<span class="${cls}">${arrow} ${Math.abs(diff)} vs semana ant.</span>`;
+}
 </script>
 </body>
 </html>
