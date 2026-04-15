@@ -1049,53 +1049,32 @@
     var { data: { session } } = await sb.auth.getSession();
     if (!session) return;
 
-    // Verificar si tiene token con scopes reales: primero sesión activa, luego BD
-    var hasRealToken = false;
+    // Leer token guardado en BD (fuente de verdad)
+    try {
+      var { data: client } = await sb.from('clients')
+        .select('google_access_token, email')
+        .eq('id', session.user.id)
+        .single();
 
-    // 1. Comprobar sesión activa (token en memoria)
-    if (session.provider_token) {
-      try {
-        var testRes = await fetch('https://www.googleapis.com/webmasters/v3/sites', {
-          headers: { Authorization: 'Bearer ' + session.provider_token }
-        });
-        if (testRes.ok || testRes.status === 403) {
-          // 403 = tiene acceso pero no tiene sites — es válido
-          hasRealToken = true;
-          // Guardar en BD para futuras sesiones
-          await sb.from('clients').update({
-            google_access_token: session.provider_token,
-            google_refresh_token: session.provider_refresh_token || null
-          }).eq('id', session.user.id);
-        }
-      } catch(e) {}
-    }
-
-    // 2. Si no hay en sesión, comprobar BD
-    if (!hasRealToken) {
-      try {
-        var { data: client } = await sb.from('clients')
-          .select('google_access_token, email')
-          .eq('id', session.user.id)
-          .single();
-        if (client && client.google_access_token) {
-          hasRealToken = true;
-        }
-      } catch(e) {}
-    }
-
-    if (hasRealToken) {
-      markGoogleConnected(session.user.email);
-    } else {
-      var banner = document.getElementById('banner-connect');
-      if (banner) banner.style.display = 'block';
-      var connectArea = document.getElementById('dash-connect-area');
-      if (connectArea) {
-        connectArea.innerHTML = '<a href="/perfil.html" class="btn btn-accent" style="display:block;text-align:center;text-decoration:none;padding:10px">Conectar Google →</a>';
+      if (client && client.google_access_token) {
+        markGoogleConnected(client.email || session.user.email);
+      } else {
+        // Mostrar banner para conectar
+        var banner = document.getElementById('banner-connect');
+        if (banner) banner.style.display = 'block';
+        var connectArea = document.getElementById('dash-connect-area');
+        if (connectArea) connectArea.style.display = 'none';
       }
+    } catch(e) {
+      console.log('checkGoogleConnection error:', e);
     }
   }
 
   function markGoogleConnected(email) {
+    // Ocultar banner
+    var banner = document.getElementById('banner-connect');
+    if (banner) banner.style.display = 'none';
+
     // Marcar GSC, Ads y GA4 como conectados
     ['gsc','ads','ga4'].forEach(function(key) {
       var statusEl = document.getElementById('conn-' + key + '-status');
@@ -1103,6 +1082,8 @@
       if (statusEl) { statusEl.textContent = 'Conectado'; statusEl.className = 'connection-status connected'; }
       if (detailEl && email) detailEl.textContent = email;
     });
+
+    // Ocultar botón de conectar
     var connectArea = document.getElementById('dash-connect-area');
     if (connectArea) connectArea.style.display = 'none';
 
@@ -1113,267 +1094,30 @@
     var badgeEl = document.getElementById('ob-google-badge');
     if (pendingEl) pendingEl.style.display = 'none';
     if (okEl) okEl.style.display = '';
-    if (emailEl && email) emailEl.textContent = email;
-    if (badgeEl) { badgeEl.textContent = '✓ Conectado'; badgeEl.style.background = '#10b98120'; badgeEl.style.color = '#10b981'; }
+    if (emailEl) emailEl.textContent = email;
+    if (badgeEl) { badgeEl.textContent = 'Conectado'; badgeEl.className = 'connection-status connected'; }
   }
 
-  function connectGoogle(context) {
-    var btnId = context === 'onboarding' ? 'ob-google-btn' : 'dash-google-btn';
-    var btn = document.getElementById(btnId);
-    if (btn) { btn.disabled = true; btn.innerHTML = '<span class="spinner"></span> Conectando...'; }
-
-    var isToolConnection = (context === 'onboarding' || context === 'dashboard');
-    var scopeList = isToolConnection
-      ? 'email profile https://www.googleapis.com/auth/webmasters.readonly https://www.googleapis.com/auth/adwords https://www.googleapis.com/auth/analytics.readonly'
-      : 'email profile';
-
-    sb.auth.signInWithOAuth({
-      provider: 'google',
-      options: {
-        scopes: scopeList,
-        redirectTo: 'https://app.traxxo.ai',
-        queryParams: { access_type: 'offline', prompt: isToolConnection ? 'consent' : 'select_account' }
-      }
-    }).then(function(result) {
-      if (result.error) {
-        if (btn) { btn.disabled = false; btn.innerHTML = '<svg width="16" height="16" viewBox="0 0 18 18"><path fill="#4285F4" d="M17.64 9.2c0-.637-.057-1.251-.164-1.84H9v3.481h4.844c-.209 1.125-.843 2.078-1.796 2.716v2.259h2.908c1.702-1.567 2.684-3.875 2.684-6.615z"/><path fill="#34A853" d="M9 18c2.43 0 4.467-.806 5.956-2.184l-2.908-2.259c-.806.54-1.837.86-3.048.86-2.344 0-4.328-1.584-5.036-3.711H.957v2.332C2.438 15.983 5.482 18 9 18z"/><path fill="#FBBC05" d="M3.964 10.706c-.18-.54-.282-1.117-.282-1.706s.102-1.166.282-1.706V4.962H.957C.347 6.175 0 7.55 0 9s.348 2.825.957 4.038l3.007-2.332z"/><path fill="#EA4335" d="M9 3.58c1.321 0 2.508.454 3.44 1.345l2.582-2.58C13.463.891 11.426 0 9 0 5.482 0 2.438 2.017.957 4.962L3.964 7.294C4.672 5.163 6.656 3.58 9 3.58z"/></svg> Conectar Google'; }
-      }
-    });
-  }
-
-  // ─── ONBOARDING ──────────────────────────────────────────
-  var _selectedPlan = null;
-
-  function startOnboarding() {
-    document.getElementById('dash-main').style.display = 'none';
-    document.getElementById('onboarding').style.display = '';
-    document.getElementById('ob-plan-selector').style.display = '';
-    document.getElementById('ob-wizard').style.display = 'none';
-  }
-
-  function selectPlan(plan, el) {
-    _selectedPlan = plan;
-    document.querySelectorAll('.plan-card').forEach(function(c){ c.classList.remove('selected'); });
-    el.classList.add('selected');
-    if (plan === 'agency') {
-      setTimeout(function() {
-        document.getElementById('ob-plan-selector').innerHTML =
-          '<div class="ob-success"><div class="ob-success-icon">📩</div><h3>Hablemos</h3><p style="margin-bottom:20px">El plan Agency se configura de forma personalizada.<br/>Envíanos un mensaje y lo preparamos para ti.</p>' +
-          '<a href="mailto:hola@traxxo.ai" class="btn" style="display:block;text-decoration:none;text-align:center;line-height:1">Contactar con nosotros</a>' +
-          '<button class="btn" style="margin-top:10px;background:var(--border);color:var(--text)" onclick="document.getElementById(\"ob-plan-selector\").style.display=\"\";location.reload()">← Volver a los planes</button></div>';
-      }, 300);
-      return;
-    }
-    setTimeout(function() {
-      document.getElementById('ob-plan-selector').style.display = 'none';
-      document.getElementById('ob-wizard').style.display = '';
-      obNext(1);
-    }, 300);
-  }
-
-  var PLATFORMS = {
-    ecommerce: [
-      ['prestashop','PrestaShop'],['shopify','Shopify'],['woocommerce','WooCommerce'],
-      ['magento','Magento'],['bigcommerce','BigCommerce'],['custom','Desarrollo a medida'],['other','Otra']
-    ],
-    web: [
-      ['wordpress','WordPress'],['webflow','Webflow'],['squarespace','Squarespace'],
-      ['wix','Wix'],['hubspot','HubSpot CMS'],['custom','Desarrollo a medida'],['other','Otra']
-    ]
-  };
-
-  function toggleB2B(val) {
-    ['b2c','b2b','b2b2c'].forEach(function(v) {
-      var el = document.getElementById(v + '-label');
-      if (el) el.style.borderColor = (val === v) ? 'rgba(34,211,238,.4)' : 'var(--border)';
-    });
-  }
-
-  function togglePlatform(type) {
-    var row = document.getElementById('platform-row');
-    var sel = document.getElementById('ob-platform');
-    if (!type) { row.style.display = 'none'; return; }
-    row.style.display = '';
-    var options = PLATFORMS[type === 'ecommerce' ? 'ecommerce' : 'web'];
-    sel.innerHTML = '<option value="">Selecciona...</option>';
-    options.forEach(function(o) {
-      var opt = document.createElement('option');
-      opt.value = o[0]; opt.textContent = o[1];
-      sel.appendChild(opt);
-    });
-  }
-  // Ocultar plataforma por defecto
-  document.getElementById('platform-row').style.display = 'none';
-
-  function obNext(step) {
-    if (step === 2) {
-      var domain = document.getElementById('ob-domain').value.trim();
-      if (!domain) { document.getElementById('ob-domain').focus(); return; }
-    }
-    document.querySelectorAll('.ob-step').forEach(function(s) {
-      var n = parseInt(s.dataset.step);
-      s.classList.remove('active', 'done');
-      if (n === step) s.classList.add('active');
-      else if (n < step) s.classList.add('done');
-    });
-    [1,2,3,4].forEach(function(n) {
-      var el = document.getElementById('ob-' + n);
-      if (el) el.style.display = n === step ? '' : 'none';
-    });
-    // Si vamos al paso 4, verificar si Google ya está conectado
-    if (step === 4) checkGoogleConnection();
-  }
-
-  async function obFinish() {
-    function getVal(id) { var el = document.getElementById(id); return el ? el.value.trim() : ''; }
-
-    var domain      = getVal('ob-domain');
-    var platform    = getVal('ob-platform');
-    var country     = getVal('ob-country');
-    var competitors = getVal('ob-competitors');
-    var priority    = getVal('ob-priority');
-    var peaks       = getVal('ob-peaks');
-    var budget      = getVal('ob-budget');
-
-    var btn = document.getElementById('ob-finish-btn');
-    btn.disabled = true; btn.textContent = 'Guardando...';
-    // Timeout de seguridad — si algo falla, el botón no se queda bloqueado
-    var safetyTimeout = setTimeout(function() {
-      if (btn.textContent === 'Guardando...') {
-        btn.disabled = false; btn.textContent = 'Empezar →';
-      }
-    }, 8000);
-
-    var { data: { session } } = await sb.auth.getSession();
-    var userId = session ? session.user.id : null;
-
-    var objectives = [
-      priority    ? 'prioritario: ' + priority : '',
-      peaks       ? 'picos: ' + peaks : '',
-      budget      ? 'presupuesto: ' + budget + '€/mes' : '',
-      competitors ? 'competidores: ' + competitors : ''
-    ].filter(Boolean).join(' | ');
-
-    if (userId) {
-      try {
-        await sb.from('clients').upsert({ id: userId, email: session.user.email }, { onConflict: 'id' });
-      } catch(e) { console.log('clients upsert error:', e); }
-
-      try {
-        var { error: projError } = await sb.from('projects').insert({
-          client_id:  userId,
-          domain:     domain || 'sin especificar',
-          platform:   platform || 'other',
-          country:    country || 'es',
-          objectives: objectives || 'sin especificar',
-          plan:       _selectedPlan || 'basic',
-          active:     true
-        });
-        if (projError) console.error('Error guardando proyecto:', projError);
-      } catch(e) { console.log('projects insert error:', e); }
-
-      // Notificar a Daniel
-      try {
-        var b2bVal = document.querySelector('input[name="b2b2c"]:checked');
-        await sb.from('leads_notify').insert({
-          client_id:    userId,
-          client_email: session.user.email,
-          client_name:  (session.user.user_metadata || {}).full_name || (session.user.user_metadata || {}).name || session.user.email,
-          domain:       domain || 'sin especificar',
-          plan:         _selectedPlan || 'basic',
-          country:      country || 'es',
-          web_type:     getVal('ob-type'),
-          b2b_b2c:      b2bVal ? b2bVal.value : '',
-          platform:     getVal('ob-platform'),
-          priority:     priority,
-          competitors:  competitors,
-          budget:       budget
-        });
-      } catch(e) { console.log('leads_notify error:', e); }
-    }
-
-    clearTimeout(safetyTimeout);
-
-    // Mostrar éxito
-    document.getElementById('onboarding').innerHTML =
-      '<div class="ob-success">' +
-      '<div class="ob-success-icon">🎉</div>' +
-      '<h3>¡Proyecto configurado!</h3>' +
-      '<p style="margin-bottom:16px">Hemos guardado <strong>' + domain + '</strong>.<br/>Nos pondremos en contacto en las próximas 24 horas con los primeros pasos.</p>' +
-      '<div style="padding:16px;background:var(--bg);border:1px solid var(--border);border-radius:10px;font-size:13px;color:var(--muted)">' +
-      '📧 Recibirás un email en <strong>' + (session ? session.user.email : '') + '</strong> con las instrucciones para lanzar tu primer dashboard.' +
-      '</div>' +
-      '<button class="btn" style="margin-top:20px" onclick="goToDashboard()">Ver mi cuenta →</button>' +
-      '</div>';
-  }
-
-  function goToDashboard() {
-    document.getElementById('onboarding').style.display = 'none';
-    document.getElementById('dash-main').style.display = '';
-    checkGoogleConnection();
-  }
-
-  function goToDashboardApp() {
-    window.location.href = '/dashboard.html';
-  }
-
-  function showAddCountryModal() {
-    var m = document.getElementById('modal-country');
-    m.style.display = 'flex';
-  }
-  function hideAddCountryModal() {
-    document.getElementById('modal-country').style.display = 'none';
-  }
-
-  async function submitAddCountry() {
-    var country = document.getElementById('addon-country').value;
-    var btn = document.getElementById('addon-country-btn');
-    btn.disabled = true; btn.textContent = 'Enviando...';
-    var { data: { session } } = await sb.auth.getSession();
-    if (session) {
-      try {
-        await sb.from('leads_notify').insert({
-          client_id: session.user.id,
-          client_email: session.user.email,
-          client_name: (session.user.user_metadata||{}).full_name || session.user.email,
-          domain: 'add-on',
-          plan: 'addon-country',
-          country: country,
-          web_type: 'addon',
-          objectives: 'Solicitud add-on pais: ' + country
-        });
-      } catch(e) { console.log(e); }
-    }
-    btn.disabled = false;
-    document.getElementById('modal-country').innerHTML =
-      '<div style="background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:28px;width:100%;max-width:380px;text-align:center">' +
-      '<div style="font-size:36px;margin-bottom:12px">✅</div>' +
-      '<h3 style="font-size:16px;font-weight:700;margin-bottom:8px">Solicitud recibida</h3>' +
-      '<p style="font-size:13px;color:var(--muted);margin-bottom:20px">Te contactaremos en menos de 24 horas para activar tu nuevo país.</p>' +
-      '<button class="btn" onclick="hideAddCountryModal()">Cerrar</button>' +
-      '</div>';
-  }
-
-  function showUpgradeMsg() {
-    alert('El plan Pro incluye hasta 3 webs + 5 países. Escríbenos a hola@traxxo.ai para actualizar tu plan.');
-  }
-
-  // ─── INIT ────────────────────────────────────────────────
-  // Comprobar sesión activa al cargar (incluye vuelta de OAuth)
+  // Guardar token cuando viene del perfil (OAuth redirect)
   sb.auth.onAuthStateChange(async function(event, session) {
-    if (session) {
-      // Guardar token de Google si viene de OAuth
-      if (session.provider_token && session.user) {
-        await sb.from('clients').update({
-          google_access_token: session.provider_token,
-          google_refresh_token: session.provider_refresh_token || null,
-          google_token_expires_at: session.expires_at ? new Date(session.expires_at * 1000).toISOString() : null
-        }).eq('id', session.user.id);
-      }
-      showDashboard(session.user);
+    if (event === 'SIGNED_IN' && session && session.provider_token) {
+      // Verificar que tiene scopes reales probando GSC
+      try {
+        var testRes = await fetch('https://www.googleapis.com/webmasters/v3/sites', {
+          headers: { Authorization: 'Bearer ' + session.provider_token }
+        });
+        if (testRes.ok || testRes.status === 403) {
+          await sb.from('clients').update({
+            google_access_token: session.provider_token,
+            google_refresh_token: session.provider_refresh_token || null,
+            google_token_expires_at: session.expires_at ? new Date(session.expires_at * 1000).toISOString() : null
+          }).eq('id', session.user.id);
+        }
+      } catch(e) {}
     }
   });
 
+  // ─── INIT ────────────────────────────────────────────────
   sb.auth.getSession().then(function({ data: { session } }) {
     if (session) showDashboard(session.user);
   });
@@ -1396,7 +1140,7 @@
   }
 
   function toggleIntake(el, value) {
-    var isSelected = el.style.borderColor === 'var(--accent)' || el.dataset.selected === '1';
+    var isSelected = el.dataset.selected === '1';
     if (isSelected) {
       el.style.borderColor = 'var(--border)';
       el.style.color = 'var(--muted)';
@@ -1416,30 +1160,21 @@
   async function submitIntake() {
     var url = document.getElementById('intake-url').value.trim();
     var niche = document.getElementById('intake-niche').value;
-    
     if (!url) { showMsg('intake-msg', _lang === 'en' ? 'Add your website URL' : 'Añade la URL de tu web', 'error'); return; }
     if (!_intakeData['web-type']) { showMsg('intake-msg', _lang === 'en' ? 'Select your website type' : 'Selecciona el tipo de web', 'error'); return; }
 
-    // Verificar dominio duplicado
     var cleanDomain = url.replace(/^https?:\/\//, '').replace(/\/$/, '').split('/')[0];
-    var { data: existing } = await sb.from('projects')
-      .select('id, client_id')
-      .eq('domain', cleanDomain)
-      .limit(1);
-    
-    if (existing && existing.length > 0) {
-      var userId = (await sb.auth.getUser()).data.user?.id;
-      if (existing[0].client_id !== userId) {
-        showMsg('intake-msg', _lang === 'en'
-          ? 'This domain is already being monitored. If it\'s yours, sign in to your account.'
-          : 'Este dominio ya está siendo monitorizado. Si es tuyo, inicia sesión en tu cuenta.', 'error');
-        return;
-      }
+
+    // Verificar dominio duplicado
+    var userId = (await sb.auth.getUser()).data.user?.id;
+    var { data: existing } = await sb.from('projects').select('id, client_id').eq('domain', cleanDomain).limit(1);
+    if (existing && existing.length > 0 && existing[0].client_id !== userId) {
+      showMsg('intake-msg', _lang === 'en' ? 'This domain is already being monitored.' : 'Este dominio ya está siendo monitorizado.', 'error');
+      return;
     }
 
     var intakePayload = {
-      url: url,
-      niche: niche,
+      url: url, niche: niche,
       web_type: _intakeData['web-type'],
       reto: _intakeData['reto'],
       herramientas: _intakeData['herramientas'] || [],
@@ -1449,203 +1184,94 @@
       canal: _intakeData['canal'],
     };
 
-    // Guardar en Supabase
-    var userId = (await sb.auth.getUser()).data.user?.id;
     if (userId) {
-      var cleanDomain2 = url.replace(/^https?:\/\//, '').replace(/\/$/, '').split('/')[0];
-      // Comprobar si ya existe proyecto para este usuario
       var { data: existingProj } = await sb.from('projects').select('id').eq('client_id', userId).limit(1);
       if (existingProj && existingProj.length > 0) {
-        // Actualizar
-        await sb.from('projects').update({
-          domain: cleanDomain2,
-          intake_data: intakePayload,
-          active: true
-        }).eq('client_id', userId);
+        await sb.from('projects').update({ domain: cleanDomain, intake_data: intakePayload, active: true }).eq('client_id', userId);
       } else {
-        // Insertar nuevo
-        await sb.from('projects').insert({
-          client_id: userId,
-          domain: cleanDomain2,
-          intake_data: intakePayload,
-          active: true
-        });
+        await sb.from('projects').insert({ client_id: userId, domain: cleanDomain, intake_data: intakePayload, active: true });
       }
     }
 
-    // Verificar sites de GSC antes de ir al dashboard
-    var session = (await sb.auth.getSession()).data.session;
-    if (session && session.provider_token) {
-      try {
-        var sitesRes = await fetch('https://www.googleapis.com/webmasters/v3/sites', {
-          headers: { Authorization: 'Bearer ' + session.provider_token }
-        });
-        var sitesData = await sitesRes.json();
-        var sites = (sitesData.siteEntry || []).map(function(s) { return s.siteUrl; });
-        if (sites.length > 1) {
-          // Mostrar selector de site
-          showSiteSelector(sites, userId);
-          return;
-        } else if (sites.length === 1) {
-          // Solo 1 site — guardar automáticamente
-          await sb.from('projects').update({ gsc_site_url: sites[0] }).eq('client_id', userId);
-        }
-      } catch(e) { console.log('GSC sites error:', e); }
-    }
-    // Ir al dashboard
+    // Ir directo al dashboard
     document.getElementById('onboarding').style.display = 'none';
     document.getElementById('dash-main').style.display = '';
   }
 
+  function connectGoogle(context) {
+    var isToolConnection = (context === 'onboarding' || context === 'dashboard');
+    var scopeList = isToolConnection
+      ? 'email profile https://www.googleapis.com/auth/webmasters.readonly https://www.googleapis.com/auth/adwords https://www.googleapis.com/auth/analytics.readonly'
+      : 'email profile';
+    sb.auth.signInWithOAuth({
+      provider: 'google',
+      options: {
+        scopes: scopeList,
+        redirectTo: 'https://app.traxxo.ai',
+        queryParams: { access_type: 'offline', prompt: isToolConnection ? 'consent' : 'select_account' }
+      }
+    });
+  }
 
-  // ─── i18n ────────────────────────────────────────────────────
-  var TRANSLATIONS = {
-    es: {
-      login: 'Entrar', register: 'Registro',
-      google_login: 'Continuar con Google', google_register: 'Registrarse con Google',
-      or_email: 'o con email',
-      name: 'Nombre', company: 'Empresa', company_opt: '(opcional)',
-      email: 'Email', password: 'Contraseña', password_ph: 'Mínimo 8 caracteres',
-      repeat_pass: 'Repite la contraseña', repeat_ph: 'Repite tu contraseña',
-      terms_text: 'Acepto los', terms_link: 'Términos', and: 'y la', privacy_link: 'Privacidad',
-      create_account: 'Crear cuenta', sign_in: 'Entrar',
-      forgot: '¿Olvidaste tu contraseña?',
-      reset_title: 'Recuperar contraseña', reset_ph: 'tu@email.com', reset_btn: 'Enviar enlace', back: '← Volver al login',
-      intake_title: 'Cuéntanos sobre tu proyecto',
-      intake_sub: 'Usamos esta información para preparar tu dashboard a medida.',
-      intake_url: 'URL de tu web',
-      intake_webtype: '¿Qué tipo de web tienes?',
-      intake_niche: 'Sector / Nicho',
-      intake_reto: '¿Cuál es tu mayor reto SEO?',
-      intake_tools: '¿Qué herramientas usas ya?',
-      intake_traffic: 'Tráfico orgánico mensual aproximado',
-      intake_ads: '¿Inviertes en Google Ads?',
-      intake_team: '¿Cómo trabajas?',
-      intake_source: '¿Cómo nos encontraste?',
-      intake_btn: 'Enviar y continuar →',
-      plan_title: 'Elige tu plan', plan_sub: 'Puedes cambiar en cualquier momento.',
-      welcome: 'Bienvenido,', logout: 'Cerrar sesión',
-    },
-    en: {
-      login: 'Sign in', register: 'Sign up',
-      google_login: 'Continue with Google', google_register: 'Sign up with Google',
-      or_email: 'or with email',
-      name: 'Name', company: 'Company', company_opt: '(optional)',
-      email: 'Email', password: 'Password', password_ph: 'Minimum 8 characters',
-      repeat_pass: 'Repeat password', repeat_ph: 'Repeat your password',
-      terms_text: 'I accept the', terms_link: 'Terms', and: 'and', privacy_link: 'Privacy Policy',
-      create_account: 'Create account', sign_in: 'Sign in',
-      forgot: 'Forgot your password?',
-      reset_title: 'Reset password', reset_ph: 'your@email.com', reset_btn: 'Send link', back: '← Back to login',
-      intake_title: 'Tell us about your project',
-      intake_sub: 'We use this info to prepare your custom dashboard.',
-      intake_url: 'Your website URL',
-      intake_webtype: 'What type of website do you have?',
-      intake_niche: 'Industry / Niche',
-      intake_reto: 'What is your biggest SEO challenge?',
-      intake_tools: 'Which tools do you already use?',
-      intake_traffic: 'Approximate monthly organic traffic',
-      intake_ads: 'Do you invest in Google Ads?',
-      intake_team: 'How do you work?',
-      intake_source: 'How did you find us?',
-      intake_btn: 'Submit and continue →',
-      plan_title: 'Choose your plan', plan_sub: 'Change anytime.',
-      welcome: 'Welcome,', logout: 'Sign out',
+  // ─── ONBOARDING ───────────────────────────────────────────
+  var _selectedPlan = null;
+
+  function startOnboarding() {
+    document.getElementById('ob-plan-selector').style.display = 'none';
+    document.getElementById('ob-wizard').style.display = '';
+    document.getElementById('ob-step-1').style.display = '';
+  }
+
+  function selectPlan(plan, el) {
+    _selectedPlan = plan;
+    document.querySelectorAll('.plan-card').forEach(function(c) { c.classList.remove('selected'); });
+    if (el) el.classList.add('selected');
+    document.getElementById('ob-next-btn').disabled = false;
+  }
+
+  function obNext(step) {
+    document.querySelectorAll('[id^="ob-step-"]').forEach(function(s) { s.style.display = 'none'; });
+    var next = document.getElementById('ob-step-' + step);
+    if (next) next.style.display = '';
+  }
+
+  async function obFinish() {
+    var userId = (await sb.auth.getUser()).data.user?.id;
+    if (userId && _selectedPlan) {
+      await sb.from('clients').update({ plan: _selectedPlan }).eq('id', userId);
     }
-  };
-
-  var _lang = localStorage.getItem('traxxo_lang') ||
-    (navigator.language && navigator.language.startsWith('en') ? 'en' : 'es');
-
-  function setLang(lang) {
-    _lang = lang;
-    localStorage.setItem('traxxo_lang', lang);
-    applyLang();
+    document.getElementById('onboarding').style.display = 'none';
+    document.getElementById('dash-main').style.display = '';
   }
 
-  function t(key) {
-    return (TRANSLATIONS[_lang] && TRANSLATIONS[_lang][key]) || TRANSLATIONS['es'][key] || key;
+  function getVal(id) {
+    var el = document.getElementById(id);
+    return el ? el.value.trim() : '';
   }
 
-  function applyLang() {
-    var T = TRANSLATIONS[_lang];
-    if (!T) return;
-
-    // Selector botones
-    var btnEs = document.getElementById('lang-es');
-    var btnEn = document.getElementById('lang-en');
-    if (btnEs) { btnEs.style.color = _lang === 'es' ? 'var(--accent)' : 'var(--muted)'; btnEs.style.borderColor = _lang === 'es' ? 'var(--accent)' : 'var(--border)'; }
-    if (btnEn) { btnEn.style.color = _lang === 'en' ? 'var(--accent)' : 'var(--muted)'; btnEn.style.borderColor = _lang === 'en' ? 'var(--accent)' : 'var(--border)'; }
-
-    // Tabs
-    var tabLogin = document.querySelector('[onclick="showLogin()"]');
-    var tabReg = document.querySelector('[onclick="showRegister()"]');
-    if (tabLogin) tabLogin.textContent = T.login;
-    if (tabReg) tabReg.textContent = T.register;
-
-    // Google buttons
-    document.querySelectorAll('#login-form .btn-google').forEach(function(b) { if (b.querySelector('svg')) b.childNodes[b.childNodes.length-1].textContent = ' ' + T.google_login; });
-    document.querySelectorAll('#register-form .btn-google').forEach(function(b) { if (b.querySelector('svg')) b.childNodes[b.childNodes.length-1].textContent = ' ' + T.google_register; });
-
-    // Or separators
-    document.querySelectorAll('.or-sep').forEach(function(el) { el.textContent = T.or_email; });
-
-    // Labels
-    var map = {
-      'label-name': 'name', 'label-company': 'company', 'label-email': 'email',
-      'label-password': 'password', 'label-repeat': 'repeat_pass',
-      'label-forgot': 'forgot', 'label-reset': 'reset_title',
-      'label-intake-title': 'intake_title', 'label-intake-sub': 'intake_sub',
-      'label-plan-title': 'plan_title', 'label-plan-sub': 'plan_sub',
-      'label-welcome': 'welcome', 'label-logout': 'logout',
-    };
-    Object.keys(map).forEach(function(id) {
-      var el = document.getElementById(id);
-      if (el) el.textContent = T[map[id]];
-    });
-
-    // Placeholders
-    var phMap = {
-      'reg-password': 'password_ph', 'reg-password2': 'repeat_ph',
-      'login-password': 'password_ph', 'intake-url': 'intake_url',
-      'reset-email': 'reset_ph',
-    };
-    Object.keys(phMap).forEach(function(id) {
-      var el = document.getElementById(id);
-      if (el) el.placeholder = T[phMap[id]];
-    });
-
-    // Buttons
-    var btns = {
-      'btn-create': 'create_account', 'btn-login': 'sign_in',
-      'btn-reset': 'reset_btn', 'btn-intake': 'intake_btn',
-    };
-    Object.keys(btns).forEach(function(id) {
-      var el = document.getElementById(id);
-      if (el) el.textContent = T[btns[id]];
-    });
-
-    // Terms text
-    var termsEl = document.getElementById('terms-text');
-    if (termsEl) termsEl.innerHTML = T.terms_text + ' <a href="https://traxxo.ai/terminos.html" target="_blank" style="color:var(--accent)">' + T.terms_link + '</a> ' + T.and + ' <a href="https://traxxo.ai/privacidad.html" target="_blank" style="color:var(--accent)">' + T.privacy_link + '</a>';
-
-    // Intake labels
-    var intakeLabels = {
-      'label-intake-url': 'intake_url', 'label-intake-webtype': 'intake_webtype',
-      'label-intake-niche': 'intake_niche', 'label-intake-reto': 'intake_reto',
-      'label-intake-tools': 'intake_tools', 'label-intake-traffic': 'intake_traffic',
-      'label-intake-ads': 'intake_ads', 'label-intake-team': 'intake_team',
-      'label-intake-source': 'intake_source',
-    };
-    Object.keys(intakeLabels).forEach(function(id) {
-      var el = document.getElementById(id);
-      if (el) el.textContent = T[intakeLabels[id]];
-    });
+  function goToDashboard() {
+    document.getElementById('onboarding').style.display = 'none';
+    document.getElementById('dash-main').style.display = '';
   }
 
-  // Aplicar al cargar
-  document.addEventListener('DOMContentLoaded', applyLang);
+  function goToDashboardApp() {
+    window.location.href = '/dashboard.html';
+  }
 
+  function showAddCountryModal() {
+    var m = document.getElementById('modal-country');
+    if (m) m.style.display = 'flex';
+  }
+  function hideAddCountryModal() {
+    var m = document.getElementById('modal-country');
+    if (m) m.style.display = 'none';
+  }
+  async function submitAddCountry() {
+    hideAddCountryModal();
+  }
+  function showUpgradeMsg() {
+    alert('Disponible en el plan Pro. Próximamente.');
+  }
 
   // ─── SITE SELECTOR ───────────────────────────────────────
   var _selectedSite = null;
@@ -1654,38 +1280,67 @@
   function showSiteSelector(sites, userId) {
     _siteUserId = userId;
     var list = document.getElementById('site-list');
+    if (!list) return;
     list.innerHTML = '';
     sites.forEach(function(site) {
       var el = document.createElement('div');
       el.style.cssText = 'padding:10px 14px;background:var(--bg);border:1px solid var(--border);border-radius:8px;cursor:pointer;font-size:13px;color:var(--muted);transition:all .15s;word-break:break-all';
       el.textContent = site;
       el.onclick = function() {
-        list.querySelectorAll('div').forEach(function(d) {
-          d.style.borderColor = 'var(--border)';
-          d.style.color = 'var(--muted)';
-          d.style.background = 'var(--bg)';
-        });
-        el.style.borderColor = 'var(--accent)';
-        el.style.color = 'var(--accent)';
-        el.style.background = 'rgba(34,211,238,.06)';
+        list.querySelectorAll('div').forEach(function(d) { d.style.borderColor='var(--border)'; d.style.color='var(--muted)'; d.style.background='var(--bg)'; });
+        el.style.borderColor = 'var(--accent)'; el.style.color = 'var(--accent)'; el.style.background = 'rgba(34,211,238,.06)';
         _selectedSite = site;
-        document.getElementById('btn-confirm-site').disabled = false;
+        var btn = document.getElementById('btn-confirm-site');
+        if (btn) btn.disabled = false;
       };
       list.appendChild(el);
     });
     var modal = document.getElementById('modal-site-selector');
-    modal.style.display = 'flex';
+    if (modal) modal.style.display = 'flex';
   }
 
   async function confirmSite() {
     if (!_selectedSite || !_siteUserId) return;
     var btn = document.getElementById('btn-confirm-site');
-    btn.disabled = true; btn.textContent = 'Guardando...';
+    if (btn) { btn.disabled = true; btn.textContent = 'Guardando...'; }
     await sb.from('projects').update({ gsc_site_url: _selectedSite }).eq('client_id', _siteUserId);
-    document.getElementById('modal-site-selector').style.display = 'none';
+    var modal = document.getElementById('modal-site-selector');
+    if (modal) modal.style.display = 'none';
     document.getElementById('onboarding').style.display = 'none';
     document.getElementById('dash-main').style.display = '';
   }
+
+  // ─── i18n ────────────────────────────────────────────────
+  var TRANSLATIONS = {
+    es: { login:'Entrar', register:'Registro', google_login:'Continuar con Google', google_register:'Registrarse con Google', or_email:'o con email', name:'Nombre', company:'Empresa', email:'Email', password:'Contraseña', password_ph:'Mínimo 8 caracteres', repeat_pass:'Repite la contraseña', repeat_ph:'Repite tu contraseña', terms_text:'Acepto los', terms_link:'Términos', and:'y la', privacy_link:'Privacidad', create_account:'Crear cuenta', sign_in:'Entrar', forgot:'¿Olvidaste tu contraseña?', intake_title:'Cuéntanos sobre tu proyecto', intake_sub:'Usamos esta información para preparar tu dashboard a medida.', intake_url:'URL de tu web', intake_btn:'Enviar y continuar →', plan_title:'Elige tu plan', plan_sub:'Puedes cambiar en cualquier momento.', welcome:'Bienvenido,', logout:'Cerrar sesión' },
+    en: { login:'Sign in', register:'Sign up', google_login:'Continue with Google', google_register:'Sign up with Google', or_email:'or with email', name:'Name', company:'Company', email:'Email', password:'Password', password_ph:'Minimum 8 characters', repeat_pass:'Repeat password', repeat_ph:'Repeat your password', terms_text:'I accept the', terms_link:'Terms', and:'and', privacy_link:'Privacy Policy', create_account:'Create account', sign_in:'Sign in', forgot:'Forgot your password?', intake_title:'Tell us about your project', intake_sub:'We use this info to prepare your custom dashboard.', intake_url:'Your website URL', intake_btn:'Submit and continue →', plan_title:'Choose your plan', plan_sub:'Change anytime.', welcome:'Welcome,', logout:'Sign out' }
+  };
+
+  var _lang = localStorage.getItem('traxxo_lang') || (navigator.language && navigator.language.startsWith('en') ? 'en' : 'es');
+
+  function setLang(lang) { _lang = lang; localStorage.setItem('traxxo_lang', lang); applyLang(); }
+  function t(key) { return (TRANSLATIONS[_lang] && TRANSLATIONS[_lang][key]) || TRANSLATIONS['es'][key] || key; }
+
+  function applyLang() {
+    var T = TRANSLATIONS[_lang];
+    if (!T) return;
+    var btnEs = document.getElementById('lang-es');
+    var btnEn = document.getElementById('lang-en');
+    if (btnEs) { btnEs.style.color = _lang==='es'?'var(--accent)':'var(--muted)'; btnEs.style.borderColor = _lang==='es'?'var(--accent)':'var(--border)'; }
+    if (btnEn) { btnEn.style.color = _lang==='en'?'var(--accent)':'var(--muted)'; btnEn.style.borderColor = _lang==='en'?'var(--accent)':'var(--border)'; }
+    var tabLogin = document.querySelector('[onclick="showLogin()"]');
+    var tabReg = document.querySelector('[onclick="showRegister()"]');
+    if (tabLogin) tabLogin.textContent = T.login;
+    if (tabReg) tabReg.textContent = T.register;
+    var idMap = { 'btn-create':'create_account','btn-login':'sign_in','btn-intake':'intake_btn' };
+    Object.keys(idMap).forEach(function(id) { var el=document.getElementById(id); if(el) el.textContent=T[idMap[id]]; });
+    var phMap = { 'reg-password':'password_ph','reg-password2':'repeat_ph','login-password':'password_ph','intake-url':'intake_url' };
+    Object.keys(phMap).forEach(function(id) { var el=document.getElementById(id); if(el) el.placeholder=T[phMap[id]]; });
+    var termsEl = document.getElementById('terms-text');
+    if (termsEl) termsEl.innerHTML = T.terms_text+' <a href="https://traxxo.ai/terminos.html" target="_blank" style="color:var(--accent)">'+T.terms_link+'</a> '+T.and+' <a href="https://traxxo.ai/privacidad.html" target="_blank" style="color:var(--accent)">'+T.privacy_link+'</a>';
+  }
+
+  document.addEventListener('DOMContentLoaded', applyLang);
 
 </script>
 </body>
