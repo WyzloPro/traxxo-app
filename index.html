@@ -921,7 +921,49 @@
     var { data, error } = await sb.auth.signUp({ email, password: pass, options: { data: { name, company } } });
     btn.disabled = false; btn.textContent = 'Crear cuenta';
     if (error) { showMsg('register-msg', error.message, 'error'); return; }
-    showMsg('register-msg', '✓ Cuenta creada. Revisa tu email para confirmar.', 'success');
+    // Mostrar pantalla de confirmación con carrusel
+    var linesEs = [
+      'Bienvenido al lado brillante del SEO',
+      'Tu competencia no verá esto venir',
+      'Menos adivinar. Más crecer.',
+      'Tus datos acaban de tener cerebro',
+      'Por fin, SEO que te dice qué hacer',
+      'Vamos a hacer subir tus gráficos'
+    ];
+    var linesEn = [
+      'Welcome to the bright side of SEO',
+      'Your competitors won\'t see this coming',
+      'Less guessing. More growing.',
+      'Your data just got a brain',
+      'Finally, SEO that tells you what to do',
+      'Let\'s make your graphs go up'
+    ];
+    var lines = _lang === 'en' ? linesEn : linesEs;
+    document.getElementById('register-form').innerHTML = `
+      <div style="text-align:center;padding:28px 0">
+        <div style="width:64px;height:64px;background:rgba(34,211,238,.1);border:2px solid var(--accent);border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 20px;font-size:28px;color:var(--accent)">✓</div>
+        <h3 style="font-size:18px;font-weight:700;margin-bottom:8px">${_lang === 'en' ? 'Check your email' : '¡Revisa tu email!'}</h3>
+        <p style="font-size:14px;color:var(--muted);line-height:1.6;margin-bottom:20px">${_lang === 'en' ? 'We sent a confirmation link to' : 'Enviamos un enlace a'} <strong style="color:var(--text)">${email}</strong>.</p>
+        <div style="min-height:48px;display:flex;align-items:center;justify-content:center;margin-bottom:20px">
+          <p id="carousel-line" style="font-size:15px;font-weight:600;color:var(--accent);transition:opacity .4s;margin:0"></p>
+        </div>
+        <p style="font-size:12px;color:var(--muted)">${_lang === 'en' ? "Don't see it? Check your spam folder." : '¿No lo ves? Revisa la carpeta de spam.'}</p>
+      </div>
+    `;
+    // Carrusel
+    var carouselIdx = 0;
+    var carouselEl = document.getElementById('carousel-line');
+    function showCarouselLine() {
+      if (!carouselEl) return;
+      carouselEl.style.opacity = '0';
+      setTimeout(function() {
+        carouselEl.textContent = lines[carouselIdx % lines.length];
+        carouselEl.style.opacity = '1';
+        carouselIdx++;
+      }, 400);
+    }
+    showCarouselLine();
+    setInterval(showCarouselLine, 3000);
   }
 
   async function logout() {
@@ -1301,8 +1343,25 @@
     var url = document.getElementById('intake-url').value.trim();
     var niche = document.getElementById('intake-niche').value;
     
-    if (!url) { showMsg('intake-msg', 'Añade la URL de tu web', 'error'); return; }
-    if (!_intakeData['web-type']) { showMsg('intake-msg', 'Selecciona el tipo de web', 'error'); return; }
+    if (!url) { showMsg('intake-msg', _lang === 'en' ? 'Add your website URL' : 'Añade la URL de tu web', 'error'); return; }
+    if (!_intakeData['web-type']) { showMsg('intake-msg', _lang === 'en' ? 'Select your website type' : 'Selecciona el tipo de web', 'error'); return; }
+
+    // Verificar dominio duplicado
+    var cleanDomain = url.replace(/^https?:\/\//, '').replace(/\/$/, '').split('/')[0];
+    var { data: existing } = await sb.from('projects')
+      .select('id, client_id')
+      .eq('domain', cleanDomain)
+      .limit(1);
+    
+    if (existing && existing.length > 0) {
+      var userId = (await sb.auth.getUser()).data.user?.id;
+      if (existing[0].client_id !== userId) {
+        showMsg('intake-msg', _lang === 'en'
+          ? 'This domain is already being monitored. If it\'s yours, sign in to your account.'
+          : 'Este dominio ya está siendo monitorizado. Si es tuyo, inicia sesión en tu cuenta.', 'error');
+        return;
+      }
+    }
 
     var intakePayload = {
       url: url,
