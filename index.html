@@ -289,7 +289,7 @@
           <!-- Nicho -->
           <div>
             <label id="label-intake-niche" style="font-size:12px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;display:block;margin-bottom:6px">Sector / Nicho</label>
-            <select id="intake-niche" onchange="_intakeData['niche']=this.value" style="width:100%;background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:10px 14px;color:var(--text);font-size:13px;font-family:var(--font);outline:none;-webkit-appearance:none">
+            <select id="intake-niche" onchange="_intakeData['niche']=this.value;document.getElementById('niche-other').style.display=this.value==='Otro'?'block':'none'" style="width:100%;background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:10px 14px;color:var(--text);font-size:13px;font-family:var(--font);outline:none;-webkit-appearance:none">
               <option value="">Selecciona tu sector...</option>
               <option>Salud y bienestar</option>
               <option>Moda y lifestyle</option>
@@ -303,6 +303,7 @@
               <option>Belleza y cosmética</option>
               <option>Otro</option>
             </select>
+            <input type="text" id="niche-other" placeholder="¿Cuál es tu sector?" oninput="_intakeData['niche']=this.value" style="display:none;width:100%;margin-top:8px;background:var(--bg);border:1px solid var(--accent);border-radius:8px;padding:10px 14px;color:var(--text);font-size:13px;font-family:var(--font);outline:none" />
           </div>
 
           <!-- Mayor reto -->
