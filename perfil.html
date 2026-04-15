@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+  <title>Traxxo — Mi perfil</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --bg: #09090b; --surface: #111113; --border: #1f1f23;
+      --text: #fafafa; --muted: #71717a; --accent: #22d3ee;
+      --green: #10b981; --red: #ef4444; --font: 'Inter', system-ui, sans-serif;
+    }
+    body { background: var(--bg); color: var(--text); font-family: var(--font); min-height: 100vh; -webkit-font-smoothing: antialiased; }
+
+    .header { display:flex; align-items:center; justify-content:space-between; padding:12px 24px; border-bottom:1px solid var(--border); background:var(--surface); position:sticky; top:0; z-index:100; }
+    .logo { display:flex; align-items:center; gap:8px; font-size:16px; font-weight:700; text-decoration:none; color:var(--text); }
+    .header-right { display:flex; gap:10px; align-items:center; }
+    .btn { padding:8px 16px; border-radius:8px; font-size:13px; font-weight:600; font-family:var(--font); cursor:pointer; border:none; transition:all .15s; }
+    .btn-ghost { background:none; border:1px solid var(--border); color:var(--muted); }
+    .btn-ghost:hover { color:var(--text); border-color:var(--muted); }
+    .btn-accent { background:var(--accent); color:#000; }
+    .btn-accent:hover { opacity:.85; }
+    .btn-danger { background:rgba(239,68,68,.1); color:var(--red); border:1px solid rgba(239,68,68,.2); }
+    .btn-danger:hover { background:rgba(239,68,68,.2); }
+
+    .container { max-width:640px; margin:0 auto; padding:32px 24px; }
+
+    .section { background:var(--surface); border:1px solid var(--border); border-radius:14px; padding:24px; margin-bottom:16px; }
+    .section-title { font-size:13px; font-weight:700; color:var(--muted); text-transform:uppercase; letter-spacing:.06em; margin-bottom:16px; }
+
+    /* CUENTA */
+    .account-row { display:flex; justify-content:space-between; align-items:center; padding:8px 0; border-bottom:1px solid rgba(255,255,255,.04); }
+    .account-row:last-child { border-bottom:none; }
+    .account-label { font-size:12px; color:var(--muted); }
+    .account-value { font-size:13px; font-weight:500; }
+    .plan-badge { font-size:11px; font-weight:700; padding:3px 10px; border-radius:20px; background:rgba(34,211,238,.1); color:var(--accent); border:1px solid rgba(34,211,238,.2); }
+
+    /* CONEXIONES */
+    .conn-row { display:flex; align-items:center; gap:14px; padding:14px 0; border-bottom:1px solid rgba(255,255,255,.04); }
+    .conn-row:last-child { border-bottom:none; }
+    .conn-icon { width:40px; height:40px; border-radius:10px; display:flex; align-items:center; justify-content:center; font-size:12px; font-weight:700; flex-shrink:0; border:1px solid; }
+    .conn-info { flex:1; }
+    .conn-name { font-size:14px; font-weight:600; }
+    .conn-detail { font-size:12px; color:var(--muted); margin-top:2px; }
+    .conn-status { font-size:11px; font-weight:700; padding:3px 10px; border-radius:20px; white-space:nowrap; }
+    .conn-status.connected { background:rgba(16,185,129,.1); color:var(--green); border:1px solid rgba(16,185,129,.2); }
+    .conn-status.disconnected { background:var(--bg); color:var(--muted); border:1px solid var(--border); }
+    .conn-btn { font-size:12px; padding:6px 12px; margin-left:8px; flex-shrink:0; }
+
+    /* SEMRUSH INPUT */
+    .semrush-input-wrap { display:flex; gap:8px; margin-top:12px; }
+    .semrush-input { flex:1; background:var(--bg); border:1px solid var(--border); border-radius:8px; padding:9px 14px; color:var(--text); font-size:13px; font-family:var(--font); outline:none; transition:border-color .15s; }
+    .semrush-input:focus { border-color:rgba(34,211,238,.4); }
+    .semrush-input::placeholder { color:var(--muted); }
+
+    /* DOMINIO */
+    .domain-wrap { display:flex; gap:8px; margin-top:12px; align-items:center; }
+    .domain-tag { background:var(--bg); border:1px solid var(--border); border-radius:8px; padding:9px 14px; font-size:13px; color:var(--text); flex:1; }
+
+    .msg { font-size:12px; margin-top:8px; padding:8px 12px; border-radius:8px; display:none; }
+    .msg.success { background:rgba(16,185,129,.1); color:var(--green); border:1px solid rgba(16,185,129,.2); display:block; }
+    .msg.error { background:rgba(239,68,68,.1); color:var(--red); border:1px solid rgba(239,68,68,.2); display:block; }
+
+    .danger-zone { border-color:rgba(239,68,68,.2); }
+    .danger-zone .section-title { color:var(--red); }
+  </style>
+</head>
+<body>
+
+<div class="header">
+  <a href="/dashboard.html" class="logo">
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none"><rect width="24" height="24" rx="7" fill="#22d3ee" fill-opacity=".12"/><path d="M5 12h4l2-5 2 10 2-5h2" stroke="#22d3ee" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    traxxo
+  </a>
+  <div class="header-right">
+    <a href="/dashboard.html" class="btn btn-ghost">← Dashboard</a>
+    <button class="btn btn-ghost" onclick="logout()">Cerrar sesión</button>
+  </div>
+</div>
+
+<div class="container">
+
+  <!-- CUENTA -->
+  <div class="section">
+    <div class="section-title">Mi cuenta</div>
+    <div class="account-row">
+      <span class="account-label">Email</span>
+      <span class="account-value" id="profile-email">—</span>
+    </div>
+    <div class="account-row">
+      <span class="account-label">Nombre</span>
+      <span class="account-value" id="profile-name">—</span>
+    </div>
+    <div class="account-row">
+      <span class="account-label">Empresa</span>
+      <span class="account-value" id="profile-company">—</span>
+    </div>
+    <div class="account-row">
+      <span class="account-label">Plan</span>
+      <span class="plan-badge" id="profile-plan">Early Access</span>
+    </div>
+    <div class="account-row">
+      <span class="account-label">Web monitorizada</span>
+      <span class="account-value" id="profile-domain">—</span>
+    </div>
+  </div>
+
+  <!-- CONEXIONES GOOGLE -->
+  <div class="section">
+    <div class="section-title">Conexiones de Google</div>
+    <p style="font-size:13px;color:var(--muted);margin-bottom:16px">Conecta tu cuenta de Google para que Traxxo pueda leer tus datos de GSC, Ads y Analytics.</p>
+
+    <div class="conn-row">
+      <div class="conn-icon" style="background:#4285f420;border-color:#4285f440;color:#4285f4">GSC</div>
+      <div class="conn-info">
+        <div class="conn-name">Google Search Console</div>
+        <div class="conn-detail" id="gsc-detail">Clics, impresiones y posiciones</div>
+      </div>
+      <span class="conn-status disconnected" id="gsc-status">Sin conectar</span>
+    </div>
+
+    <div class="conn-row">
+      <div class="conn-icon" style="background:#fbbc0420;border-color:#fbbc0440;color:#fbbc04">ADS</div>
+      <div class="conn-info">
+        <div class="conn-name">Google Ads</div>
+        <div class="conn-detail" id="ads-detail">Campañas, gasto y ROAS</div>
+      </div>
+      <span class="conn-status disconnected" id="ads-status">Sin conectar</span>
+    </div>
+
+    <div class="conn-row">
+      <div class="conn-icon" style="background:#e8710a20;border-color:#e8710a40;color:#e8710a">GA4</div>
+      <div class="conn-info">
+        <div class="conn-name">Google Analytics 4</div>
+        <div class="conn-detail" id="ga4-detail">Sesiones, usuarios y conversiones</div>
+      </div>
+      <span class="conn-status disconnected" id="ga4-status">Sin conectar</span>
+    </div>
+
+    <div style="margin-top:16px">
+      <button class="btn btn-accent" id="btn-connect-google" onclick="connectGoogle()" style="width:100%;display:flex;align-items:center;justify-content:center;gap:8px">
+        <svg width="16" height="16" viewBox="0 0 18 18"><path fill="#000" d="M17.64 9.2c0-.637-.057-1.251-.164-1.84H9v3.481h4.844c-.209 1.125-.843 2.078-1.796 2.716v2.259h2.908c1.702-1.567 2.684-3.875 2.684-6.615z"/><path fill="#000" d="M9 18c2.43 0 4.467-.806 5.956-2.184l-2.908-2.259c-.806.54-1.837.86-3.048.86-2.344 0-4.328-1.584-5.036-3.711H.957v2.332C2.438 15.983 5.482 18 9 18z"/><path fill="#000" d="M3.964 10.706c-.18-.54-.282-1.117-.282-1.706s.102-1.166.282-1.706V4.962H.957C.347 6.175 0 7.55 0 9s.348 2.825.957 4.038l3.007-2.332z"/><path fill="#000" d="M9 3.58c1.321 0 2.508.454 3.44 1.345l2.582-2.58C13.463.891 11.426 0 9 0 5.482 0 2.438 2.017.957 4.962L3.964 7.294C4.672 5.163 6.656 3.58 9 3.58z"/></svg>
+        Conectar con Google
+      </button>
+      <p style="font-size:11px;color:var(--muted);text-align:center;margin-top:8px">Solo pedimos acceso de lectura. Nunca modificamos tus datos.</p>
+    </div>
+  </div>
+
+  <!-- SEMRUSH -->
+  <div class="section">
+    <div class="section-title">Semrush</div>
+    <p style="font-size:13px;color:var(--muted);margin-bottom:4px">Introduce tu API key de Semrush para ver posiciones orgánicas por tema.</p>
+    <a href="https://www.semrush.com/user/profile/api/" target="_blank" style="font-size:12px;color:var(--accent)">¿Dónde encuentro mi API key?</a>
+    <div class="semrush-input-wrap">
+      <input type="password" id="semrush-key" class="semrush-input" placeholder="Tu API key de Semrush..." />
+      <button class="btn btn-accent" onclick="saveSemrush()">Guardar</button>
+    </div>
+    <div class="msg" id="semrush-msg"></div>
+  </div>
+
+  <!-- DANGER ZONE -->
+  <div class="section danger-zone">
+    <div class="section-title">Zona peligrosa</div>
+    <div style="display:flex;justify-content:space-between;align-items:center">
+      <div>
+        <div style="font-size:13px;font-weight:600;margin-bottom:4px">Cerrar sesión</div>
+        <div style="font-size:12px;color:var(--muted)">Salir de tu cuenta en este dispositivo</div>
+      </div>
+      <button class="btn btn-danger" onclick="logout()">Cerrar sesión</button>
+    </div>
+  </div>
+
+</div>
+
+<script>
+const SUPABASE_URL  = 'https://ghqttckqvjptxhihojey.supabase.co';
+const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdocXR0Y2txdmpwdHhoaWhvamV5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU2NDU1OTYsImV4cCI6MjA5MTIyMTU5Nn0.KlPDplMIIWQwx5oafvkfxbsm0dzPb0cbTJpCM83cqK4';
+const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
+
+var _userId = null;
+var _projectId = null;
+
+sb.auth.getSession().then(async function({ data: { session } }) {
+  if (!session) { window.location.href = '/'; return; }
+  _userId = session.user.id;
+
+  // Cargar datos del cliente
+  var { data: client } = await sb.from('clients').select('*').eq('id', _userId).single();
+  var { data: project } = await sb.from('projects').select('*').eq('client_id', _userId).limit(1).single();
+
+  if (project) _projectId = project.id;
+
+  document.getElementById('profile-email').textContent = session.user.email || '—';
+  document.getElementById('profile-name').textContent = client?.name || session.user.user_metadata?.full_name || '—';
+  document.getElementById('profile-company').textContent = client?.company || '—';
+  document.getElementById('profile-domain').textContent = project?.domain || '—';
+
+  var plan = client?.plan || 'early_access';
+  var planEl = document.getElementById('profile-plan');
+  planEl.textContent = plan === 'basic' ? 'Basic' : plan === 'pro' ? 'Pro' : plan === 'agency' ? 'Agency' : 'Early Access';
+
+  // Verificar conexión Google
+  if (client?.google_access_token) {
+    try {
+      var res = await fetch('https://www.googleapis.com/webmasters/v3/sites', {
+        headers: { Authorization: 'Bearer ' + client.google_access_token }
+      });
+      if (res.ok) {
+        var email = session.user.email;
+        ['gsc', 'ads', 'ga4'].forEach(function(s) {
+          document.getElementById(s + '-status').textContent = 'Conectado';
+          document.getElementById(s + '-status').className = 'conn-status connected';
+          document.getElementById(s + '-detail').textContent = email;
+        });
+        document.getElementById('btn-connect-google').textContent = 'Reconectar Google';
+        document.getElementById('btn-connect-google').style.background = 'var(--border)';
+        document.getElementById('btn-connect-google').style.color = 'var(--text)';
+      }
+    } catch(e) {}
+  }
+
+  // Cargar API key de Semrush si existe
+  if (project?.semrush_api_key) {
+    document.getElementById('semrush-key').value = project.semrush_api_key;
+  }
+});
+
+function connectGoogle() {
+  sb.auth.signInWithOAuth({
+    provider: 'google',
+    options: {
+      scopes: 'email profile https://www.googleapis.com/auth/webmasters.readonly https://www.googleapis.com/auth/adwords https://www.googleapis.com/auth/analytics.readonly',
+      redirectTo: 'https://app.traxxo.ai/perfil.html',
+      queryParams: { access_type: 'offline', prompt: 'consent' }
+    }
+  });
+}
+
+// Al volver del OAuth de Google, guardar el token
+sb.auth.onAuthStateChange(async function(event, session) {
+  if (event === 'SIGNED_IN' && session?.provider_token) {
+    await sb.from('clients').update({
+      google_access_token: session.provider_token,
+      google_refresh_token: session.provider_refresh_token || null,
+      google_token_expires_at: session.expires_at ? new Date(session.expires_at * 1000).toISOString() : null
+    }).eq('id', session.user.id);
+
+    // Actualizar UI
+    ['gsc', 'ads', 'ga4'].forEach(function(s) {
+      document.getElementById(s + '-status').textContent = 'Conectado';
+      document.getElementById(s + '-status').className = 'conn-status connected';
+      document.getElementById(s + '-detail').textContent = session.user.email;
+    });
+
+    // Si tiene varios sites GSC, mostrar selector
+    try {
+      var res = await fetch('https://www.googleapis.com/webmasters/v3/sites', {
+        headers: { Authorization: 'Bearer ' + session.provider_token }
+      });
+      var data = await res.json();
+      var sites = (data.siteEntry || []).map(function(s) { return s.siteUrl; });
+      if (sites.length > 0) {
+        showSiteModal(sites, session.user.id);
+      }
+    } catch(e) {}
+  }
+});
+
+async function saveSemrush() {
+  var key = document.getElementById('semrush-key').value.trim();
+  if (!key) return;
+  var { error } = await sb.from('projects').update({ semrush_api_key: key }).eq('client_id', _userId);
+  var msg = document.getElementById('semrush-msg');
+  if (error) {
+    msg.textContent = 'Error al guardar: ' + error.message;
+    msg.className = 'msg error';
+  } else {
+    msg.textContent = '✓ API key guardada correctamente';
+    msg.className = 'msg success';
+    setTimeout(function() { msg.className = 'msg'; }, 3000);
+  }
+}
+
+// Modal de selección de site GSC
+function showSiteModal(sites, userId) {
+  var overlay = document.createElement('div');
+  overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:200;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(4px)';
+  var modal = document.createElement('div');
+  modal.style.cssText = 'background:#111113;border:1px solid #1f1f23;border-radius:16px;padding:28px;width:100%;max-width:440px;margin:16px';
+  
+  var selected = null;
+  var html = '<h3 style="font-size:16px;font-weight:700;margin-bottom:6px">¿Cuál es tu web principal?</h3>';
+  html += '<p style="font-size:13px;color:#71717a;margin-bottom:16px">Selecciona el site de Google Search Console que quieres monitorizar.</p>';
+  html += '<div id="site-list-modal" style="display:flex;flex-direction:column;gap:8px;max-height:260px;overflow-y:auto;margin-bottom:16px">';
+  sites.forEach(function(site) {
+    html += '<div class="site-option" data-url="' + site + '" onclick="selectSiteOption(this)" style="padding:10px 14px;background:#09090b;border:1px solid #1f1f23;border-radius:8px;cursor:pointer;font-size:13px;color:#71717a;word-break:break-all;transition:all .15s">' + site + '</div>';
+  });
+  html += '</div>';
+  html += '<button id="confirm-site-btn" onclick="confirmSiteModal()" style="width:100%;padding:11px;background:#22d3ee;color:#000;font-weight:700;font-size:14px;border:none;border-radius:8px;cursor:pointer;font-family:Inter,sans-serif" disabled>Confirmar →</button>';
+  
+  modal.innerHTML = html;
+  overlay.appendChild(modal);
+  document.body.appendChild(overlay);
+  
+  window._siteOverlay = overlay;
+  window._siteUserId = userId;
+}
+
+function selectSiteOption(el) {
+  document.querySelectorAll('.site-option').forEach(function(o) {
+    o.style.borderColor = '#1f1f23';
+    o.style.color = '#71717a';
+    o.style.background = '#09090b';
+  });
+  el.style.borderColor = '#22d3ee';
+  el.style.color = '#22d3ee';
+  el.style.background = 'rgba(34,211,238,.06)';
+  window._selectedSiteUrl = el.dataset.url;
+  document.getElementById('confirm-site-btn').disabled = false;
+}
+
+async function confirmSiteModal() {
+  if (!window._selectedSiteUrl) return;
+  await sb.from('projects').update({ gsc_site_url: window._selectedSiteUrl }).eq('client_id', window._siteUserId);
+  document.getElementById('profile-domain').textContent = window._selectedSiteUrl;
+  if (window._siteOverlay) window._siteOverlay.remove();
+}
+
+async function logout() {
+  await sb.auth.signOut();
+  window.location.href = '/';
+}
+</script>
+</body>
+</html>
