@@ -1000,8 +1000,8 @@
 
   async function logout() {
     await sb.auth.signOut();
-    document.getElementById('dashboard').style.display = 'none';
-    document.getElementById('auth-section').style.display = '';
+    // Recargar la página limpia — la forma más fiable
+    window.location.href = window.location.pathname + '?logout=1';
   }
 
   // ─── DASHBOARD ───────────────────────────────────────────
@@ -1098,46 +1098,49 @@
     if (badgeEl) { badgeEl.textContent = 'Conectado'; badgeEl.className = 'connection-status connected'; }
   }
 
-  // Guardar token cuando viene del perfil (OAuth redirect)
+
+
+  // ─── INIT ────────────────────────────────────────────────
+  var _isLoggingOut = window.location.search.includes('logout=1');
+  if (_isLoggingOut) {
+    history.replaceState(null, '', window.location.pathname);
+  }
+
+  // UN SOLO onAuthStateChange para todo
   sb.auth.onAuthStateChange(async function(event, session) {
-    if (event === 'SIGNED_IN' && session && session.provider_token) {
-      // Verificar que tiene scopes reales probando GSC
-      try {
-        var testRes = await fetch('https://www.googleapis.com/webmasters/v3/sites', {
-          headers: { Authorization: 'Bearer ' + session.provider_token }
-        });
-        if (testRes.ok || testRes.status === 403) {
-          await sb.from('clients').update({
-            google_access_token: session.provider_token,
-            google_refresh_token: session.provider_refresh_token || null,
-            google_token_expires_at: session.expires_at ? new Date(session.expires_at * 1000).toISOString() : null
-          }).eq('id', session.user.id);
-        }
-      } catch(e) {}
+    if (_isLoggingOut) return; // ignorar eventos durante logout
+
+    if (event === 'SIGNED_IN' && session) {
+      // Limpiar hash si viene de OAuth
+      if (window.location.hash && window.location.hash.includes('access_token')) {
+        history.replaceState(null, '', window.location.pathname);
+      }
+      // Guardar token de Google si tiene scopes reales
+      if (session.provider_token) {
+        try {
+          var testRes = await fetch('https://www.googleapis.com/webmasters/v3/sites', {
+            headers: { Authorization: 'Bearer ' + session.provider_token }
+          });
+          if (testRes.ok || testRes.status === 403) {
+            await sb.from('clients').update({
+              google_access_token: session.provider_token,
+              google_refresh_token: session.provider_refresh_token || null,
+              google_token_expires_at: session.expires_at ? new Date(session.expires_at * 1000).toISOString() : null
+            }).eq('id', session.user.id);
+          }
+        } catch(e) {}
+      }
+      showDashboard(session.user);
+    } else if (event === 'SIGNED_OUT') {
+      document.getElementById('dashboard').style.display = 'none';
+      document.getElementById('auth-section').style.display = '';
     }
   });
 
-  // ─── INIT ────────────────────────────────────────────────
-  // Detectar callback OAuth en el hash
-  if (window.location.hash && window.location.hash.includes('access_token')) {
-    sb.auth.onAuthStateChange(function(event, session) {
-      if (event === 'SIGNED_IN' && session) {
-        history.replaceState(null, '', window.location.pathname);
-        showDashboard(session.user);
-      } else if (event === 'SIGNED_OUT') {
-        document.getElementById('dashboard').style.display = 'none';
-        document.getElementById('auth-section').style.display = '';
-      }
-    });
-  } else {
+  // Restaurar sesión existente al cargar (si no es logout)
+  if (!_isLoggingOut) {
     sb.auth.getSession().then(function({ data: { session } }) {
       if (session) showDashboard(session.user);
-    });
-    sb.auth.onAuthStateChange(function(event, session) {
-      if (event === 'SIGNED_OUT') {
-        document.getElementById('dashboard').style.display = 'none';
-        document.getElementById('auth-section').style.display = '';
-      }
     });
   }
 
