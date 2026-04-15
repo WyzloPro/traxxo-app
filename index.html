@@ -152,18 +152,8 @@
 </head>
 <body>
 
-<!-- LOADING INICIAL -->
-<div id="loading-screen" style="position:fixed;inset:0;background:#09090b;display:flex;align-items:center;justify-content:center;z-index:999">
-  <div style="text-align:center">
-    <svg width="44" height="44" viewBox="0 0 44 44" fill="none" style="display:block;margin:0 auto 16px">
-      <circle cx="22" cy="22" r="18" stroke="#1f1f23" stroke-width="4"/>
-      <circle cx="22" cy="22" r="18" stroke="#22d3ee" stroke-width="4" stroke-linecap="round" opacity=".6" stroke-dasharray="113.1" stroke-dashoffset="84.8" style="animation:spin .8s linear infinite;transform-origin:center"/>
-    </svg>
-  </div>
-</div>
-
 <!-- AUTH -->
-<div id="auth-section" style="display:none">
+<div id="auth-section">
   <div class="card">
     <div class="logo">
       <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
@@ -1010,24 +1000,15 @@
 
   async function logout() {
     await sb.auth.signOut();
-    // Recargar la página limpia — la forma más fiable
-    window.location.href = window.location.pathname + '?logout=1';
   }
 
   // ─── DASHBOARD ───────────────────────────────────────────
-  function hideLoading() {
-    var ls = document.getElementById('loading-screen');
-    if (ls) ls.style.display = 'none';
-  }
-
   function showLogin() {
-    hideLoading();
     document.getElementById('auth-section').style.display = '';
     document.getElementById('dashboard').style.display = 'none';
   }
 
   function showDashboard(user) {
-    hideLoading();
     document.getElementById('auth-section').style.display = 'none';
     document.getElementById('dashboard').style.display = 'flex';
     var meta = user.user_metadata || {};
@@ -1113,61 +1094,27 @@
 
 
   // ─── INIT ────────────────────────────────────────────────
-  var _isLoggingOut = window.location.search.includes('logout=1');
-  if (_isLoggingOut) {
-    history.replaceState(null, '', window.location.pathname);
-  }
+  // Verificar sesión al cargar
+  sb.auth.getSession().then(function({ data: { session } }) {
+    if (session) {
+      showDashboard(session.user);
+    } else {
+      showLogin();
+    }
+  });
 
-  // UN SOLO onAuthStateChange para todo
-  sb.auth.onAuthStateChange(async function(event, session) {
-    if (_isLoggingOut) return; // ignorar eventos durante logout
-
+  // Escuchar cambios de auth
+  sb.auth.onAuthStateChange(function(event, session) {
     if (event === 'SIGNED_IN' && session) {
-      // Limpiar hash si viene de OAuth
-      if (window.location.hash && window.location.hash.includes('access_token')) {
+      // Limpiar hash OAuth si existe
+      if (window.location.hash.includes('access_token')) {
         history.replaceState(null, '', window.location.pathname);
-      }
-      // Guardar token de Google si tiene scopes reales
-      if (session.provider_token) {
-        try {
-          var testRes = await fetch('https://www.googleapis.com/webmasters/v3/sites', {
-            headers: { Authorization: 'Bearer ' + session.provider_token }
-          });
-          if (testRes.ok || testRes.status === 403) {
-            await sb.from('clients').update({
-              google_access_token: session.provider_token,
-              google_refresh_token: session.provider_refresh_token || null,
-              google_token_expires_at: session.expires_at ? new Date(session.expires_at * 1000).toISOString() : null
-            }).eq('id', session.user.id);
-          }
-        } catch(e) {}
       }
       showDashboard(session.user);
     } else if (event === 'SIGNED_OUT') {
       showLogin();
     }
   });
-
-  // Timeout de seguridad: si en 4s no se resuelve, mostrar login
-  var _initTimeout = setTimeout(function() { showLogin(); }, 4000);
-
-  // Restaurar sesión existente al cargar (si no es logout)
-  if (!_isLoggingOut) {
-    sb.auth.getSession().then(function({ data: { session } }) {
-      clearTimeout(_initTimeout);
-      if (session) {
-        showDashboard(session.user);
-      } else {
-        showLogin();
-      }
-    }).catch(function() {
-      clearTimeout(_initTimeout);
-      showLogin();
-    });
-  } else {
-    clearTimeout(_initTimeout);
-    showLogin();
-  }
 
   // ─── INTAKE FORM ──────────────────────────────────────────
   var _intakeData = {};
