@@ -1118,9 +1118,21 @@
   });
 
   // ─── INIT ────────────────────────────────────────────────
-  sb.auth.getSession().then(function({ data: { session } }) {
-    if (session) showDashboard(session.user);
-  });
+  // Detectar callback OAuth en el hash
+  if (window.location.hash && window.location.hash.includes('access_token')) {
+    // Supabase procesa el hash automáticamente, esperar la sesión
+    sb.auth.onAuthStateChange(function(event, session) {
+      if (session && event === 'SIGNED_IN') {
+        // Limpiar el hash de la URL
+        history.replaceState(null, '', window.location.pathname);
+        showDashboard(session.user);
+      }
+    });
+  } else {
+    sb.auth.getSession().then(function({ data: { session } }) {
+      if (session) showDashboard(session.user);
+    });
+  }
 
   // ─── INTAKE FORM ──────────────────────────────────────────
   var _intakeData = {};
