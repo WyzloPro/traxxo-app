@@ -1327,19 +1327,32 @@
   var _intakeMulti = {};
 
   function selectIntake(group, el, value) {
-    // Deselect others in group
     var parent = el.parentElement;
-    parent.querySelectorAll('.intake-opt').forEach(function(o) { o.classList.remove('selected'); });
-    el.classList.add('selected');
+    parent.querySelectorAll('.intake-opt').forEach(function(o) {
+      o.style.borderColor = 'var(--border)';
+      o.style.color = 'var(--muted)';
+      o.style.background = 'var(--bg)';
+    });
+    el.style.borderColor = 'var(--accent)';
+    el.style.color = 'var(--accent)';
+    el.style.background = 'rgba(34,211,238,.06)';
     _intakeData[group] = value;
   }
 
   function toggleIntake(el, value) {
-    el.classList.toggle('selected');
-    if (el.classList.contains('selected')) {
-      _intakeMulti[value] = true;
-    } else {
+    var isSelected = el.style.borderColor === 'var(--accent)' || el.dataset.selected === '1';
+    if (isSelected) {
+      el.style.borderColor = 'var(--border)';
+      el.style.color = 'var(--muted)';
+      el.style.background = 'var(--bg)';
+      el.dataset.selected = '0';
       delete _intakeMulti[value];
+    } else {
+      el.style.borderColor = 'var(--accent)';
+      el.style.color = 'var(--accent)';
+      el.style.background = 'rgba(34,211,238,.06)';
+      el.dataset.selected = '1';
+      _intakeMulti[value] = true;
     }
     _intakeData['herramientas'] = Object.keys(_intakeMulti);
   }
