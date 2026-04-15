@@ -164,8 +164,8 @@
     </div>
 
     <div class="tabs">
-      <button class="tab-btn active" onclick="switchTab('login')">Entrar</button>
-      <button class="tab-btn" onclick="switchTab('register')">Registro</button>
+      <button class="tab-btn active" onclick="switchTab('login')" data-i18n="login"><span>Entrar</span></button>
+      <button class="tab-btn" onclick="switchTab('register')" data-i18n="register"><span>Registro</span></button>
     </div>
 
     <!-- LOGIN -->
@@ -176,17 +176,17 @@
       </button>
       <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px">
         <div style="flex:1;height:1px;background:var(--border)"></div>
-        <span style="font-size:12px;color:var(--muted)">o con email</span>
+        <span style="font-size:12px;color:var(--muted)" class="or-sep">o con email</span>
         <div style="flex:1;height:1px;background:var(--border)"></div>
       </div>
-      <label>Email</label>
+      <label id="label-email-l">Email</label>
       <input type="email" id="login-email" placeholder="tu@empresa.com" />
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
         <label style="margin:0">Contraseña</label>
-        <a href="#" onclick="showReset();return false;" style="font-size:11px;color:var(--muted);text-decoration:none;transition:color .15s" onmouseover="this.style.color='var(--accent)'" onmouseout="this.style.color='var(--muted)'">¿Olvidaste tu contraseña?</a>
+        <a href="#" onclick="showReset();return false;" style="font-size:11px;color:var(--muted);text-decoration:none;transition:color .15s" onmouseover="this.style.color='var(--accent)'" onmouseout="this.style.color='var(--muted)'" id="label-forgot">¿Olvidaste tu contraseña?</a>
       </div>
       <input type="password" id="login-password" placeholder="••••••••" />
-      <button class="btn" onclick="login()">Entrar</button>
+      <button class="btn" id="btn-login" onclick="login()">Entrar</button>
       <div class="msg" id="login-msg"></div>
     </div>
 
@@ -195,7 +195,7 @@
       <p style="font-size:13px;color:var(--muted);margin-bottom:20px">Introduce tu email y te enviamos un enlace para restablecer tu contraseña.</p>
       <label>Email</label>
       <input type="email" id="reset-email" placeholder="tu@empresa.com" />
-      <button class="btn" onclick="sendReset()">Enviar enlace</button>
+      <button class="btn" id="btn-reset" onclick="sendReset()">Enviar enlace</button>
       <div style="margin-top:12px">
         <a href="#" onclick="hideReset();return false;" style="font-size:12px;color:var(--muted);text-decoration:none">← Volver al login</a>
       </div>
@@ -213,20 +213,20 @@
         <span style="font-size:12px;color:var(--muted)">o con email</span>
         <div style="flex:1;height:1px;background:var(--border)"></div>
       </div>
-      <label>Nombre</label>
+      <label id="label-name">Nombre</label>
       <input type="text" id="reg-name" placeholder="Tu nombre" />
-      <label>Empresa <span style="font-size:11px;color:var(--muted);font-weight:400">(opcional)</span></label>
+      <label id="label-company">Empresa <span style="font-size:11px;color:var(--muted);font-weight:400">(opcional)</span></label>
       <input type="text" id="reg-company" placeholder="Tu empresa o agencia" />
-      <label>Email</label>
+      <label id="label-email-r">Email</label>
       <input type="email" id="reg-email" placeholder="tu@empresa.com" />
-      <label>Contraseña</label>
+      <label id="label-password">Contraseña</label>
       <div style="position:relative">
         <input type="password" id="reg-password" placeholder="Mínimo 8 caracteres" style="padding-right:40px" />
         <button type="button" onclick="togglePwd('reg-password', this)" style="position:absolute;right:10px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:var(--muted);padding:0;display:flex;align-items:center">
           <svg id="eye-reg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
         </button>
       </div>
-      <label>Repite la contraseña</label>
+      <label id="label-repeat">Repite la contraseña</label>
       <div style="position:relative">
         <input type="password" id="reg-password2" placeholder="Repite tu contraseña" style="padding-right:40px" />
         <button type="button" onclick="togglePwd('reg-password2', this)" style="position:absolute;right:10px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:var(--muted);padding:0;display:flex;align-items:center">
@@ -237,7 +237,7 @@
         <input type="checkbox" id="reg-terms" style="accent-color:var(--accent);vertical-align:middle;margin-right:6px;width:13px;height:13px" />
         Acepto los <a href="https://traxxo.ai/terminos.html" target="_blank" style="color:var(--accent)">Términos</a> y la <a href="https://traxxo.ai/privacidad.html" target="_blank" style="color:var(--accent)">Privacidad</a>
       </div>
-      <button class="btn" onclick="register()">Crear cuenta</button>
+      <button class="btn" id="btn-create" onclick="register()">Crear cuenta</button>
       <div class="msg" id="register-msg"></div>
     </div>
   </div>
@@ -254,30 +254,30 @@
         </svg>
         traxxo
       </div>
-      <button class="logout-btn" onclick="logout()">Cerrar sesión</button>
+      <button class="logout-btn" id="label-logout" onclick="logout()">Cerrar sesión</button>
     </div>
 
-    <p class="welcome">Bienvenido, <span id="user-email"></span></p>
+    <p class="welcome"><span id="label-welcome">Bienvenido,</span> <span id="user-email"></span></p>
 
     <!-- ONBOARDING WIZARD -->
     <div id="onboarding" style="display:none">
 
       <!-- INTAKE FORM (paso 0) -->
       <div id="ob-intake">
-        <h3 class="ob-title" style="margin-bottom:4px">Cuéntanos sobre tu proyecto</h3>
-        <p class="ob-sub" style="margin-bottom:20px">Usamos esta información para preparar tu dashboard a medida.</p>
+        <h3 class="ob-title" id="label-intake-title" style="margin-bottom:4px">Cuéntanos sobre tu proyecto</h3>
+        <p class="ob-sub" id="label-intake-sub" style="margin-bottom:20px">Usamos esta información para preparar tu dashboard a medida.</p>
 
         <div style="display:flex;flex-direction:column;gap:14px">
 
           <!-- URL -->
           <div>
-            <label style="font-size:12px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;display:block;margin-bottom:6px">URL de tu web</label>
+            <label id="label-intake-url" style="font-size:12px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;display:block;margin-bottom:6px">URL de tu web</label>
             <input type="url" id="intake-url" placeholder="https://tuweb.com" style="width:100%;background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:10px 14px;color:var(--text);font-size:13px;font-family:var(--font);outline:none" />
           </div>
 
           <!-- Tipo de web -->
           <div>
-            <label style="font-size:12px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;display:block;margin-bottom:6px">¿Qué tipo de web tienes?</label>
+            <label id="label-intake-webtype" style="font-size:12px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;display:block;margin-bottom:6px">¿Qué tipo de web tienes?</label>
             <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
               <div class="intake-opt" onclick="selectIntake('web-type',this,'ecommerce')">E-commerce</div>
               <div class="intake-opt" onclick="selectIntake('web-type',this,'servicios')">Servicios / Agencia</div>
@@ -288,7 +288,7 @@
 
           <!-- Nicho -->
           <div>
-            <label style="font-size:12px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;display:block;margin-bottom:6px">Sector / Nicho</label>
+            <label id="label-intake-niche" style="font-size:12px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;display:block;margin-bottom:6px">Sector / Nicho</label>
             <select id="intake-niche" style="width:100%;background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:10px 14px;color:var(--text);font-size:13px;font-family:var(--font);outline:none;-webkit-appearance:none">
               <option value="">Selecciona tu sector...</option>
               <option>Salud y bienestar</option>
@@ -307,7 +307,7 @@
 
           <!-- Mayor reto -->
           <div>
-            <label style="font-size:12px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;display:block;margin-bottom:6px">¿Cuál es tu mayor reto SEO?</label>
+            <label id="label-intake-reto" style="font-size:12px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;display:block;margin-bottom:6px">¿Cuál es tu mayor reto SEO?</label>
             <div style="display:flex;flex-direction:column;gap:8px">
               <div class="intake-opt" onclick="selectIntake('reto',this,'trafico')">Conseguir más tráfico orgánico</div>
               <div class="intake-opt" onclick="selectIntake('reto',this,'conversiones')">Mejorar conversiones</div>
@@ -319,7 +319,7 @@
 
           <!-- Herramientas -->
           <div>
-            <label style="font-size:12px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;display:block;margin-bottom:6px">¿Qué herramientas usas ya? <span style="font-weight:400;text-transform:none">(varias)</span></label>
+            <label id="label-intake-tools" style="font-size:12px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;display:block;margin-bottom:6px">¿Qué herramientas usas ya? <span style="font-weight:400;text-transform:none">(varias)</span></label>
             <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
               <div class="intake-opt intake-multi" onclick="toggleIntake(this,'gsc')">Google Search Console</div>
               <div class="intake-opt intake-multi" onclick="toggleIntake(this,'ads')">Google Ads</div>
@@ -332,7 +332,7 @@
 
           <!-- Tráfico -->
           <div>
-            <label style="font-size:12px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;display:block;margin-bottom:6px">Tráfico orgánico mensual aproximado</label>
+            <label id="label-intake-traffic" style="font-size:12px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;display:block;margin-bottom:6px">Tráfico orgánico mensual aproximado</label>
             <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
               <div class="intake-opt" onclick="selectIntake('trafico',this,'menos1k')">Menos de 1.000 visitas</div>
               <div class="intake-opt" onclick="selectIntake('trafico',this,'1k-10k')">1.000 - 10.000</div>
@@ -343,7 +343,7 @@
 
           <!-- Google Ads presupuesto -->
           <div>
-            <label style="font-size:12px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;display:block;margin-bottom:6px">¿Inviertes en Google Ads?</label>
+            <label id="label-intake-ads" style="font-size:12px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;display:block;margin-bottom:6px">¿Inviertes en Google Ads?</label>
             <div style="display:flex;flex-direction:column;gap:8px">
               <div class="intake-opt" onclick="selectIntake('ads-budget',this,'no')">No, solo SEO orgánico</div>
               <div class="intake-opt" onclick="selectIntake('ads-budget',this,'menos500')">Sí, menos de 500€/mes</div>
@@ -354,7 +354,7 @@
 
           <!-- Equipo -->
           <div>
-            <label style="font-size:12px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;display:block;margin-bottom:6px">¿Cómo trabajas?</label>
+            <label id="label-intake-team" style="font-size:12px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;display:block;margin-bottom:6px">¿Cómo trabajas?</label>
             <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
               <div class="intake-opt" onclick="selectIntake('equipo',this,'solo')">Solo / Freelance</div>
               <div class="intake-opt" onclick="selectIntake('equipo',this,'empresa')">Empresa pequeña</div>
@@ -365,7 +365,7 @@
 
           <!-- Objetivo -->
           <div>
-            <label style="font-size:12px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;display:block;margin-bottom:6px">¿Cómo nos encontraste?</label>
+            <label id="label-intake-source" style="font-size:12px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;display:block;margin-bottom:6px">¿Cómo nos encontraste?</label>
             <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
               <div class="intake-opt" onclick="selectIntake('canal',this,'linkedin')">LinkedIn</div>
               <div class="intake-opt" onclick="selectIntake('canal',this,'referido')">Referido</div>
@@ -374,15 +374,15 @@
             </div>
           </div>
 
-          <button class="btn" onclick="submitIntake()" style="margin-top:8px">Enviar y continuar →</button>
+          <button class="btn" id="btn-intake" onclick="submitIntake()" style="margin-top:8px">Enviar y continuar →</button>
           <div class="msg" id="intake-msg"></div>
         </div>
       </div>
 
       <!-- PLAN SELECTOR (paso 1) -->
       <div id="ob-plan-selector" style="display:none">
-        <h3 class="ob-title" style="margin-bottom:6px">Elige tu plan</h3>
-        <p class="ob-sub">Puedes cambiar en cualquier momento.</p>
+        <h3 class="ob-title" id="label-plan-title" style="margin-bottom:6px">Elige tu plan</h3>
+        <p class="ob-sub" id="label-plan-sub">Puedes cambiar en cualquier momento.</p>
 
         <!-- 3 planes en columna -->
         <div style="display:flex;flex-direction:column;gap:12px;margin-bottom:20px">
@@ -1331,6 +1331,155 @@
     document.getElementById('ob-intake').style.display = 'none';
     document.getElementById('ob-plan-selector').style.display = '';
   }
+
+
+  // ─── i18n ────────────────────────────────────────────────────
+  var TRANSLATIONS = {
+    es: {
+      login: 'Entrar', register: 'Registro',
+      google_login: 'Continuar con Google', google_register: 'Registrarse con Google',
+      or_email: 'o con email',
+      name: 'Nombre', company: 'Empresa', company_opt: '(opcional)',
+      email: 'Email', password: 'Contraseña', password_ph: 'Mínimo 8 caracteres',
+      repeat_pass: 'Repite la contraseña', repeat_ph: 'Repite tu contraseña',
+      terms_text: 'Acepto los', terms_link: 'Términos', and: 'y la', privacy_link: 'Privacidad',
+      create_account: 'Crear cuenta', sign_in: 'Entrar',
+      forgot: '¿Olvidaste tu contraseña?',
+      reset_title: 'Recuperar contraseña', reset_ph: 'tu@email.com', reset_btn: 'Enviar enlace', back: '← Volver al login',
+      intake_title: 'Cuéntanos sobre tu proyecto',
+      intake_sub: 'Usamos esta información para preparar tu dashboard a medida.',
+      intake_url: 'URL de tu web',
+      intake_webtype: '¿Qué tipo de web tienes?',
+      intake_niche: 'Sector / Nicho',
+      intake_reto: '¿Cuál es tu mayor reto SEO?',
+      intake_tools: '¿Qué herramientas usas ya?',
+      intake_traffic: 'Tráfico orgánico mensual aproximado',
+      intake_ads: '¿Inviertes en Google Ads?',
+      intake_team: '¿Cómo trabajas?',
+      intake_source: '¿Cómo nos encontraste?',
+      intake_btn: 'Enviar y continuar →',
+      plan_title: 'Elige tu plan', plan_sub: 'Puedes cambiar en cualquier momento.',
+      welcome: 'Bienvenido,', logout: 'Cerrar sesión',
+    },
+    en: {
+      login: 'Sign in', register: 'Sign up',
+      google_login: 'Continue with Google', google_register: 'Sign up with Google',
+      or_email: 'or with email',
+      name: 'Name', company: 'Company', company_opt: '(optional)',
+      email: 'Email', password: 'Password', password_ph: 'Minimum 8 characters',
+      repeat_pass: 'Repeat password', repeat_ph: 'Repeat your password',
+      terms_text: 'I accept the', terms_link: 'Terms', and: 'and', privacy_link: 'Privacy Policy',
+      create_account: 'Create account', sign_in: 'Sign in',
+      forgot: 'Forgot your password?',
+      reset_title: 'Reset password', reset_ph: 'your@email.com', reset_btn: 'Send link', back: '← Back to login',
+      intake_title: 'Tell us about your project',
+      intake_sub: 'We use this info to prepare your custom dashboard.',
+      intake_url: 'Your website URL',
+      intake_webtype: 'What type of website do you have?',
+      intake_niche: 'Industry / Niche',
+      intake_reto: 'What is your biggest SEO challenge?',
+      intake_tools: 'Which tools do you already use?',
+      intake_traffic: 'Approximate monthly organic traffic',
+      intake_ads: 'Do you invest in Google Ads?',
+      intake_team: 'How do you work?',
+      intake_source: 'How did you find us?',
+      intake_btn: 'Submit and continue →',
+      plan_title: 'Choose your plan', plan_sub: 'Change anytime.',
+      welcome: 'Welcome,', logout: 'Sign out',
+    }
+  };
+
+  var _lang = localStorage.getItem('traxxo_lang') ||
+    (navigator.language && navigator.language.startsWith('en') ? 'en' : 'es');
+
+  function setLang(lang) {
+    _lang = lang;
+    localStorage.setItem('traxxo_lang', lang);
+    applyLang();
+  }
+
+  function t(key) {
+    return (TRANSLATIONS[_lang] && TRANSLATIONS[_lang][key]) || TRANSLATIONS['es'][key] || key;
+  }
+
+  function applyLang() {
+    var T = TRANSLATIONS[_lang];
+    if (!T) return;
+
+    // Selector botones
+    var btnEs = document.getElementById('lang-es');
+    var btnEn = document.getElementById('lang-en');
+    if (btnEs) { btnEs.style.color = _lang === 'es' ? 'var(--accent)' : 'var(--muted)'; btnEs.style.borderColor = _lang === 'es' ? 'var(--accent)' : 'var(--border)'; }
+    if (btnEn) { btnEn.style.color = _lang === 'en' ? 'var(--accent)' : 'var(--muted)'; btnEn.style.borderColor = _lang === 'en' ? 'var(--accent)' : 'var(--border)'; }
+
+    // Tabs
+    var tabLogin = document.querySelector('[onclick="showLogin()"]');
+    var tabReg = document.querySelector('[onclick="showRegister()"]');
+    if (tabLogin) tabLogin.textContent = T.login;
+    if (tabReg) tabReg.textContent = T.register;
+
+    // Google buttons
+    document.querySelectorAll('#login-form .btn-google').forEach(function(b) { if (b.querySelector('svg')) b.childNodes[b.childNodes.length-1].textContent = ' ' + T.google_login; });
+    document.querySelectorAll('#register-form .btn-google').forEach(function(b) { if (b.querySelector('svg')) b.childNodes[b.childNodes.length-1].textContent = ' ' + T.google_register; });
+
+    // Or separators
+    document.querySelectorAll('.or-sep').forEach(function(el) { el.textContent = T.or_email; });
+
+    // Labels
+    var map = {
+      'label-name': 'name', 'label-company': 'company', 'label-email': 'email',
+      'label-password': 'password', 'label-repeat': 'repeat_pass',
+      'label-forgot': 'forgot', 'label-reset': 'reset_title',
+      'label-intake-title': 'intake_title', 'label-intake-sub': 'intake_sub',
+      'label-plan-title': 'plan_title', 'label-plan-sub': 'plan_sub',
+      'label-welcome': 'welcome', 'label-logout': 'logout',
+    };
+    Object.keys(map).forEach(function(id) {
+      var el = document.getElementById(id);
+      if (el) el.textContent = T[map[id]];
+    });
+
+    // Placeholders
+    var phMap = {
+      'reg-password': 'password_ph', 'reg-password2': 'repeat_ph',
+      'login-password': 'password_ph', 'intake-url': 'intake_url',
+      'reset-email': 'reset_ph',
+    };
+    Object.keys(phMap).forEach(function(id) {
+      var el = document.getElementById(id);
+      if (el) el.placeholder = T[phMap[id]];
+    });
+
+    // Buttons
+    var btns = {
+      'btn-create': 'create_account', 'btn-login': 'sign_in',
+      'btn-reset': 'reset_btn', 'btn-intake': 'intake_btn',
+    };
+    Object.keys(btns).forEach(function(id) {
+      var el = document.getElementById(id);
+      if (el) el.textContent = T[btns[id]];
+    });
+
+    // Terms text
+    var termsEl = document.getElementById('terms-text');
+    if (termsEl) termsEl.innerHTML = T.terms_text + ' <a href="https://traxxo.ai/terminos.html" target="_blank" style="color:var(--accent)">' + T.terms_link + '</a> ' + T.and + ' <a href="https://traxxo.ai/privacidad.html" target="_blank" style="color:var(--accent)">' + T.privacy_link + '</a>';
+
+    // Intake labels
+    var intakeLabels = {
+      'label-intake-url': 'intake_url', 'label-intake-webtype': 'intake_webtype',
+      'label-intake-niche': 'intake_niche', 'label-intake-reto': 'intake_reto',
+      'label-intake-tools': 'intake_tools', 'label-intake-traffic': 'intake_traffic',
+      'label-intake-ads': 'intake_ads', 'label-intake-team': 'intake_team',
+      'label-intake-source': 'intake_source',
+    };
+    Object.keys(intakeLabels).forEach(function(id) {
+      var el = document.getElementById(id);
+      if (el) el.textContent = T[intakeLabels[id]];
+    });
+  }
+
+  // Aplicar al cargar
+  document.addEventListener('DOMContentLoaded', applyLang);
 
 </script>
 </body>
