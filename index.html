@@ -152,8 +152,18 @@
 </head>
 <body>
 
+<!-- LOADING INICIAL -->
+<div id="loading-screen" style="position:fixed;inset:0;background:#09090b;display:flex;align-items:center;justify-content:center;z-index:999">
+  <div style="text-align:center">
+    <svg width="44" height="44" viewBox="0 0 44 44" fill="none" style="display:block;margin:0 auto 16px">
+      <circle cx="22" cy="22" r="18" stroke="#1f1f23" stroke-width="4"/>
+      <circle cx="22" cy="22" r="18" stroke="#22d3ee" stroke-width="4" stroke-linecap="round" opacity=".6" stroke-dasharray="113.1" stroke-dashoffset="84.8" style="animation:spin .8s linear infinite;transform-origin:center"/>
+    </svg>
+  </div>
+</div>
+
 <!-- AUTH -->
-<div id="auth-section">
+<div id="auth-section" style="display:none">
   <div class="card">
     <div class="logo">
       <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
@@ -1005,7 +1015,19 @@
   }
 
   // ─── DASHBOARD ───────────────────────────────────────────
+  function hideLoading() {
+    var ls = document.getElementById('loading-screen');
+    if (ls) ls.style.display = 'none';
+  }
+
+  function showLogin() {
+    hideLoading();
+    document.getElementById('auth-section').style.display = '';
+    document.getElementById('dashboard').style.display = 'none';
+  }
+
   function showDashboard(user) {
+    hideLoading();
     document.getElementById('auth-section').style.display = 'none';
     document.getElementById('dashboard').style.display = 'flex';
     var meta = user.user_metadata || {};
@@ -1017,16 +1039,6 @@
   }
 
   async function checkOnboardingStatus(user) {
-    // Si viene de OAuth de Google (provider_token en hash), ir al paso 4
-    var hash = window.location.hash;
-    if (hash && hash.includes('access_token')) {
-      // Supabase maneja el token; mostramos el dashboard principal directamente
-      // El estado de Google se actualizará via checkGoogleConnection
-      document.getElementById('dash-main').style.display = '';
-      document.getElementById('onboarding').style.display = 'none';
-      return;
-    }
-
     // Comprobar si ya tiene proyectos con intake completado
     var { data: projects } = await sb.from('projects').select('id, intake_data, plan').eq('client_id', user.id).limit(1);
     
@@ -1132,16 +1144,29 @@
       }
       showDashboard(session.user);
     } else if (event === 'SIGNED_OUT') {
-      document.getElementById('dashboard').style.display = 'none';
-      document.getElementById('auth-section').style.display = '';
+      showLogin();
     }
   });
+
+  // Timeout de seguridad: si en 4s no se resuelve, mostrar login
+  var _initTimeout = setTimeout(function() { showLogin(); }, 4000);
 
   // Restaurar sesión existente al cargar (si no es logout)
   if (!_isLoggingOut) {
     sb.auth.getSession().then(function({ data: { session } }) {
-      if (session) showDashboard(session.user);
+      clearTimeout(_initTimeout);
+      if (session) {
+        showDashboard(session.user);
+      } else {
+        showLogin();
+      }
+    }).catch(function() {
+      clearTimeout(_initTimeout);
+      showLogin();
     });
+  } else {
+    clearTimeout(_initTimeout);
+    showLogin();
   }
 
   // ─── INTAKE FORM ──────────────────────────────────────────
