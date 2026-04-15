@@ -1120,17 +1120,24 @@
   // ─── INIT ────────────────────────────────────────────────
   // Detectar callback OAuth en el hash
   if (window.location.hash && window.location.hash.includes('access_token')) {
-    // Supabase procesa el hash automáticamente, esperar la sesión
     sb.auth.onAuthStateChange(function(event, session) {
-      if (session && event === 'SIGNED_IN') {
-        // Limpiar el hash de la URL
+      if (event === 'SIGNED_IN' && session) {
         history.replaceState(null, '', window.location.pathname);
         showDashboard(session.user);
+      } else if (event === 'SIGNED_OUT') {
+        document.getElementById('dashboard').style.display = 'none';
+        document.getElementById('auth-section').style.display = '';
       }
     });
   } else {
     sb.auth.getSession().then(function({ data: { session } }) {
       if (session) showDashboard(session.user);
+    });
+    sb.auth.onAuthStateChange(function(event, session) {
+      if (event === 'SIGNED_OUT') {
+        document.getElementById('dashboard').style.display = 'none';
+        document.getElementById('auth-section').style.display = '';
+      }
     });
   }
 
