@@ -260,8 +260,125 @@
     <!-- ONBOARDING WIZARD -->
     <div id="onboarding" style="display:none">
 
-      <!-- PLAN SELECTOR (paso 0) -->
-      <div id="ob-plan-selector">
+      <!-- INTAKE FORM (paso 0) -->
+      <div id="ob-intake">
+        <h3 class="ob-title" style="margin-bottom:4px">Cuéntanos sobre tu proyecto</h3>
+        <p class="ob-sub" style="margin-bottom:20px">Usamos esta información para preparar tu dashboard a medida.</p>
+
+        <div style="display:flex;flex-direction:column;gap:14px">
+
+          <!-- URL -->
+          <div>
+            <label style="font-size:12px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;display:block;margin-bottom:6px">URL de tu web</label>
+            <input type="url" id="intake-url" placeholder="https://tuweb.com" style="width:100%;background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:10px 14px;color:var(--text);font-size:13px;font-family:var(--font);outline:none" />
+          </div>
+
+          <!-- Tipo de web -->
+          <div>
+            <label style="font-size:12px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;display:block;margin-bottom:6px">¿Qué tipo de web tienes?</label>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+              <div class="intake-opt" onclick="selectIntake('web-type',this,'ecommerce')">E-commerce</div>
+              <div class="intake-opt" onclick="selectIntake('web-type',this,'servicios')">Servicios / Agencia</div>
+              <div class="intake-opt" onclick="selectIntake('web-type',this,'blog')">Blog / Contenido</div>
+              <div class="intake-opt" onclick="selectIntake('web-type',this,'saas')">SaaS / App</div>
+            </div>
+          </div>
+
+          <!-- Nicho -->
+          <div>
+            <label style="font-size:12px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;display:block;margin-bottom:6px">Sector / Nicho</label>
+            <select id="intake-niche" style="width:100%;background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:10px 14px;color:var(--text);font-size:13px;font-family:var(--font);outline:none;-webkit-appearance:none">
+              <option value="">Selecciona tu sector...</option>
+              <option>Salud y bienestar</option>
+              <option>Moda y lifestyle</option>
+              <option>Alimentación</option>
+              <option>Tecnología</option>
+              <option>Viajes y turismo</option>
+              <option>Educación y formación</option>
+              <option>Servicios profesionales</option>
+              <option>Inmobiliaria</option>
+              <option>Deporte y fitness</option>
+              <option>Belleza y cosmética</option>
+              <option>Otro</option>
+            </select>
+          </div>
+
+          <!-- Mayor reto -->
+          <div>
+            <label style="font-size:12px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;display:block;margin-bottom:6px">¿Cuál es tu mayor reto SEO?</label>
+            <div style="display:flex;flex-direction:column;gap:8px">
+              <div class="intake-opt" onclick="selectIntake('reto',this,'trafico')">Conseguir más tráfico orgánico</div>
+              <div class="intake-opt" onclick="selectIntake('reto',this,'conversiones')">Mejorar conversiones</div>
+              <div class="intake-opt" onclick="selectIntake('reto',this,'competidor')">Superar a un competidor concreto</div>
+              <div class="intake-opt" onclick="selectIntake('reto',this,'penalizacion')">Recuperarme de una penalización</div>
+              <div class="intake-opt" onclick="selectIntake('reto',this,'visibilidad')">No aparezco donde debería</div>
+            </div>
+          </div>
+
+          <!-- Herramientas -->
+          <div>
+            <label style="font-size:12px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;display:block;margin-bottom:6px">¿Qué herramientas usas ya? <span style="font-weight:400;text-transform:none">(varias)</span></label>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+              <div class="intake-opt intake-multi" onclick="toggleIntake(this,'gsc')">Google Search Console</div>
+              <div class="intake-opt intake-multi" onclick="toggleIntake(this,'ads')">Google Ads</div>
+              <div class="intake-opt intake-multi" onclick="toggleIntake(this,'ga4')">Google Analytics</div>
+              <div class="intake-opt intake-multi" onclick="toggleIntake(this,'semrush')">Semrush</div>
+              <div class="intake-opt intake-multi" onclick="toggleIntake(this,'ahrefs')">Ahrefs</div>
+              <div class="intake-opt intake-multi" onclick="toggleIntake(this,'ninguna')">Ninguna todavía</div>
+            </div>
+          </div>
+
+          <!-- Tráfico -->
+          <div>
+            <label style="font-size:12px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;display:block;margin-bottom:6px">Tráfico orgánico mensual aproximado</label>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+              <div class="intake-opt" onclick="selectIntake('trafico',this,'menos1k')">Menos de 1.000 visitas</div>
+              <div class="intake-opt" onclick="selectIntake('trafico',this,'1k-10k')">1.000 - 10.000</div>
+              <div class="intake-opt" onclick="selectIntake('trafico',this,'10k-50k')">10.000 - 50.000</div>
+              <div class="intake-opt" onclick="selectIntake('trafico',this,'mas50k')">Más de 50.000</div>
+            </div>
+          </div>
+
+          <!-- Google Ads presupuesto -->
+          <div>
+            <label style="font-size:12px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;display:block;margin-bottom:6px">¿Inviertes en Google Ads?</label>
+            <div style="display:flex;flex-direction:column;gap:8px">
+              <div class="intake-opt" onclick="selectIntake('ads-budget',this,'no')">No, solo SEO orgánico</div>
+              <div class="intake-opt" onclick="selectIntake('ads-budget',this,'menos500')">Sí, menos de 500€/mes</div>
+              <div class="intake-opt" onclick="selectIntake('ads-budget',this,'500-2k')">Sí, entre 500€ y 2.000€/mes</div>
+              <div class="intake-opt" onclick="selectIntake('ads-budget',this,'mas2k')">Sí, más de 2.000€/mes</div>
+            </div>
+          </div>
+
+          <!-- Equipo -->
+          <div>
+            <label style="font-size:12px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;display:block;margin-bottom:6px">¿Cómo trabajas?</label>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+              <div class="intake-opt" onclick="selectIntake('equipo',this,'solo')">Solo / Freelance</div>
+              <div class="intake-opt" onclick="selectIntake('equipo',this,'empresa')">Empresa pequeña</div>
+              <div class="intake-opt" onclick="selectIntake('equipo',this,'agencia')">Agencia</div>
+              <div class="intake-opt" onclick="selectIntake('equipo',this,'otro')">Otro</div>
+            </div>
+          </div>
+
+          <!-- Objetivo -->
+          <div>
+            <label style="font-size:12px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;display:block;margin-bottom:6px">¿Cómo nos encontraste?</label>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+              <div class="intake-opt" onclick="selectIntake('canal',this,'linkedin')">LinkedIn</div>
+              <div class="intake-opt" onclick="selectIntake('canal',this,'referido')">Referido</div>
+              <div class="intake-opt" onclick="selectIntake('canal',this,'google')">Google</div>
+              <div class="intake-opt" onclick="selectIntake('canal',this,'otro')">Otro</div>
+            </div>
+          </div>
+
+          <button class="btn" onclick="submitIntake()" style="margin-top:8px">Enviar y continuar →</button>
+          <div class="msg" id="intake-msg"></div>
+        </div>
+      </div>
+
+      <!-- PLAN SELECTOR (paso 1) -->
+      <div id="ob-plan-selector" style="display:none">
         <h3 class="ob-title" style="margin-bottom:6px">Elige tu plan</h3>
         <p class="ob-sub">Puedes cambiar en cualquier momento.</p>
 
@@ -837,10 +954,11 @@
     // Comprobar si ya tiene proyectos
     var { data: projects } = await sb.from('projects').select('id').eq('client_id', user.id).limit(1);
     if (!projects || projects.length === 0) {
-      // Nuevo usuario — mostrar onboarding
+      // Nuevo usuario — mostrar intake form primero
       document.getElementById('dash-main').style.display = 'none';
       document.getElementById('onboarding').style.display = '';
-      document.getElementById('ob-plan-selector').style.display = '';
+      document.getElementById('ob-intake').style.display = '';
+      document.getElementById('ob-plan-selector').style.display = 'none';
       document.getElementById('ob-wizard').style.display = 'none';
     } else {
       document.getElementById('dash-main').style.display = '';
@@ -907,12 +1025,17 @@
     var btn = document.getElementById(btnId);
     if (btn) { btn.disabled = true; btn.innerHTML = '<span class="spinner"></span> Conectando...'; }
 
+    var isToolConnection = (context === 'onboarding' || context === 'dashboard');
+    var scopeList = isToolConnection
+      ? 'email profile https://www.googleapis.com/auth/webmasters.readonly https://www.googleapis.com/auth/adwords https://www.googleapis.com/auth/analytics.readonly'
+      : 'email profile';
+
     sb.auth.signInWithOAuth({
       provider: 'google',
       options: {
-        scopes: 'https://www.googleapis.com/auth/webmasters.readonly https://www.googleapis.com/auth/adwords https://www.googleapis.com/auth/analytics.readonly email profile',
+        scopes: scopeList,
         redirectTo: 'https://app.traxxo.ai',
-        queryParams: { access_type: 'offline', prompt: 'consent' }
+        queryParams: { access_type: 'offline', prompt: isToolConnection ? 'consent' : 'select_account' }
       }
     }).then(function(result) {
       if (result.error) {
@@ -1149,6 +1272,64 @@
   sb.auth.getSession().then(function({ data: { session } }) {
     if (session) showDashboard(session.user);
   });
+
+  // ─── INTAKE FORM ──────────────────────────────────────────
+  var _intakeData = {};
+  var _intakeMulti = {};
+
+  function selectIntake(group, el, value) {
+    // Deselect others in group
+    var parent = el.parentElement;
+    parent.querySelectorAll('.intake-opt').forEach(function(o) { o.classList.remove('selected'); });
+    el.classList.add('selected');
+    _intakeData[group] = value;
+  }
+
+  function toggleIntake(el, value) {
+    el.classList.toggle('selected');
+    if (el.classList.contains('selected')) {
+      _intakeMulti[value] = true;
+    } else {
+      delete _intakeMulti[value];
+    }
+    _intakeData['herramientas'] = Object.keys(_intakeMulti);
+  }
+
+  async function submitIntake() {
+    var url = document.getElementById('intake-url').value.trim();
+    var niche = document.getElementById('intake-niche').value;
+    
+    if (!url) { showMsg('intake-msg', 'Añade la URL de tu web', 'error'); return; }
+    if (!_intakeData['web-type']) { showMsg('intake-msg', 'Selecciona el tipo de web', 'error'); return; }
+
+    var intakePayload = {
+      url: url,
+      niche: niche,
+      web_type: _intakeData['web-type'],
+      reto: _intakeData['reto'],
+      herramientas: _intakeData['herramientas'] || [],
+      trafico: _intakeData['trafico'],
+      ads_budget: _intakeData['ads-budget'],
+      equipo: _intakeData['equipo'],
+      canal: _intakeData['canal'],
+    };
+
+    // Guardar en Supabase
+    var userId = (await sb.auth.getUser()).data.user?.id;
+    if (userId) {
+      await sb.from('projects').upsert({
+        client_id: userId,
+        domain: url.replace(/^https?:\/\//, '').replace(/\/$/, ''),
+        intake_data: intakePayload,
+        active: true
+      }, { onConflict: 'client_id' });
+    }
+
+    // Mostrar planes
+    document.getElementById('ob-intake').style.display = 'none';
+    document.getElementById('ob-plan-selector').style.display = '';
+  }
+
 </script>
 </body>
 </html>
