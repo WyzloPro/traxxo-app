@@ -395,7 +395,7 @@
 
           <!-- Basic -->
           <div class="plan-card" onclick="selectPlan('basic',this)">
-            <div class="plan-badge" style="background:rgba(34,211,238,.1);color:var(--accent);border-color:rgba(34,211,238,.2)">Pre-lanzamiento · 2 meses gratis</div>
+            <div class="plan-badge" style="background:rgba(34,211,238,.1);color:var(--accent);border-color:rgba(34,211,238,.2)">1er mes gratis · Compromiso 4 meses</div>
             <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:4px;margin-top:8px">
               <div>
                 <div class="plan-name">Basic</div>
@@ -419,7 +419,7 @@
 
           <!-- Pro -->
           <div class="plan-card plan-card-pro" onclick="selectPlan('pro',this)">
-            <div class="plan-badge">Pre-lanzamiento · 3 meses gratis</div>
+            <div class="plan-badge">1er mes gratis · Compromiso 4 meses</div>
             <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:4px;margin-top:8px">
               <div>
                 <div class="plan-name">Pro</div>
@@ -1001,16 +1001,25 @@
       return;
     }
 
-    // Comprobar si ya tiene proyectos
-    var { data: projects } = await sb.from('projects').select('id').eq('client_id', user.id).limit(1);
+    // Comprobar si ya tiene proyectos con intake completado
+    var { data: projects } = await sb.from('projects').select('id, intake_data, plan').eq('client_id', user.id).limit(1);
+    
     if (!projects || projects.length === 0) {
-      // Nuevo usuario — mostrar intake form primero
+      // Nuevo usuario — mostrar intake form
       document.getElementById('dash-main').style.display = 'none';
       document.getElementById('onboarding').style.display = '';
       document.getElementById('ob-intake').style.display = '';
       document.getElementById('ob-plan-selector').style.display = 'none';
       document.getElementById('ob-wizard').style.display = 'none';
+    } else if (projects[0].intake_data && !projects[0].plan) {
+      // Intake completado pero sin plan — mostrar selector de planes
+      document.getElementById('dash-main').style.display = 'none';
+      document.getElementById('onboarding').style.display = '';
+      document.getElementById('ob-intake').style.display = 'none';
+      document.getElementById('ob-plan-selector').style.display = '';
+      document.getElementById('ob-wizard').style.display = 'none';
     } else {
+      // Usuario con proyecto y plan — ir al dashboard
       document.getElementById('dash-main').style.display = '';
       document.getElementById('onboarding').style.display = 'none';
     }
@@ -1397,12 +1406,25 @@
     // Guardar en Supabase
     var userId = (await sb.auth.getUser()).data.user?.id;
     if (userId) {
-      await sb.from('projects').upsert({
-        client_id: userId,
-        domain: url.replace(/^https?:\/\//, '').replace(/\/$/, ''),
-        intake_data: intakePayload,
-        active: true
-      }, { onConflict: 'client_id' });
+      var cleanDomain2 = url.replace(/^https?:\/\//, '').replace(/\/$/, '').split('/')[0];
+      // Comprobar si ya existe proyecto para este usuario
+      var { data: existingProj } = await sb.from('projects').select('id').eq('client_id', userId).limit(1);
+      if (existingProj && existingProj.length > 0) {
+        // Actualizar
+        await sb.from('projects').update({
+          domain: cleanDomain2,
+          intake_data: intakePayload,
+          active: true
+        }).eq('client_id', userId);
+      } else {
+        // Insertar nuevo
+        await sb.from('projects').insert({
+          client_id: userId,
+          domain: cleanDomain2,
+          intake_data: intakePayload,
+          active: true
+        });
+      }
     }
 
     // Mostrar planes
