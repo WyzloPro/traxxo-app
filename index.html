@@ -739,6 +739,21 @@
 
     <!-- DASHBOARD PRINCIPAL -->
     <div id="dash-main">
+
+      <!-- BANNER CONEXION GOOGLE -->
+      <div id="banner-connect" style="display:none;background:linear-gradient(135deg,rgba(34,211,238,.08),rgba(139,92,246,.08));border:1px solid rgba(34,211,238,.25);border-radius:14px;padding:20px;margin-bottom:14px">
+        <div style="display:flex;align-items:center;gap:12px">
+          <div style="width:40px;height:40px;background:rgba(34,211,238,.1);border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#22d3ee" stroke-width="1.5" stroke-linecap="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
+          </div>
+          <div style="flex:1">
+            <div style="font-size:14px;font-weight:700;margin-bottom:2px">Conecta tus herramientas</div>
+            <div style="font-size:12px;color:var(--muted)">Vincula Google Search Console, Ads y Analytics para activar tu dashboard.</div>
+          </div>
+          <a href="/perfil.html" style="background:var(--accent);color:#000;font-size:13px;font-weight:700;padding:9px 16px;border-radius:8px;text-decoration:none;white-space:nowrap;flex-shrink:0">Conectar →</a>
+        </div>
+      </div>
+
       <div class="dash-card">
         <h3>Tu cuenta está activa</h3>
         <p>Configura tu primer proyecto para recibir el dashboard automatizado cada semana.</p>
@@ -1034,22 +1049,50 @@
     var { data: { session } } = await sb.auth.getSession();
     if (!session) return;
 
-    // Solo marcar conectado si hay token real con scopes guardado en BD
-    try {
-      var { data: client } = await sb.from('clients')
-        .select('google_access_token, email')
-        .eq('id', session.user.id)
-        .single();
-      if (client && client.google_access_token) {
-        markGoogleConnected(client.email || session.user.email);
-      } else {
-        // Mostrar botón para ir al perfil a conectar
-        var connectArea = document.getElementById('dash-connect-area');
-        if (connectArea) {
-          connectArea.innerHTML = '<a href="/perfil.html" class="btn btn-accent" style="display:block;text-align:center;text-decoration:none;padding:10px">Conectar Google Search Console →</a><p style="font-size:11px;color:var(--muted);text-align:center;margin-top:8px">Necesario para ver tus datos reales</p>';
+    // Verificar si tiene token con scopes reales: primero sesión activa, luego BD
+    var hasRealToken = false;
+
+    // 1. Comprobar sesión activa (token en memoria)
+    if (session.provider_token) {
+      try {
+        var testRes = await fetch('https://www.googleapis.com/webmasters/v3/sites', {
+          headers: { Authorization: 'Bearer ' + session.provider_token }
+        });
+        if (testRes.ok || testRes.status === 403) {
+          // 403 = tiene acceso pero no tiene sites — es válido
+          hasRealToken = true;
+          // Guardar en BD para futuras sesiones
+          await sb.from('clients').update({
+            google_access_token: session.provider_token,
+            google_refresh_token: session.provider_refresh_token || null
+          }).eq('id', session.user.id);
         }
+      } catch(e) {}
+    }
+
+    // 2. Si no hay en sesión, comprobar BD
+    if (!hasRealToken) {
+      try {
+        var { data: client } = await sb.from('clients')
+          .select('google_access_token, email')
+          .eq('id', session.user.id)
+          .single();
+        if (client && client.google_access_token) {
+          hasRealToken = true;
+        }
+      } catch(e) {}
+    }
+
+    if (hasRealToken) {
+      markGoogleConnected(session.user.email);
+    } else {
+      var banner = document.getElementById('banner-connect');
+      if (banner) banner.style.display = 'block';
+      var connectArea = document.getElementById('dash-connect-area');
+      if (connectArea) {
+        connectArea.innerHTML = '<a href="/perfil.html" class="btn btn-accent" style="display:block;text-align:center;text-decoration:none;padding:10px">Conectar Google →</a>';
       }
-    } catch(e) { console.log('clients read error:', e); }
+    }
   }
 
   function markGoogleConnected(email) {
