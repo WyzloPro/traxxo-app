@@ -275,21 +275,21 @@
             <input type="url" id="intake-url" placeholder="https://tuweb.com" style="width:100%;background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:10px 14px;color:var(--text);font-size:13px;font-family:var(--font);outline:none" />
           </div>
 
-          <!-- Tipo de web -->
+          <!-- Tipo de web — chips visuales -->
           <div>
-            <label id="label-intake-webtype" style="font-size:12px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;display:block;margin-bottom:6px">¿Qué tipo de web tienes?</label>
+            <label id="label-intake-webtype" style="font-size:12px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;display:block;margin-bottom:8px">¿Qué tipo de web tienes?</label>
             <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
-              <div class="intake-opt" onclick="selectIntake('web-type',this,'ecommerce')">E-commerce</div>
-              <div class="intake-opt" onclick="selectIntake('web-type',this,'servicios')">Servicios / Agencia</div>
-              <div class="intake-opt" onclick="selectIntake('web-type',this,'blog')">Blog / Contenido</div>
-              <div class="intake-opt" onclick="selectIntake('web-type',this,'saas')">SaaS / App</div>
+              <div class="intake-opt" onclick="selectIntake('web-type',this,'ecommerce')" style="text-align:center;padding:12px 8px;background:var(--bg);border:1px solid var(--border);border-radius:10px;cursor:pointer;font-size:13px;color:var(--muted);transition:all .15s">🛒<br/>E-commerce</div>
+              <div class="intake-opt" onclick="selectIntake('web-type',this,'servicios')" style="text-align:center;padding:12px 8px;background:var(--bg);border:1px solid var(--border);border-radius:10px;cursor:pointer;font-size:13px;color:var(--muted);transition:all .15s">🏢<br/>Servicios</div>
+              <div class="intake-opt" onclick="selectIntake('web-type',this,'blog')" style="text-align:center;padding:12px 8px;background:var(--bg);border:1px solid var(--border);border-radius:10px;cursor:pointer;font-size:13px;color:var(--muted);transition:all .15s">✍️<br/>Blog</div>
+              <div class="intake-opt" onclick="selectIntake('web-type',this,'saas')" style="text-align:center;padding:12px 8px;background:var(--bg);border:1px solid var(--border);border-radius:10px;cursor:pointer;font-size:13px;color:var(--muted);transition:all .15s">⚡<br/>SaaS / App</div>
             </div>
           </div>
 
           <!-- Nicho -->
           <div>
             <label id="label-intake-niche" style="font-size:12px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;display:block;margin-bottom:6px">Sector / Nicho</label>
-            <select id="intake-niche" style="width:100%;background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:10px 14px;color:var(--text);font-size:13px;font-family:var(--font);outline:none;-webkit-appearance:none">
+            <select id="intake-niche" onchange="_intakeData['niche']=this.value" style="width:100%;background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:10px 14px;color:var(--text);font-size:13px;font-family:var(--font);outline:none;-webkit-appearance:none">
               <option value="">Selecciona tu sector...</option>
               <option>Salud y bienestar</option>
               <option>Moda y lifestyle</option>
@@ -308,69 +308,74 @@
           <!-- Mayor reto -->
           <div>
             <label id="label-intake-reto" style="font-size:12px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;display:block;margin-bottom:6px">¿Cuál es tu mayor reto SEO?</label>
-            <div style="display:flex;flex-direction:column;gap:8px">
-              <div class="intake-opt" onclick="selectIntake('reto',this,'trafico')">Conseguir más tráfico orgánico</div>
-              <div class="intake-opt" onclick="selectIntake('reto',this,'conversiones')">Mejorar conversiones</div>
-              <div class="intake-opt" onclick="selectIntake('reto',this,'competidor')">Superar a un competidor concreto</div>
-              <div class="intake-opt" onclick="selectIntake('reto',this,'penalizacion')">Recuperarme de una penalización</div>
-              <div class="intake-opt" onclick="selectIntake('reto',this,'visibilidad')">No aparezco donde debería</div>
-            </div>
+            <select id="intake-reto" onchange="_intakeData['reto']=this.value" style="width:100%;background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:10px 14px;color:var(--text);font-size:13px;font-family:var(--font);outline:none;-webkit-appearance:none">
+              <option value="">Selecciona...</option>
+              <option value="trafico">Conseguir más tráfico orgánico</option>
+              <option value="conversiones">Mejorar conversiones</option>
+              <option value="competidor">Superar a un competidor concreto</option>
+              <option value="penalizacion">Recuperarme de una penalización</option>
+              <option value="visibilidad">No aparezco donde debería</option>
+            </select>
           </div>
 
-          <!-- Herramientas -->
+          <!-- Herramientas — chips multi -->
           <div>
-            <label id="label-intake-tools" style="font-size:12px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;display:block;margin-bottom:6px">¿Qué herramientas usas ya? <span style="font-weight:400;text-transform:none">(varias)</span></label>
-            <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
-              <div class="intake-opt intake-multi" onclick="toggleIntake(this,'gsc')">Google Search Console</div>
-              <div class="intake-opt intake-multi" onclick="toggleIntake(this,'ads')">Google Ads</div>
-              <div class="intake-opt intake-multi" onclick="toggleIntake(this,'ga4')">Google Analytics</div>
-              <div class="intake-opt intake-multi" onclick="toggleIntake(this,'semrush')">Semrush</div>
-              <div class="intake-opt intake-multi" onclick="toggleIntake(this,'ahrefs')">Ahrefs</div>
-              <div class="intake-opt intake-multi" onclick="toggleIntake(this,'ninguna')">Ninguna todavía</div>
+            <label id="label-intake-tools" style="font-size:12px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;display:block;margin-bottom:8px">¿Qué herramientas usas ya? <span style="font-weight:400;text-transform:none;font-size:11px">(varias)</span></label>
+            <div style="display:flex;flex-wrap:wrap;gap:8px">
+              <div class="intake-chip" onclick="toggleIntake(this,'gsc')" style="padding:7px 14px;background:var(--bg);border:1px solid var(--border);border-radius:20px;cursor:pointer;font-size:12px;color:var(--muted);transition:all .15s;white-space:nowrap">GSC</div>
+              <div class="intake-chip" onclick="toggleIntake(this,'ads')" style="padding:7px 14px;background:var(--bg);border:1px solid var(--border);border-radius:20px;cursor:pointer;font-size:12px;color:var(--muted);transition:all .15s;white-space:nowrap">Google Ads</div>
+              <div class="intake-chip" onclick="toggleIntake(this,'ga4')" style="padding:7px 14px;background:var(--bg);border:1px solid var(--border);border-radius:20px;cursor:pointer;font-size:12px;color:var(--muted);transition:all .15s;white-space:nowrap">Analytics</div>
+              <div class="intake-chip" onclick="toggleIntake(this,'semrush')" style="padding:7px 14px;background:var(--bg);border:1px solid var(--border);border-radius:20px;cursor:pointer;font-size:12px;color:var(--muted);transition:all .15s;white-space:nowrap">Semrush</div>
+              <div class="intake-chip" onclick="toggleIntake(this,'ahrefs')" style="padding:7px 14px;background:var(--bg);border:1px solid var(--border);border-radius:20px;cursor:pointer;font-size:12px;color:var(--muted);transition:all .15s;white-space:nowrap">Ahrefs</div>
+              <div class="intake-chip" onclick="toggleIntake(this,'ninguna')" style="padding:7px 14px;background:var(--bg);border:1px solid var(--border);border-radius:20px;cursor:pointer;font-size:12px;color:var(--muted);transition:all .15s;white-space:nowrap">Ninguna</div>
             </div>
           </div>
 
           <!-- Tráfico -->
           <div>
-            <label id="label-intake-traffic" style="font-size:12px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;display:block;margin-bottom:6px">Tráfico orgánico mensual aproximado</label>
-            <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
-              <div class="intake-opt" onclick="selectIntake('trafico',this,'menos1k')">Menos de 1.000 visitas</div>
-              <div class="intake-opt" onclick="selectIntake('trafico',this,'1k-10k')">1.000 - 10.000</div>
-              <div class="intake-opt" onclick="selectIntake('trafico',this,'10k-50k')">10.000 - 50.000</div>
-              <div class="intake-opt" onclick="selectIntake('trafico',this,'mas50k')">Más de 50.000</div>
-            </div>
+            <label id="label-intake-traffic" style="font-size:12px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;display:block;margin-bottom:6px">Tráfico orgánico mensual</label>
+            <select id="intake-traffic" onchange="_intakeData['trafico']=this.value" style="width:100%;background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:10px 14px;color:var(--text);font-size:13px;font-family:var(--font);outline:none;-webkit-appearance:none">
+              <option value="">Selecciona...</option>
+              <option value="menos1k">Menos de 1.000 visitas</option>
+              <option value="1k-10k">1.000 - 10.000</option>
+              <option value="10k-50k">10.000 - 50.000</option>
+              <option value="mas50k">Más de 50.000</option>
+            </select>
           </div>
 
-          <!-- Google Ads presupuesto -->
+          <!-- Google Ads -->
           <div>
             <label id="label-intake-ads" style="font-size:12px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;display:block;margin-bottom:6px">¿Inviertes en Google Ads?</label>
-            <div style="display:flex;flex-direction:column;gap:8px">
-              <div class="intake-opt" onclick="selectIntake('ads-budget',this,'no')">No, solo SEO orgánico</div>
-              <div class="intake-opt" onclick="selectIntake('ads-budget',this,'menos500')">Sí, menos de 500€/mes</div>
-              <div class="intake-opt" onclick="selectIntake('ads-budget',this,'500-2k')">Sí, entre 500€ y 2.000€/mes</div>
-              <div class="intake-opt" onclick="selectIntake('ads-budget',this,'mas2k')">Sí, más de 2.000€/mes</div>
-            </div>
+            <select id="intake-ads" onchange="_intakeData['ads-budget']=this.value" style="width:100%;background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:10px 14px;color:var(--text);font-size:13px;font-family:var(--font);outline:none;-webkit-appearance:none">
+              <option value="">Selecciona...</option>
+              <option value="no">No, solo SEO orgánico</option>
+              <option value="menos500">Sí, menos de 500€/mes</option>
+              <option value="500-2k">Sí, entre 500€ y 2.000€/mes</option>
+              <option value="mas2k">Sí, más de 2.000€/mes</option>
+            </select>
           </div>
 
-          <!-- Equipo -->
-          <div>
-            <label id="label-intake-team" style="font-size:12px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;display:block;margin-bottom:6px">¿Cómo trabajas?</label>
-            <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
-              <div class="intake-opt" onclick="selectIntake('equipo',this,'solo')">Solo / Freelance</div>
-              <div class="intake-opt" onclick="selectIntake('equipo',this,'empresa')">Empresa pequeña</div>
-              <div class="intake-opt" onclick="selectIntake('equipo',this,'agencia')">Agencia</div>
-              <div class="intake-opt" onclick="selectIntake('equipo',this,'otro')">Otro</div>
+          <!-- Equipo + Canal en grid -->
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+            <div>
+              <label id="label-intake-team" style="font-size:12px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;display:block;margin-bottom:6px">¿Cómo trabajas?</label>
+              <select id="intake-team" onchange="_intakeData['equipo']=this.value" style="width:100%;background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:10px 10px;color:var(--text);font-size:12px;font-family:var(--font);outline:none;-webkit-appearance:none">
+                <option value="">...</option>
+                <option value="solo">Solo / Freelance</option>
+                <option value="empresa">Empresa</option>
+                <option value="agencia">Agencia</option>
+                <option value="otro">Otro</option>
+              </select>
             </div>
-          </div>
-
-          <!-- Objetivo -->
-          <div>
-            <label id="label-intake-source" style="font-size:12px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;display:block;margin-bottom:6px">¿Cómo nos encontraste?</label>
-            <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
-              <div class="intake-opt" onclick="selectIntake('canal',this,'linkedin')">LinkedIn</div>
-              <div class="intake-opt" onclick="selectIntake('canal',this,'referido')">Referido</div>
-              <div class="intake-opt" onclick="selectIntake('canal',this,'google')">Google</div>
-              <div class="intake-opt" onclick="selectIntake('canal',this,'otro')">Otro</div>
+            <div>
+              <label id="label-intake-source" style="font-size:12px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;display:block;margin-bottom:6px">¿Cómo nos encontraste?</label>
+              <select id="intake-source" onchange="_intakeData['canal']=this.value" style="width:100%;background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:10px 10px;color:var(--text);font-size:12px;font-family:var(--font);outline:none;-webkit-appearance:none">
+                <option value="">...</option>
+                <option value="linkedin">LinkedIn</option>
+                <option value="referido">Referido</option>
+                <option value="google">Google</option>
+                <option value="otro">Otro</option>
+              </select>
             </div>
           </div>
 
