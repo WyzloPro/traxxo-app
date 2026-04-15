@@ -906,7 +906,7 @@
     var btn = document.querySelector('#reset-form .btn');
     btn.disabled = true; btn.textContent = 'Enviando...';
     var { error } = await sb.auth.resetPasswordForEmail(email, {
-      redirectTo: 'https://traxxo-app.vercel.app'
+      redirectTo: 'https://app.traxxo.ai'
     });
     btn.disabled = false; btn.textContent = 'Enviar enlace';
     if (error) {
