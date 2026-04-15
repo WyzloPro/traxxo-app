@@ -1034,29 +1034,20 @@
     var { data: { session } } = await sb.auth.getSession();
     if (!session) return;
 
-    var hasGoogle = session.provider_token ||
-      (session.user && session.user.app_metadata && session.user.app_metadata.provider === 'google');
-
-    if (hasGoogle) {
-      // Guardar en Supabase
-      await sb.from('clients').upsert({
-        id: session.user.id,
-        email: session.user.email,
-        google_connected: true,
-        google_email: session.user.email
-      }, { onConflict: 'id' });
-      markGoogleConnected(session.user.email);
-      return;
-    }
-
-    // Si no hay token activo, leer de Supabase
+    // Solo marcar conectado si hay token real con scopes guardado en BD
     try {
       var { data: client } = await sb.from('clients')
-        .select('google_connected, google_email')
+        .select('google_access_token, email')
         .eq('id', session.user.id)
         .single();
-      if (client && client.google_connected) {
-        markGoogleConnected(client.google_email || session.user.email);
+      if (client && client.google_access_token) {
+        markGoogleConnected(client.email || session.user.email);
+      } else {
+        // Mostrar botón para ir al perfil a conectar
+        var connectArea = document.getElementById('dash-connect-area');
+        if (connectArea) {
+          connectArea.innerHTML = '<a href="/perfil.html" class="btn btn-accent" style="display:block;text-align:center;text-decoration:none;padding:10px">Conectar Google Search Console →</a><p style="font-size:11px;color:var(--muted);text-align:center;margin-top:8px">Necesario para ver tus datos reales</p>';
+        }
       }
     } catch(e) { console.log('clients read error:', e); }
   }
@@ -1326,8 +1317,16 @@
 
   // ─── INIT ────────────────────────────────────────────────
   // Comprobar sesión activa al cargar (incluye vuelta de OAuth)
-  sb.auth.onAuthStateChange(function(event, session) {
+  sb.auth.onAuthStateChange(async function(event, session) {
     if (session) {
+      // Guardar token de Google si viene de OAuth
+      if (session.provider_token && session.user) {
+        await sb.from('clients').update({
+          google_access_token: session.provider_token,
+          google_refresh_token: session.provider_refresh_token || null,
+          google_token_expires_at: session.expires_at ? new Date(session.expires_at * 1000).toISOString() : null
+        }).eq('id', session.user.id);
+      }
       showDashboard(session.user);
     }
   });
