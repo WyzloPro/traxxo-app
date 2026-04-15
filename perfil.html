@@ -12,107 +12,142 @@
     :root {
       --bg: #09090b; --surface: #111113; --border: #1f1f23;
       --text: #fafafa; --muted: #71717a; --accent: #22d3ee;
-      --green: #10b981; --red: #ef4444; --font: 'Inter', system-ui, sans-serif;
+      --green: #10b981; --red: #ef4444; --yellow: #f59e0b;
+      --font: 'Inter', system-ui, sans-serif;
     }
     body { background: var(--bg); color: var(--text); font-family: var(--font); min-height: 100vh; -webkit-font-smoothing: antialiased; }
 
+    /* HEADER */
     .header { display:flex; align-items:center; justify-content:space-between; padding:12px 24px; border-bottom:1px solid var(--border); background:var(--surface); position:sticky; top:0; z-index:100; }
     .logo { display:flex; align-items:center; gap:8px; font-size:16px; font-weight:700; text-decoration:none; color:var(--text); }
-    .header-right { display:flex; gap:10px; align-items:center; }
     .btn { padding:8px 16px; border-radius:8px; font-size:13px; font-weight:600; font-family:var(--font); cursor:pointer; border:none; transition:all .15s; }
-    .btn-ghost { background:none; border:1px solid var(--border); color:var(--muted); }
+    .btn-ghost { background:none; border:1px solid var(--border); color:var(--muted); text-decoration:none; display:inline-flex; align-items:center; }
     .btn-ghost:hover { color:var(--text); border-color:var(--muted); }
     .btn-accent { background:var(--accent); color:#000; }
     .btn-accent:hover { opacity:.85; }
+    .btn-accent:disabled { opacity:.4; cursor:not-allowed; }
     .btn-danger { background:rgba(239,68,68,.1); color:var(--red); border:1px solid rgba(239,68,68,.2); }
     .btn-danger:hover { background:rgba(239,68,68,.2); }
+    .btn-warning { background:rgba(245,158,11,.1); color:var(--yellow); border:1px solid rgba(245,158,11,.2); }
+    .btn-warning:hover { background:rgba(245,158,11,.2); }
 
+    /* LAYOUT */
     .container { max-width:640px; margin:0 auto; padding:32px 24px; }
 
+    /* SECTIONS */
     .section { background:var(--surface); border:1px solid var(--border); border-radius:14px; padding:24px; margin-bottom:16px; }
-    .section-title { font-size:13px; font-weight:700; color:var(--muted); text-transform:uppercase; letter-spacing:.06em; margin-bottom:16px; }
+    .section-title { font-size:12px; font-weight:700; color:var(--muted); text-transform:uppercase; letter-spacing:.06em; margin-bottom:16px; }
 
-    /* CUENTA */
-    .account-row { display:flex; justify-content:space-between; align-items:center; padding:8px 0; border-bottom:1px solid rgba(255,255,255,.04); }
-    .account-row:last-child { border-bottom:none; }
-    .account-label { font-size:12px; color:var(--muted); }
-    .account-value { font-size:13px; font-weight:500; }
-    .plan-badge { font-size:11px; font-weight:700; padding:3px 10px; border-radius:20px; background:rgba(34,211,238,.1); color:var(--accent); border:1px solid rgba(34,211,238,.2); }
+    /* PERFIL HEADER */
+    .profile-header { display:flex; align-items:center; gap:16px; margin-bottom:20px; }
+    .avatar { width:60px; height:60px; border-radius:50%; background:rgba(34,211,238,.1); border:2px solid rgba(34,211,238,.2); display:flex; align-items:center; justify-content:center; font-size:22px; font-weight:700; color:var(--accent); flex-shrink:0; overflow:hidden; }
+    .avatar img { width:100%; height:100%; object-fit:cover; }
+    .profile-meta { flex:1; }
+    .profile-name { font-size:18px; font-weight:700; }
+    .profile-email { font-size:13px; color:var(--muted); margin-top:2px; }
+    .plan-badge { display:inline-block; font-size:11px; font-weight:700; padding:3px 10px; border-radius:20px; background:rgba(34,211,238,.1); color:var(--accent); border:1px solid rgba(34,211,238,.2); margin-top:6px; }
+
+    /* FORM */
+    .field { margin-bottom:14px; }
+    .field label { font-size:12px; font-weight:600; color:var(--muted); text-transform:uppercase; letter-spacing:.05em; display:block; margin-bottom:6px; }
+    .field input { width:100%; background:var(--bg); border:1px solid var(--border); border-radius:8px; padding:10px 14px; color:var(--text); font-size:13px; font-family:var(--font); outline:none; transition:border-color .15s; }
+    .field input:focus { border-color:rgba(34,211,238,.4); }
+    .field input::placeholder { color:var(--muted); }
+    .field input:disabled { opacity:.5; cursor:not-allowed; }
 
     /* CONEXIONES */
     .conn-row { display:flex; align-items:center; gap:14px; padding:14px 0; border-bottom:1px solid rgba(255,255,255,.04); }
     .conn-row:last-child { border-bottom:none; }
-    .conn-icon { width:40px; height:40px; border-radius:10px; display:flex; align-items:center; justify-content:center; font-size:12px; font-weight:700; flex-shrink:0; border:1px solid; }
+    .conn-icon { width:40px; height:40px; border-radius:10px; display:flex; align-items:center; justify-content:center; font-size:11px; font-weight:700; flex-shrink:0; border:1px solid; }
     .conn-info { flex:1; }
     .conn-name { font-size:14px; font-weight:600; }
     .conn-detail { font-size:12px; color:var(--muted); margin-top:2px; }
-    .conn-status { font-size:11px; font-weight:700; padding:3px 10px; border-radius:20px; white-space:nowrap; }
-    .conn-status.connected { background:rgba(16,185,129,.1); color:var(--green); border:1px solid rgba(16,185,129,.2); }
-    .conn-status.disconnected { background:var(--bg); color:var(--muted); border:1px solid var(--border); }
-    .conn-btn { font-size:12px; padding:6px 12px; margin-left:8px; flex-shrink:0; }
+    .conn-badge { font-size:11px; font-weight:700; padding:3px 10px; border-radius:20px; white-space:nowrap; }
+    .conn-badge.connected { background:rgba(16,185,129,.1); color:var(--green); border:1px solid rgba(16,185,129,.2); }
+    .conn-badge.disconnected { background:var(--bg); color:var(--muted); border:1px solid var(--border); }
 
-    /* SEMRUSH INPUT */
-    .semrush-input-wrap { display:flex; gap:8px; margin-top:12px; }
-    .semrush-input { flex:1; background:var(--bg); border:1px solid var(--border); border-radius:8px; padding:9px 14px; color:var(--text); font-size:13px; font-family:var(--font); outline:none; transition:border-color .15s; }
-    .semrush-input:focus { border-color:rgba(34,211,238,.4); }
-    .semrush-input::placeholder { color:var(--muted); }
+    /* SEMRUSH */
+    .semrush-row { display:flex; gap:8px; }
+    .semrush-row input { flex:1; }
 
-    /* DOMINIO */
-    .domain-wrap { display:flex; gap:8px; margin-top:12px; align-items:center; }
-    .domain-tag { background:var(--bg); border:1px solid var(--border); border-radius:8px; padding:9px 14px; font-size:13px; color:var(--text); flex:1; }
+    /* TOGGLE */
+    .toggle-row { display:flex; align-items:center; justify-content:space-between; padding:12px 0; border-bottom:1px solid rgba(255,255,255,.04); }
+    .toggle-row:last-child { border-bottom:none; }
+    .toggle-label { font-size:13px; font-weight:600; }
+    .toggle-sub { font-size:12px; color:var(--muted); margin-top:2px; }
+    .toggle { position:relative; width:44px; height:24px; flex-shrink:0; }
+    .toggle input { opacity:0; width:0; height:0; }
+    .toggle-slider { position:absolute; inset:0; background:var(--border); border-radius:12px; cursor:pointer; transition:.2s; }
+    .toggle-slider:before { content:''; position:absolute; width:18px; height:18px; left:3px; top:3px; background:#fff; border-radius:50%; transition:.2s; }
+    .toggle input:checked + .toggle-slider { background:var(--accent); }
+    .toggle input:checked + .toggle-slider:before { transform:translateX(20px); }
 
+    /* MSGS */
     .msg { font-size:12px; margin-top:8px; padding:8px 12px; border-radius:8px; display:none; }
-    .msg.success { background:rgba(16,185,129,.1); color:var(--green); border:1px solid rgba(16,185,129,.2); display:block; }
-    .msg.error { background:rgba(239,68,68,.1); color:var(--red); border:1px solid rgba(239,68,68,.2); display:block; }
+    .msg.success { background:rgba(16,185,129,.1); color:var(--green); display:block; }
+    .msg.error { background:rgba(239,68,68,.1); color:var(--red); display:block; }
 
-    .danger-zone { border-color:rgba(239,68,68,.2); }
-    .danger-zone .section-title { color:var(--red); }
+    /* DANGER */
+    .danger-section { border-color:rgba(239,68,68,.2); }
+    .danger-section .section-title { color:var(--red); }
+    .danger-row { display:flex; justify-content:space-between; align-items:center; padding:12px 0; border-bottom:1px solid rgba(255,255,255,.04); }
+    .danger-row:last-child { border-bottom:none; }
+    .danger-info { flex:1; padding-right:16px; }
+    .danger-info-title { font-size:13px; font-weight:600; }
+    .danger-info-sub { font-size:12px; color:var(--muted); margin-top:2px; }
+
+    /* MODAL */
+    .modal-overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,.7); z-index:200; align-items:center; justify-content:center; backdrop-filter:blur(4px); }
+    .modal-overlay.active { display:flex; }
+    .modal { background:var(--surface); border:1px solid var(--border); border-radius:16px; padding:28px; width:100%; max-width:400px; margin:16px; }
+    .modal-title { font-size:16px; font-weight:700; margin-bottom:8px; }
+    .modal-body { font-size:13px; color:var(--muted); line-height:1.6; margin-bottom:20px; }
+    .modal-warning { background:rgba(239,68,68,.08); border:1px solid rgba(239,68,68,.2); border-radius:8px; padding:12px; font-size:12px; color:var(--red); margin-bottom:16px; }
+    .modal-actions { display:flex; gap:8px; justify-content:flex-end; }
+
+    /* SITE SELECTOR */
+    .site-option { padding:10px 14px; background:var(--bg); border:1px solid var(--border); border-radius:8px; cursor:pointer; font-size:13px; color:var(--muted); word-break:break-all; transition:all .15s; margin-bottom:8px; }
+    .site-option:hover { border-color:var(--accent); color:var(--text); }
+    .site-option.selected { border-color:var(--accent); color:var(--accent); background:rgba(34,211,238,.06); }
+    .site-list { max-height:240px; overflow-y:auto; margin-bottom:16px; }
   </style>
 </head>
 <body>
 
 <div class="header">
-  <a href="/dashboard.html" class="logo">
+  <a href="/" class="logo">
     <svg width="22" height="22" viewBox="0 0 24 24" fill="none"><rect width="24" height="24" rx="7" fill="#22d3ee" fill-opacity=".12"/><path d="M5 12h4l2-5 2 10 2-5h2" stroke="#22d3ee" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
     traxxo
   </a>
-  <div class="header-right">
-    <a href="/dashboard.html" class="btn btn-ghost">← Dashboard</a>
-    <button class="btn btn-ghost" onclick="logout()">Cerrar sesión</button>
+  <div style="display:flex;gap:8px">
+    <a href="/dashboard.html" class="btn btn-ghost">Dashboard</a>
+    <a href="/" class="btn btn-ghost">← Mi cuenta</a>
   </div>
 </div>
 
 <div class="container">
 
-  <!-- CUENTA -->
+  <!-- PERFIL -->
   <div class="section">
-    <div class="section-title">Mi cuenta</div>
-    <div class="account-row">
-      <span class="account-label">Email</span>
-      <span class="account-value" id="profile-email">—</span>
+    <div class="profile-header">
+      <div class="avatar" id="avatar-wrap">?</div>
+      <div class="profile-meta">
+        <div class="profile-name" id="profile-display-name">—</div>
+        <div class="profile-email" id="profile-email">—</div>
+        <div class="plan-badge" id="profile-plan">Early Access</div>
+      </div>
     </div>
-    <div class="account-row">
-      <span class="account-label">Nombre</span>
-      <span class="account-value" id="profile-name">—</span>
-    </div>
-    <div class="account-row">
-      <span class="account-label">Empresa</span>
-      <span class="account-value" id="profile-company">—</span>
-    </div>
-    <div class="account-row">
-      <span class="account-label">Plan</span>
-      <span class="plan-badge" id="profile-plan">Early Access</span>
-    </div>
-    <div class="account-row">
-      <span class="account-label">Web monitorizada</span>
-      <span class="account-value" id="profile-domain">—</span>
-    </div>
+    <div class="section-title">Información personal</div>
+    <div class="field"><label>Nombre</label><input type="text" id="edit-name" placeholder="Tu nombre" /></div>
+    <div class="field"><label>Empresa</label><input type="text" id="edit-company" placeholder="Tu empresa o agencia" /></div>
+    <button class="btn btn-accent" onclick="saveProfile()" id="btn-save-profile">Guardar cambios</button>
+    <div class="msg" id="profile-msg"></div>
   </div>
 
   <!-- CONEXIONES GOOGLE -->
   <div class="section">
     <div class="section-title">Conexiones de Google</div>
-    <p style="font-size:13px;color:var(--muted);margin-bottom:16px">Conecta tu cuenta de Google para que Traxxo pueda leer tus datos de GSC, Ads y Analytics.</p>
+    <p style="font-size:13px;color:var(--muted);margin-bottom:16px">Conecta tu cuenta de Google para que Traxxo lea tus datos de GSC, Ads y Analytics.</p>
 
     <div class="conn-row">
       <div class="conn-icon" style="background:#4285f420;border-color:#4285f440;color:#4285f4">GSC</div>
@@ -120,60 +155,117 @@
         <div class="conn-name">Google Search Console</div>
         <div class="conn-detail" id="gsc-detail">Clics, impresiones y posiciones</div>
       </div>
-      <span class="conn-status disconnected" id="gsc-status">Sin conectar</span>
+      <span class="conn-badge disconnected" id="gsc-badge">Sin conectar</span>
     </div>
-
     <div class="conn-row">
       <div class="conn-icon" style="background:#fbbc0420;border-color:#fbbc0440;color:#fbbc04">ADS</div>
       <div class="conn-info">
         <div class="conn-name">Google Ads</div>
         <div class="conn-detail" id="ads-detail">Campañas, gasto y ROAS</div>
       </div>
-      <span class="conn-status disconnected" id="ads-status">Sin conectar</span>
+      <span class="conn-badge disconnected" id="ads-badge">Sin conectar</span>
     </div>
-
     <div class="conn-row">
       <div class="conn-icon" style="background:#e8710a20;border-color:#e8710a40;color:#e8710a">GA4</div>
       <div class="conn-info">
         <div class="conn-name">Google Analytics 4</div>
         <div class="conn-detail" id="ga4-detail">Sesiones, usuarios y conversiones</div>
       </div>
-      <span class="conn-status disconnected" id="ga4-status">Sin conectar</span>
+      <span class="conn-badge disconnected" id="ga4-badge">Sin conectar</span>
     </div>
 
-    <div style="margin-top:16px">
-      <button class="btn btn-accent" id="btn-connect-google" onclick="connectGoogle()" style="width:100%;display:flex;align-items:center;justify-content:center;gap:8px">
-        <svg width="16" height="16" viewBox="0 0 18 18"><path fill="#000" d="M17.64 9.2c0-.637-.057-1.251-.164-1.84H9v3.481h4.844c-.209 1.125-.843 2.078-1.796 2.716v2.259h2.908c1.702-1.567 2.684-3.875 2.684-6.615z"/><path fill="#000" d="M9 18c2.43 0 4.467-.806 5.956-2.184l-2.908-2.259c-.806.54-1.837.86-3.048.86-2.344 0-4.328-1.584-5.036-3.711H.957v2.332C2.438 15.983 5.482 18 9 18z"/><path fill="#000" d="M3.964 10.706c-.18-.54-.282-1.117-.282-1.706s.102-1.166.282-1.706V4.962H.957C.347 6.175 0 7.55 0 9s.348 2.825.957 4.038l3.007-2.332z"/><path fill="#000" d="M9 3.58c1.321 0 2.508.454 3.44 1.345l2.582-2.58C13.463.891 11.426 0 9 0 5.482 0 2.438 2.017.957 4.962L3.964 7.294C4.672 5.163 6.656 3.58 9 3.58z"/></svg>
-        Conectar con Google
-      </button>
-      <p style="font-size:11px;color:var(--muted);text-align:center;margin-top:8px">Solo pedimos acceso de lectura. Nunca modificamos tus datos.</p>
+    <div style="display:flex;gap:8px;margin-top:16px">
+      <button class="btn btn-accent" id="btn-connect" onclick="connectGoogle()" style="flex:1">Conectar con Google</button>
+      <button class="btn btn-ghost" id="btn-disconnect" onclick="disconnectGoogle()" style="display:none">Desconectar</button>
+    </div>
+    <p style="font-size:11px;color:var(--muted);text-align:center;margin-top:8px">Solo pedimos acceso de lectura. Nunca modificamos tus datos.</p>
+    <div class="msg" id="google-msg"></div>
+  </div>
+
+  <!-- WEB MONITORIZADA -->
+  <div class="section">
+    <div class="section-title">Web monitorizada</div>
+    <div class="field">
+      <label>Dominio actual</label>
+      <input type="text" id="current-domain" disabled />
+    </div>
+    <p style="font-size:12px;color:var(--muted);margin-bottom:14px">Para cambiar de web es necesario resetear el proyecto — perderás el historial de análisis.</p>
+    <div style="display:flex;gap:8px">
+      <button class="btn btn-warning" onclick="openResetModal()">Cambiar proyecto</button>
+      <button class="btn btn-ghost" style="opacity:.5;cursor:not-allowed" disabled>Añadir web (Plan Pro)</button>
     </div>
   </div>
 
   <!-- SEMRUSH -->
   <div class="section">
     <div class="section-title">Semrush</div>
-    <p style="font-size:13px;color:var(--muted);margin-bottom:4px">Introduce tu API key de Semrush para ver posiciones orgánicas por tema.</p>
-    <a href="https://www.semrush.com/user/profile/api/" target="_blank" style="font-size:12px;color:var(--accent)">¿Dónde encuentro mi API key?</a>
-    <div class="semrush-input-wrap">
-      <input type="password" id="semrush-key" class="semrush-input" placeholder="Tu API key de Semrush..." />
-      <button class="btn btn-accent" onclick="saveSemrush()">Guardar</button>
+    <p style="font-size:13px;color:var(--muted);margin-bottom:4px">API key para ver posiciones orgánicas por tema.</p>
+    <a href="https://www.semrush.com/user/profile/api/" target="_blank" style="font-size:12px;color:var(--accent);display:block;margin-bottom:12px">¿Dónde encuentro mi API key? →</a>
+    <div class="semrush-row">
+      <div class="field" style="flex:1;margin:0"><input type="password" id="semrush-key" placeholder="Tu API key de Semrush..." /></div>
+      <button class="btn btn-accent" onclick="saveSemrush()" style="margin-top:0;height:40px">Guardar</button>
     </div>
     <div class="msg" id="semrush-msg"></div>
   </div>
 
-  <!-- DANGER ZONE -->
-  <div class="section danger-zone">
-    <div class="section-title">Zona peligrosa</div>
-    <div style="display:flex;justify-content:space-between;align-items:center">
+  <!-- NOTIFICACIONES -->
+  <div class="section">
+    <div class="section-title">Notificaciones</div>
+    <div class="toggle-row">
       <div>
-        <div style="font-size:13px;font-weight:600;margin-bottom:4px">Cerrar sesión</div>
-        <div style="font-size:12px;color:var(--muted)">Salir de tu cuenta en este dispositivo</div>
+        <div class="toggle-label">Resumen semanal</div>
+        <div class="toggle-sub">Email cada lunes con el análisis actualizado</div>
+      </div>
+      <label class="toggle"><input type="checkbox" id="notif-weekly" checked onchange="saveNotifications()"><span class="toggle-slider"></span></label>
+    </div>
+    <div class="toggle-row">
+      <div>
+        <div class="toggle-label">Alertas de caídas</div>
+        <div class="toggle-sub">Aviso si detectamos una caída importante de tráfico</div>
+      </div>
+      <label class="toggle"><input type="checkbox" id="notif-alerts" checked onchange="saveNotifications()"><span class="toggle-slider"></span></label>
+    </div>
+  </div>
+
+  <!-- ZONA PELIGROSA -->
+  <div class="section danger-section">
+    <div class="section-title">Zona peligrosa</div>
+    <div class="danger-row">
+      <div class="danger-info">
+        <div class="danger-info-title">Cerrar sesión</div>
+        <div class="danger-info-sub">Salir de tu cuenta en este dispositivo</div>
       </div>
       <button class="btn btn-danger" onclick="logout()">Cerrar sesión</button>
     </div>
   </div>
 
+</div>
+
+<!-- MODAL: Seleccionar site GSC -->
+<div class="modal-overlay" id="modal-sites">
+  <div class="modal">
+    <div class="modal-title">¿Cuál es tu web en GSC?</div>
+    <p class="modal-body">Tu cuenta tiene acceso a varios sites. Selecciona el que quieres monitorizar.</p>
+    <div class="site-list" id="site-list"></div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" onclick="closeSiteModal()">Cancelar</button>
+      <button class="btn btn-accent" id="btn-confirm-site" onclick="confirmSite()" disabled>Confirmar →</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: Cambiar proyecto -->
+<div class="modal-overlay" id="modal-reset">
+  <div class="modal">
+    <div class="modal-title">¿Cambiar de proyecto?</div>
+    <p class="modal-body">Esto eliminará todos los datos de análisis del proyecto actual y empezarás desde cero con una nueva web.</p>
+    <div class="modal-warning">⚠️ Esta acción no se puede deshacer. Se borrarán todos los datos históricos.</div>
+    <div class="field"><label>Escribe "CONFIRMAR" para continuar</label><input type="text" id="reset-confirm-input" placeholder="CONFIRMAR" /></div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" onclick="closeResetModal()">Cancelar</button>
+      <button class="btn btn-danger" onclick="confirmReset()">Borrar y empezar de nuevo</button>
+    </div>
+  </div>
 </div>
 
 <script>
@@ -183,151 +275,255 @@ const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
 
 var _userId = null;
 var _projectId = null;
+var _selectedSite = null;
+var _currentToken = null;
 
+// ── INIT ──────────────────────────────────────────────────
 sb.auth.getSession().then(async function({ data: { session } }) {
   if (!session) { window.location.href = '/'; return; }
   _userId = session.user.id;
+  _currentToken = session.provider_token || null;
 
-  // Cargar datos del cliente
-  var { data: client } = await sb.from('clients').select('*').eq('id', _userId).single();
-  var { data: project } = await sb.from('projects').select('*').eq('client_id', _userId).limit(1).single();
-
-  if (project) _projectId = project.id;
-
-  document.getElementById('profile-email').textContent = session.user.email || '—';
-  document.getElementById('profile-name').textContent = client?.name || session.user.user_metadata?.full_name || '—';
-  document.getElementById('profile-company').textContent = client?.company || '—';
-  document.getElementById('profile-domain').textContent = project?.domain || '—';
-
-  var plan = client?.plan || 'early_access';
-  var planEl = document.getElementById('profile-plan');
-  planEl.textContent = plan === 'basic' ? 'Basic' : plan === 'pro' ? 'Pro' : plan === 'agency' ? 'Agency' : 'Early Access';
-
-  // Verificar conexión Google
-  if (client?.google_access_token) {
-    try {
-      var res = await fetch('https://www.googleapis.com/webmasters/v3/sites', {
-        headers: { Authorization: 'Bearer ' + client.google_access_token }
-      });
-      if (res.ok) {
-        var email = session.user.email;
-        ['gsc', 'ads', 'ga4'].forEach(function(s) {
-          document.getElementById(s + '-status').textContent = 'Conectado';
-          document.getElementById(s + '-status').className = 'conn-status connected';
-          document.getElementById(s + '-detail').textContent = email;
-        });
-        document.getElementById('btn-connect-google').textContent = 'Reconectar Google';
-        document.getElementById('btn-connect-google').style.background = 'var(--border)';
-        document.getElementById('btn-connect-google').style.color = 'var(--text)';
-      }
-    } catch(e) {}
+  // Foto de Google
+  var avatar = session.user.user_metadata?.avatar_url;
+  var avatarEl = document.getElementById('avatar-wrap');
+  if (avatar) {
+    avatarEl.innerHTML = '<img src="' + avatar + '" alt="foto" />';
+  } else {
+    avatarEl.textContent = (session.user.email || '?')[0].toUpperCase();
   }
 
-  // Cargar API key de Semrush si existe
+  // Email
+  document.getElementById('profile-email').textContent = session.user.email || '';
+
+  // Cargar datos de la BD
+  var { data: client } = await sb.from('clients').select('*').eq('id', _userId).single();
+  var { data: project } = await sb.from('projects').select('*').eq('client_id', _userId).limit(1).maybeSingle();
+  if (project) { _projectId = project.id; }
+
+  // Rellenar campos
+  var name = client?.name || session.user.user_metadata?.full_name || '';
+  var company = client?.company || '';
+  document.getElementById('edit-name').value = name;
+  document.getElementById('edit-company').value = company;
+  document.getElementById('profile-display-name').textContent = name || session.user.email?.split('@')[0];
+  document.getElementById('current-domain').value = project?.domain || '—';
+
+  // Plan
+  var plan = client?.plan || 'early_access';
+  var planEl = document.getElementById('profile-plan');
+  planEl.textContent = { basic:'Basic', pro:'Pro', agency:'Agency' }[plan] || 'Early Access';
+
+  // Notificaciones
+  var notifs = client?.notifications || {};
+  document.getElementById('notif-weekly').checked = notifs.weekly !== false;
+  document.getElementById('notif-alerts').checked = notifs.alerts !== false;
+
+  // Semrush
   if (project?.semrush_api_key) {
     document.getElementById('semrush-key').value = project.semrush_api_key;
   }
+
+  // Estado Google
+  if (client?.google_access_token) {
+    markConnected(session.user.email);
+  } else if (_currentToken) {
+    // Token en sesión — guardarlo
+    await saveGoogleToken(_currentToken, session);
+    markConnected(session.user.email);
+  }
 });
 
+// OAuth callback — cuando vuelve de conectar Google
+sb.auth.onAuthStateChange(async function(event, session) {
+  if (event === 'SIGNED_IN' && session?.provider_token) {
+    _currentToken = session.provider_token;
+    await saveGoogleToken(session.provider_token, session);
+    markConnected(session.user.email);
+    // Comprobar sites GSC
+    await checkGSCSites(session.provider_token, session.user.id);
+  }
+});
+
+// ── GOOGLE ────────────────────────────────────────────────
 function connectGoogle() {
   sb.auth.signInWithOAuth({
     provider: 'google',
     options: {
       scopes: 'email profile https://www.googleapis.com/auth/webmasters.readonly https://www.googleapis.com/auth/adwords https://www.googleapis.com/auth/analytics.readonly',
       redirectTo: 'https://app.traxxo.ai/perfil.html',
-      queryParams: { access_type: 'offline', prompt: 'consent' }
+      queryParams: { access_type: 'offline', prompt: 'consent select_account' }
     }
   });
 }
 
-// Al volver del OAuth de Google, guardar el token
-sb.auth.onAuthStateChange(async function(event, session) {
-  if (event === 'SIGNED_IN' && session?.provider_token) {
-    await sb.from('clients').update({
-      google_access_token: session.provider_token,
-      google_refresh_token: session.provider_refresh_token || null,
-      google_token_expires_at: session.expires_at ? new Date(session.expires_at * 1000).toISOString() : null
-    }).eq('id', session.user.id);
+async function disconnectGoogle() {
+  await sb.from('clients').update({
+    google_access_token: null,
+    google_refresh_token: null,
+    google_token_expires_at: null
+  }).eq('id', _userId);
+  markDisconnected();
+  showMsg('google-msg', 'Google desconectado correctamente.', 'success');
+}
 
-    // Actualizar UI
-    ['gsc', 'ads', 'ga4'].forEach(function(s) {
-      document.getElementById(s + '-status').textContent = 'Conectado';
-      document.getElementById(s + '-status').className = 'conn-status connected';
-      document.getElementById(s + '-detail').textContent = session.user.email;
+async function saveGoogleToken(token, session) {
+  await sb.from('clients').update({
+    google_access_token: token,
+    google_refresh_token: session.provider_refresh_token || null,
+    google_token_expires_at: session.expires_at ? new Date(session.expires_at * 1000).toISOString() : null
+  }).eq('id', session.user.id);
+}
+
+function markConnected(email) {
+  ['gsc','ads','ga4'].forEach(function(k) {
+    var b = document.getElementById(k + '-badge');
+    var d = document.getElementById(k + '-detail');
+    if (b) { b.textContent = 'Conectado'; b.className = 'conn-badge connected'; }
+    if (d && email) d.textContent = email;
+  });
+  var btnC = document.getElementById('btn-connect');
+  var btnD = document.getElementById('btn-disconnect');
+  if (btnC) btnC.textContent = 'Reconectar / Cambiar cuenta';
+  if (btnD) btnD.style.display = '';
+}
+
+function markDisconnected() {
+  ['gsc','ads','ga4'].forEach(function(k) {
+    var b = document.getElementById(k + '-badge');
+    var d = document.getElementById(k + '-detail');
+    if (b) { b.textContent = 'Sin conectar'; b.className = 'conn-badge disconnected'; }
+    if (d) d.textContent = k === 'gsc' ? 'Clics, impresiones y posiciones' : k === 'ads' ? 'Campañas, gasto y ROAS' : 'Sesiones, usuarios y conversiones';
+  });
+  var btnD = document.getElementById('btn-disconnect');
+  if (btnD) btnD.style.display = 'none';
+  var btnC = document.getElementById('btn-connect');
+  if (btnC) btnC.textContent = 'Conectar con Google';
+}
+
+async function checkGSCSites(token, userId) {
+  try {
+    var res = await fetch('https://www.googleapis.com/webmasters/v3/sites', {
+      headers: { Authorization: 'Bearer ' + token }
     });
+    var data = await res.json();
+    var sites = (data.siteEntry || []).map(function(s) { return s.siteUrl; });
+    if (sites.length > 1) {
+      showSiteModal(sites, userId);
+    } else if (sites.length === 1) {
+      await sb.from('projects').update({ gsc_site_url: sites[0] }).eq('client_id', userId);
+      document.getElementById('current-domain').value = sites[0];
+    }
+  } catch(e) {}
+}
 
-    // Si tiene varios sites GSC, mostrar selector
-    try {
-      var res = await fetch('https://www.googleapis.com/webmasters/v3/sites', {
-        headers: { Authorization: 'Bearer ' + session.provider_token }
-      });
-      var data = await res.json();
-      var sites = (data.siteEntry || []).map(function(s) { return s.siteUrl; });
-      if (sites.length > 0) {
-        showSiteModal(sites, session.user.id);
-      }
-    } catch(e) {}
-  }
-});
+// ── SITE SELECTOR ─────────────────────────────────────────
+function showSiteModal(sites, userId) {
+  var list = document.getElementById('site-list');
+  list.innerHTML = '';
+  sites.forEach(function(site) {
+    var el = document.createElement('div');
+    el.className = 'site-option';
+    el.textContent = site;
+    el.onclick = function() {
+      list.querySelectorAll('.site-option').forEach(function(o) { o.classList.remove('selected'); });
+      el.classList.add('selected');
+      _selectedSite = site;
+      document.getElementById('btn-confirm-site').disabled = false;
+    };
+    list.appendChild(el);
+  });
+  document.getElementById('modal-sites').classList.add('active');
+}
 
+function closeSiteModal() { document.getElementById('modal-sites').classList.remove('active'); }
+
+async function confirmSite() {
+  if (!_selectedSite) return;
+  var btn = document.getElementById('btn-confirm-site');
+  btn.disabled = true; btn.textContent = 'Guardando...';
+  await sb.from('projects').update({ gsc_site_url: _selectedSite }).eq('client_id', _userId);
+  document.getElementById('current-domain').value = _selectedSite;
+  closeSiteModal();
+  btn.textContent = 'Confirmar →';
+}
+
+// ── PERFIL ────────────────────────────────────────────────
+async function saveProfile() {
+  var name = document.getElementById('edit-name').value.trim();
+  var company = document.getElementById('edit-company').value.trim();
+  var btn = document.getElementById('btn-save-profile');
+  btn.disabled = true; btn.textContent = 'Guardando...';
+  var { error } = await sb.from('clients').update({ name, company }).eq('id', _userId);
+  btn.disabled = false; btn.textContent = 'Guardar cambios';
+  if (error) { showMsg('profile-msg', 'Error al guardar: ' + error.message, 'error'); return; }
+  document.getElementById('profile-display-name').textContent = name || 'Sin nombre';
+  showMsg('profile-msg', '✓ Perfil actualizado', 'success');
+}
+
+// ── SEMRUSH ───────────────────────────────────────────────
 async function saveSemrush() {
   var key = document.getElementById('semrush-key').value.trim();
   if (!key) return;
-  var { error } = await sb.from('projects').update({ semrush_api_key: key }).eq('client_id', _userId);
-  var msg = document.getElementById('semrush-msg');
-  if (error) {
-    msg.textContent = 'Error al guardar: ' + error.message;
-    msg.className = 'msg error';
-  } else {
-    msg.textContent = '✓ API key guardada correctamente';
-    msg.className = 'msg success';
-    setTimeout(function() { msg.className = 'msg'; }, 3000);
+
+  // Validar key con Semrush
+  showMsg('semrush-msg', 'Validando API key...', '');
+  document.getElementById('semrush-msg').style.display = 'block';
+  document.getElementById('semrush-msg').style.color = 'var(--muted)';
+
+  try {
+    var testRes = await fetch('https://api.semrush.com/?type=domain_organic&key=' + key + '&domain=google.com&database=es&display_limit=1&export_columns=Ph,Po');
+    var text = await testRes.text();
+    if (text.startsWith('ERROR')) {
+      showMsg('semrush-msg', '✗ API key inválida. Verifica que sea correcta.', 'error');
+      return;
+    }
+  } catch(e) {
+    showMsg('semrush-msg', '✗ No se pudo validar. Comprueba tu conexión.', 'error');
+    return;
   }
+
+  var { error } = await sb.from('projects').update({ semrush_api_key: key }).eq('client_id', _userId);
+  if (error) { showMsg('semrush-msg', 'Error al guardar: ' + error.message, 'error'); return; }
+  showMsg('semrush-msg', '✓ API key válida y guardada correctamente', 'success');
 }
 
-// Modal de selección de site GSC
-function showSiteModal(sites, userId) {
-  var overlay = document.createElement('div');
-  overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:200;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(4px)';
-  var modal = document.createElement('div');
-  modal.style.cssText = 'background:#111113;border:1px solid #1f1f23;border-radius:16px;padding:28px;width:100%;max-width:440px;margin:16px';
-  
-  var selected = null;
-  var html = '<h3 style="font-size:16px;font-weight:700;margin-bottom:6px">¿Cuál es tu web principal?</h3>';
-  html += '<p style="font-size:13px;color:#71717a;margin-bottom:16px">Selecciona el site de Google Search Console que quieres monitorizar.</p>';
-  html += '<div id="site-list-modal" style="display:flex;flex-direction:column;gap:8px;max-height:260px;overflow-y:auto;margin-bottom:16px">';
-  sites.forEach(function(site) {
-    html += '<div class="site-option" data-url="' + site + '" onclick="selectSiteOption(this)" style="padding:10px 14px;background:#09090b;border:1px solid #1f1f23;border-radius:8px;cursor:pointer;font-size:13px;color:#71717a;word-break:break-all;transition:all .15s">' + site + '</div>';
-  });
-  html += '</div>';
-  html += '<button id="confirm-site-btn" onclick="confirmSiteModal()" style="width:100%;padding:11px;background:#22d3ee;color:#000;font-weight:700;font-size:14px;border:none;border-radius:8px;cursor:pointer;font-family:Inter,sans-serif" disabled>Confirmar →</button>';
-  
-  modal.innerHTML = html;
-  overlay.appendChild(modal);
-  document.body.appendChild(overlay);
-  
-  window._siteOverlay = overlay;
-  window._siteUserId = userId;
+// ── NOTIFICACIONES ────────────────────────────────────────
+async function saveNotifications() {
+  var weekly = document.getElementById('notif-weekly').checked;
+  var alerts = document.getElementById('notif-alerts').checked;
+  await sb.from('clients').update({ notifications: { weekly, alerts } }).eq('id', _userId);
 }
 
-function selectSiteOption(el) {
-  document.querySelectorAll('.site-option').forEach(function(o) {
-    o.style.borderColor = '#1f1f23';
-    o.style.color = '#71717a';
-    o.style.background = '#09090b';
-  });
-  el.style.borderColor = '#22d3ee';
-  el.style.color = '#22d3ee';
-  el.style.background = 'rgba(34,211,238,.06)';
-  window._selectedSiteUrl = el.dataset.url;
-  document.getElementById('confirm-site-btn').disabled = false;
+// ── RESET PROYECTO ────────────────────────────────────────
+function openResetModal() { document.getElementById('modal-reset').classList.add('active'); }
+function closeResetModal() {
+  document.getElementById('modal-reset').classList.remove('active');
+  document.getElementById('reset-confirm-input').value = '';
 }
 
-async function confirmSiteModal() {
-  if (!window._selectedSiteUrl) return;
-  await sb.from('projects').update({ gsc_site_url: window._selectedSiteUrl }).eq('client_id', window._siteUserId);
-  document.getElementById('profile-domain').textContent = window._selectedSiteUrl;
-  if (window._siteOverlay) window._siteOverlay.remove();
+async function confirmReset() {
+  var input = document.getElementById('reset-confirm-input').value.trim();
+  if (input !== 'CONFIRMAR') {
+    alert('Escribe "CONFIRMAR" para continuar.');
+    return;
+  }
+  // Borrar snapshots y proyecto
+  if (_projectId) {
+    await sb.from('weekly_snapshots').delete().eq('project_id', _projectId);
+    await sb.from('projects').delete().eq('id', _projectId);
+  }
+  closeResetModal();
+  // Redirigir al intake
+  window.location.href = '/';
+}
+
+// ── HELPERS ───────────────────────────────────────────────
+function showMsg(id, text, type) {
+  var el = document.getElementById(id);
+  if (!el) return;
+  el.textContent = text;
+  el.className = 'msg ' + type;
 }
 
 async function logout() {
