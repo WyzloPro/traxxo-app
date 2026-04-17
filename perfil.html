@@ -535,7 +535,7 @@
     } else {
       setConnectionState('gsc', 'Pendiente', 'Herramientas autorizadas. Falta elegir propiedad.', false);
     }
-    setConnectionState('ads', 'Pendiente', email ? 'Herramientas autorizadas. Falta elegir cuenta de Ads.' : 'Falta elegir cuenta de Ads.', false);
+    setConnectionState('ads', 'Pendiente', 'Falta configurar el developer token de Google Ads para poder elegir una cuenta.', false);
     if (ga4Config?.measurementId || ga4Config?.propertyId) {
       const ga4Label = ga4Config.measurementId
         ? `${ga4Config.measurementId}${ga4Config.displayName ? ' · ' + ga4Config.displayName : ''}`
@@ -781,7 +781,7 @@
   }
 
   function showAdsPending() {
-    showMsg('google-msg', 'El selector de cuentas de Google Ads es el siguiente paso. Ya he dejado la pantalla preparada para conectarlo.', 'success');
+    showMsg('google-msg', 'Google Ads aún no se puede vincular desde aquí porque falta configurar el developer token de la Google Ads API.', 'error');
   }
 
   async function loadGSCSites() {
