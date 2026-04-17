@@ -335,16 +335,16 @@
   }
 
   // ==================== GOOGLE OAUTH - VERSIÓN SIMPLE (como pediste) ====================
-  function connectGoogle() {
-    sb.auth.signInWithOAuth({
-      provider: 'google',
-      options: {
-        scopes: 'email profile https://www.googleapis.com/auth/webmasters.readonly https://www.googleapis.com/auth/adwords https://www.googleapis.com/auth/analytics.readonly',
-        redirectTo: 'https://app.traxxo.ai/perfil.html',
-        queryParams: { access_type: 'offline', prompt: 'consent select_account' }
-      }
-    });
-  }
+function connectGoogle() {
+  sb.auth.signInWithOAuth({
+    provider: 'google',
+    options: {
+      scopes: 'email profile https://www.googleapis.com/auth/webmasters.readonly https://www.googleapis.com/auth/adwords https://www.googleapis.com/auth/analytics.readonly',
+      redirectTo: 'https://app.traxxo.ai',
+      queryParams: { access_type: 'offline', prompt: 'consent select_account' }
+    }
+  });
+}
 
   // ==================== ONBOARDING (simplificado) ====================
   function submitIntake() {
