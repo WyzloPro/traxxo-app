@@ -6,7 +6,11 @@
   <link rel="apple-touch-icon" href="/favicon.svg" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Traxxo — Login</title>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght:300;400;500;600;700&display=swap" rel="stylesheet" />
+  
+  <!-- Supabase Client CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     :root {
@@ -14,14 +18,32 @@
       --text: #fafafa; --muted: #71717a; --accent: #22d3ee;
       --font: 'Inter', system-ui, sans-serif;
     }
-    body { background: var(--bg); color: var(--text); font-family: var(--font); min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 24px; -webkit-font-smoothing: antialiased; }
+    body { 
+      background: var(--bg); 
+      color: var(--text); 
+      font-family: var(--font); 
+      min-height: 100vh; 
+      display: flex; 
+      align-items: center; 
+      justify-content: center; 
+      padding: 24px; 
+      -webkit-font-smoothing: antialiased; 
+    }
     .card {
-      background: var(--surface); border: 1px solid var(--border);
-      border-radius: 16px; padding: 40px; width: 100%; max-width: 400px;
+      background: var(--surface); 
+      border: 1px solid var(--border);
+      border-radius: 16px; 
+      padding: 40px; 
+      width: 100%; 
+      max-width: 400px;
     }
     .logo {
-      display: flex; align-items: center; gap: 10px;
-      font-size: 18px; font-weight: 700; margin-bottom: 32px;
+      display: flex; 
+      align-items: center; 
+      gap: 10px;
+      font-size: 18px; 
+      font-weight: 700; 
+      margin-bottom: 32px;
     }
     .logo svg { flex-shrink: 0; }
     h1 { font-size: 22px; font-weight: 700; margin-bottom: 6px; }
@@ -46,10 +68,14 @@
     }
     .btn:hover { opacity: .85; }
     .btn:disabled { opacity: .5; cursor: not-allowed; }
-    .msg { font-size: 13px; margin-top: 16px; padding: 10px 14px; border-radius: 8px; display: none; }
+    .msg { 
+      font-size: 13px; margin-top: 16px; padding: 10px 14px; 
+      border-radius: 8px; display: none; 
+    }
     .msg.success { background: rgba(34,211,238,.08); color: var(--accent); border: 1px solid rgba(34,211,238,.2); display: block; }
     .msg.error { background: rgba(239,68,68,.08); color: #f87171; border: 1px solid rgba(239,68,68,.2); display: block; }
-    /* Mantengo tus estilos de dashboard y onboarding */
+
+    /* Estilos del dashboard y onboarding (los mantengo como tenías) */
     #dashboard { display: none; }
     .dash-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 32px; }
     .logout-btn { padding: 8px 16px; border-radius: 8px; border: 1px solid var(--border); background: none; color: var(--muted); font-size: 13px; font-family: var(--font); cursor: pointer; }
@@ -74,10 +100,16 @@
       <button class="tab-btn" onclick="switchTab('register')">Registro</button>
     </div>
 
-    <!-- ==================== FORMULARIO LOGIN (MODIFICADO PARA FLASK) ==================== -->
+    <!-- LOGIN FORM -->
     <div id="login-form">
-      <button class="btn btn-google" onclick="connectGoogle('login')" style="margin-bottom:16px">
-        <!-- Tu SVG de Google aquí -->
+      <!-- Botón Google corregido y funcional -->
+      <button 
+        class="btn" 
+        onclick="connectGoogle()" 
+        style="margin-bottom:16px; background:#fff; color:#111; border:1px solid #dadce0; display:flex; align-items:center; justify-content:center; gap:10px; font-weight:500;">
+        <img src="https://www.google.com/images/branding/googlelogo/1x/googlelogo_color_272x92dp.png" 
+             alt="Google" 
+             style="height:20px; vertical-align:middle;">
         Continuar con Google
       </button>
 
@@ -90,23 +122,19 @@
       <form method="POST" action="/login">
         <label>Email</label>
         <input type="email" name="email" id="login-email" placeholder="tu@empresa.com" required />
-
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
           <label style="margin:0">Contraseña</label>
           <a href="#" onclick="showReset();return false;" style="font-size:11px;color:var(--muted);text-decoration:none">¿Olvidaste tu contraseña?</a>
         </div>
         <input type="password" name="password" id="login-password" placeholder="••••••••" required />
-
-        <!-- Campo oculto para redirección segura -->
         <input type="hidden" name="next" value="{{ request.args.get('next', '') }}">
-
         <button type="submit" class="btn">Entrar</button>
       </form>
 
       <div class="msg" id="login-msg"></div>
     </div>
 
-    <!-- Reset Password (mantengo igual) -->
+    <!-- Reset Password -->
     <div id="reset-form" style="display:none">
       <p style="font-size:13px;color:var(--muted);margin-bottom:20px">Introduce tu email y te enviamos un enlace para restablecer tu contraseña.</p>
       <label>Email</label>
@@ -118,28 +146,80 @@
       <div class="msg" id="reset-msg"></div>
     </div>
 
-    <!-- Register (mantengo igual, solo el login fue modificado) -->
+    <!-- Register Form (mantengo tu estructura, complétalo si hace falta) -->
     <div id="register-form" style="display:none">
-      <!-- Aquí pega todo tu formulario de registro original -->
-      <!-- ... (campos de nombre, empresa, email, contraseñas, etc.) ... -->
+      <!-- Aquí pega tu formulario de registro original -->
       <button class="btn" onclick="register()">Crear cuenta</button>
       <div class="msg" id="register-msg"></div>
     </div>
   </div>
 </div>
 
-<!-- El resto de tu HTML (modal, dashboard, onboarding, etc.) se mantiene igual -->
-<!-- ... pega aquí todo lo que tenías de #modal-site-selector, #dashboard, etc. ... -->
-
 <script>
-  // Tus funciones de tabs, showMsg, showReset, hideReset, etc. se mantienen
-  function switchTab(tab) {
-    document.querySelectorAll('.tab-btn').forEach((b, i) => b.classList.toggle('active', (i === 0 && tab === 'login') || (i === 1 && tab === 'register')));
-    document.getElementById('login-form').style.display = tab === 'login' ? '' : 'none';
-    document.getElementById('register-form').style.display = tab === 'register' ? '' : 'none';
+// ==================== FUNCIONES BÁSICAS ====================
+function switchTab(tab) {
+  document.querySelectorAll('.tab-btn').forEach((b, i) => 
+    b.classList.toggle('active', (i === 0 && tab === 'login') || (i === 1 && tab === 'register'))
+  );
+  document.getElementById('login-form').style.display = tab === 'login' ? '' : 'none';
+  document.getElementById('register-form').style.display = tab === 'register' ? '' : 'none';
+}
+
+function showMsg(id, text, type = 'success') {
+  const msg = document.getElementById(id);
+  if (msg) {
+    msg.textContent = text;
+    msg.className = `msg ${type}`;
+    msg.style.display = 'block';
+  }
+}
+
+// ==================== GOOGLE LOGIN CON SUPABASE ====================
+async function connectGoogle() {
+  const loginMsg = document.getElementById('login-msg');
+  if (loginMsg) {
+    loginMsg.textContent = 'Redirigiendo a Google...';
+    loginMsg.className = 'msg success';
+    loginMsg.style.display = 'block';
   }
 
-  // El resto de tu JavaScript (logout, dashboard, onboarding, Google, etc.) se mantiene igual
+  // ←←← CAMBIA ESTOS VALORES CON LOS TUYOS ←←←
+  const supabaseUrl = 'https://xxxxxxxxxxxx.supabase.co';     // Tu Supabase URL
+  const supabaseAnonKey = 'eyJhbGciOi...';                   // Tu anon key (pública)
+
+  const supabase = window.supabase.createClient(supabaseUrl, supabaseAnonKey);
+
+  const { error } = await supabase.auth.signInWithOAuth({
+    provider: 'google',
+    options: {
+      redirectTo: window.location.origin + '/index.html'   // Cambia si tu dashboard está en otra ruta
+    }
+  });
+
+  if (error) {
+    console.error('Google login error:', error);
+    if (loginMsg) {
+      loginMsg.textContent = 'Error al conectar con Google: ' + error.message;
+      loginMsg.className = 'msg error';
+    }
+  }
+}
+
+// ==================== OTRAS FUNCIONES (añade las que ya tenías) ====================
+function showReset() {
+  document.getElementById('login-form').style.display = 'none';
+  document.getElementById('reset-form').style.display = 'block';
+}
+
+function hideReset() {
+  document.getElementById('reset-form').style.display = 'none';
+  document.getElementById('login-form').style.display = 'block';
+}
+
+// Añade aquí tus funciones register(), sendReset(), logout, etc.
+
+console.log('Traxxo login page loaded - Google button ready');
 </script>
+
 </body>
 </html>
