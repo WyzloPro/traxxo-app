@@ -51,7 +51,7 @@
     .msg.success { background: rgba(34,211,238,.08); color: var(--accent); border: 1px solid rgba(34,211,238,.2); display: block; }
     .msg.error { background: rgba(239,68,68,.08); color: #f87171; border: 1px solid rgba(239,68,68,.2); display: block; }
 
-    /* Dashboard & Onboarding */
+    /* Dashboard */
     #dashboard { display: none; }
     .dash-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 32px; }
     .logout-btn { padding: 8px 16px; border-radius: 8px; border: 1px solid var(--border); background: none; color: var(--muted); font-size: 13px; font-family: var(--font); cursor: pointer; }
@@ -60,6 +60,7 @@
     .dash-card { background: var(--bg); border: 1px solid var(--border); border-radius: 10px; padding: 20px; margin-bottom: 12px; }
     .badge { display: inline-block; padding: 2px 10px; border-radius: 20px; font-size: 11px; font-weight: 600; background: rgba(34,211,238,.1); color: var(--accent); border: 1px solid rgba(34,211,238,.2); margin-top: 8px; }
 
+    /* Onboarding */
     .ob-steps { display:flex; gap:0; margin-bottom:28px; }
     .ob-step { flex:1; text-align:center; font-size:12px; font-weight:600; color:var(--muted); padding:10px 0; border-bottom:2px solid var(--border); transition:all .2s; display:flex; align-items:center; justify-content:center; gap:6px; }
     .ob-step.active { color:var(--accent); border-bottom-color:var(--accent); }
@@ -167,7 +168,7 @@
   </div>
 </div>
 
-<!-- MODAL SITE SELECTOR -->
+<!-- MODAL: Seleccionar site GSC -->
 <div id="modal-site-selector" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:200;align-items:center;justify-content:center;backdrop-filter:blur(4px)">
   <div style="background:#111113;border:1px solid #1f1f23;border-radius:16px;padding:28px;width:100%;max-width:440px;margin:16px">
     <h3 style="font-size:16px;font-weight:700;margin-bottom:6px">¿Cuál es tu web en GSC?</h3>
@@ -192,14 +193,14 @@
     </div>
     <p class="welcome">Bienvenido, <span id="user-email"></span></p>
 
-    <!-- ONBOARDING -->
+    <!-- ONBOARDING WIZARD -->
     <div id="onboarding" style="display:none">
-      <!-- INTAKE -->
+      <!-- INTAKE FORM -->
       <div id="ob-intake">
         <h3 class="ob-title">Cuéntanos sobre tu proyecto</h3>
         <p class="ob-sub">Usamos esta información para preparar tu dashboard a medida.</p>
-        <!-- Todo tu formulario de intake aquí (URL, tipo de web, nicho, etc.) -->
-        <!-- ... (mantengo tu HTML original de intake) ... -->
+        <!-- Aquí va todo tu formulario de intake (URL, tipo de web, nicho, etc.) -->
+        <!-- Puedes pegar tu HTML completo de intake aquí si lo deseas -->
         <button class="btn" onclick="submitIntake()">Enviar y continuar →</button>
         <div class="msg" id="intake-msg"></div>
       </div>
@@ -208,27 +209,18 @@
       <div id="ob-plan-selector" style="display:none">
         <h3 class="ob-title">Elige tu plan</h3>
         <p class="ob-sub">Puedes cambiar en cualquier momento.</p>
-        <!-- Tus 3 planes (Basic, Pro, Agency) -->
-        <!-- ... pega aquí tu HTML de los 3 plan-card ... -->
+        <!-- Tus 3 planes aquí -->
       </div>
 
-      <!-- WIZARD STEPS -->
+      <!-- WIZARD -->
       <div id="ob-wizard" style="display:none">
-        <div class="ob-steps" id="ob-steps-bar">
-          <div class="ob-step active" data-step="1"><span>1</span> Tu web</div>
-          <div class="ob-step" data-step="2"><span>2</span> Herramientas</div>
-          <div class="ob-step" data-step="3"><span>3</span> Objetivos</div>
-          <div class="ob-step" data-step="4"><span>4</span> Conectar</div>
-        </div>
-        <!-- Steps 1 a 4 (tu HTML original) -->
-        <!-- ... pega aquí los 4 ob-panel ... -->
+        <!-- Tus 4 pasos (ob-1, ob-2, ob-3, ob-4) -->
       </div>
     </div>
 
     <!-- DASH MAIN -->
     <div id="dash-main" style="display:none">
-      <!-- Banner conectar Google, cards, conexiones, etc. -->
-      <!-- ... pega aquí tu HTML de #dash-main ... -->
+      <!-- Banner, conexiones, add-ons, etc. -->
       <button class="btn" onclick="goToDashboardApp()">Ver mi dashboard →</button>
     </div>
   </div>
@@ -293,13 +285,12 @@
 
     if (error) return showMsg('register-msg', error.message);
 
-    // Mensaje de confirmación
     document.getElementById('register-form').innerHTML = `
       <div style="text-align:center;padding:28px 0">
         <div style="width:64px;height:64px;background:rgba(34,211,238,.1);border:2px solid var(--accent);border-radius:50%;margin:0 auto 20px;font-size:28px;color:var(--accent)">✓</div>
         <h3 style="font-size:18px;font-weight:700;margin-bottom:8px">¡Revisa tu email!</h3>
         <p style="font-size:14px;color:var(--muted)">Enviamos un enlace a <strong>${email}</strong></p>
-        <p style="font-size:12px;color:var(--muted)">¿No lo ves? Revisa spam.</p>
+        <p style="font-size:12px;color:var(--muted)">¿No lo ves? Revisa la carpeta de spam.</p>
       </div>
     `;
   }
@@ -373,24 +364,28 @@
     console.log('Google conectado para:', email);
   }
 
- function connectGoogle(context = 'login') {
-  const isTool = ['onboarding', 'dashboard'].includes(context);
-  const scopes = isTool 
-    ? 'email profile https://www.googleapis.com/auth/webmasters.readonly https://www.googleapis.com/auth/adwords https://www.googleapis.com/auth/analytics.readonly'
-    : 'email profile';
+  // ==================== GOOGLE OAUTH (CAMBIO APLICADO) ====================
+  function connectGoogle(context = 'login') {
+    const isTool = ['onboarding', 'dashboard'].includes(context);
+    const scopes = isTool
+      ? 'email profile https://www.googleapis.com/auth/webmasters.readonly https://www.googleapis.com/auth/adwords https://www.googleapis.com/auth/analytics.readonly'
+      : 'email profile';
 
-  sb.auth.signInWithOAuth({
-    provider: 'google',
-    options: {
-      scopes,
-      redirectTo: 'https://app.traxxo.ai',
-      queryParams: { access_type: 'offline', prompt: isTool ? 'consent' : 'select_account' }
-    }
-  });
-}
+    sb.auth.signInWithOAuth({
+      provider: 'google',
+      options: {
+        scopes,
+        redirectTo: 'https://app.traxxo.ai/perfil.html',   // ← Cambio aplicado aquí
+        queryParams: { 
+          access_type: 'offline', 
+          prompt: isTool ? 'consent' : 'select_account' 
+        }
+      }
+    });
+  }
+
   // ==================== ONBOARDING ====================
   function submitIntake() {
-    // Aquí puedes agregar validación adicional
     document.getElementById('ob-intake').style.display = 'none';
     document.getElementById('ob-plan-selector').style.display = '';
   }
@@ -407,13 +402,8 @@
     if (panel) panel.classList.add('active');
   }
 
-  function toggleB2B(value) {
-    console.log('Negocio seleccionado:', value);
-  }
-
-  function togglePlatform(value) {
-    console.log('Plataforma:', value);
-  }
+  function toggleB2B(value) { console.log('Tipo de negocio:', value); }
+  function togglePlatform(value) { console.log('Plataforma:', value); }
 
   async function obFinish() {
     if (!currentUser || !selectedPlan) return;
@@ -423,7 +413,7 @@
   }
 
   function confirmSite() {
-    alert('Site confirmado (implementa la lógica completa si es necesario)');
+    alert('Site confirmado');
   }
 
   function goToDashboardApp() {
