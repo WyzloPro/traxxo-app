@@ -302,6 +302,32 @@
   let _gscSiteUrl = null;
   let _signedInWithGoogle = false;
 
+  async function syncGoogleTokensFromSession(session) {
+    if (!_userId || !session?.provider_token) return false;
+
+    const tokenExpiresAt = new Date(Date.now() + 55 * 60 * 1000).toISOString();
+    const payload = {
+      google_access_token: session.provider_token,
+      google_token_expires_at: tokenExpiresAt
+    };
+
+    if (session.provider_refresh_token) {
+      payload.google_refresh_token = session.provider_refresh_token;
+    }
+
+    const { error } = await sb
+      .from('clients')
+      .update(payload)
+      .eq('id', _userId);
+
+    if (error) {
+      console.error('No se pudieron guardar los tokens de Google:', error);
+      return false;
+    }
+
+    return true;
+  }
+
   // ==================== INIT ====================
   sb.auth.getSession().then(async ({ data: { session } }) => {
     if (!session) {
@@ -311,6 +337,7 @@
 
     _userId = session.user.id;
     _signedInWithGoogle = session.user.app_metadata?.provider === 'google';
+    const syncedGoogleTools = await syncGoogleTokensFromSession(session);
 
     // Avatar
     const avatarEl = document.getElementById('avatar-wrap');
@@ -350,7 +377,7 @@
     }
 
     // Google
-    if (client?.google_access_token) {
+    if (client?.google_access_token || syncedGoogleTools) {
       _googleConnected = true;
       _gscSiteUrl = project?.gsc_site_url || null;
       markConnected({
