@@ -17,28 +17,57 @@
     }
     body { background: var(--bg); color: var(--text); font-family: var(--font); min-height: 100vh; -webkit-font-smoothing: antialiased; }
 
-    /* HEADER */
-    .header { display:flex; align-items:center; justify-content:space-between; padding:12px 24px; border-bottom:1px solid var(--border); background:var(--surface); position:sticky; top:0; z-index:100; }
-    .logo { display:flex; align-items:center; gap:8px; font-size:16px; font-weight:700; text-decoration:none; color:var(--text); }
-    .btn { padding:8px 16px; border-radius:8px; font-size:13px; font-weight:600; font-family:var(--font); cursor:pointer; border:none; transition:all .15s; }
-    .btn-ghost { background:none; border:1px solid var(--border); color:var(--muted); text-decoration:none; display:inline-flex; align-items:center; }
+    /* HEADER - SOLO LOGO (como pediste) */
+    .header { 
+      display:flex; 
+      align-items:center; 
+      justify-content:space-between; 
+      padding:12px 24px; 
+      border-bottom:1px solid var(--border); 
+      background:var(--surface); 
+      position:sticky; 
+      top:0; 
+      z-index:100; 
+    }
+    .logo { 
+      display:flex; 
+      align-items:center; 
+      gap:8px; 
+      font-size:16px; 
+      font-weight:700; 
+      text-decoration:none; 
+      color:var(--text); 
+    }
+
+    .btn { 
+      padding:8px 16px; 
+      border-radius:8px; 
+      font-size:13px; 
+      font-weight:600; 
+      font-family:var(--font); 
+      cursor:pointer; 
+      border:none; 
+      transition:all .15s; 
+    }
+    .btn-ghost { 
+      background:none; 
+      border:1px solid var(--border); 
+      color:var(--muted); 
+      text-decoration:none; 
+      display:inline-flex; 
+      align-items:center; 
+    }
     .btn-ghost:hover { color:var(--text); border-color:var(--muted); }
     .btn-accent { background:var(--accent); color:#000; }
     .btn-accent:hover { opacity:.85; }
-    .btn-accent:disabled { opacity:.4; cursor:not-allowed; }
     .btn-danger { background:rgba(239,68,68,.1); color:var(--red); border:1px solid rgba(239,68,68,.2); }
     .btn-danger:hover { background:rgba(239,68,68,.2); }
     .btn-warning { background:rgba(245,158,11,.1); color:var(--yellow); border:1px solid rgba(245,158,11,.2); }
     .btn-warning:hover { background:rgba(245,158,11,.2); }
 
-    /* LAYOUT */
     .container { max-width:640px; margin:0 auto; padding:32px 24px; }
-
-    /* SECTIONS */
     .section { background:var(--surface); border:1px solid var(--border); border-radius:14px; padding:24px; margin-bottom:16px; }
     .section-title { font-size:12px; font-weight:700; color:var(--muted); text-transform:uppercase; letter-spacing:.06em; margin-bottom:16px; }
-
-    /* PERFIL HEADER */
     .profile-header { display:flex; align-items:center; gap:16px; margin-bottom:20px; }
     .avatar { width:60px; height:60px; border-radius:50%; background:rgba(34,211,238,.1); border:2px solid rgba(34,211,238,.2); display:flex; align-items:center; justify-content:center; font-size:22px; font-weight:700; color:var(--accent); flex-shrink:0; overflow:hidden; }
     .avatar img { width:100%; height:100%; object-fit:cover; }
@@ -46,16 +75,10 @@
     .profile-name { font-size:18px; font-weight:700; }
     .profile-email { font-size:13px; color:var(--muted); margin-top:2px; }
     .plan-badge { display:inline-block; font-size:11px; font-weight:700; padding:3px 10px; border-radius:20px; background:rgba(34,211,238,.1); color:var(--accent); border:1px solid rgba(34,211,238,.2); margin-top:6px; }
-
-    /* FORM */
     .field { margin-bottom:14px; }
     .field label { font-size:12px; font-weight:600; color:var(--muted); text-transform:uppercase; letter-spacing:.05em; display:block; margin-bottom:6px; }
     .field input { width:100%; background:var(--bg); border:1px solid var(--border); border-radius:8px; padding:10px 14px; color:var(--text); font-size:13px; font-family:var(--font); outline:none; transition:border-color .15s; }
     .field input:focus { border-color:rgba(34,211,238,.4); }
-    .field input::placeholder { color:var(--muted); }
-    .field input:disabled { opacity:.5; cursor:not-allowed; }
-
-    /* CONEXIONES */
     .conn-row { display:flex; align-items:center; gap:14px; padding:14px 0; border-bottom:1px solid rgba(255,255,255,.04); }
     .conn-row:last-child { border-bottom:none; }
     .conn-icon { width:40px; height:40px; border-radius:10px; display:flex; align-items:center; justify-content:center; font-size:11px; font-weight:700; flex-shrink:0; border:1px solid; }
@@ -65,12 +88,6 @@
     .conn-badge { font-size:11px; font-weight:700; padding:3px 10px; border-radius:20px; white-space:nowrap; }
     .conn-badge.connected { background:rgba(16,185,129,.1); color:var(--green); border:1px solid rgba(16,185,129,.2); }
     .conn-badge.disconnected { background:var(--bg); color:var(--muted); border:1px solid var(--border); }
-
-    /* SEMRUSH */
-    .semrush-row { display:flex; gap:8px; }
-    .semrush-row input { flex:1; }
-
-    /* TOGGLE */
     .toggle-row { display:flex; align-items:center; justify-content:space-between; padding:12px 0; border-bottom:1px solid rgba(255,255,255,.04); }
     .toggle-row:last-child { border-bottom:none; }
     .toggle-label { font-size:13px; font-weight:600; }
@@ -81,31 +98,14 @@
     .toggle-slider:before { content:''; position:absolute; width:18px; height:18px; left:3px; top:3px; background:#fff; border-radius:50%; transition:.2s; }
     .toggle input:checked + .toggle-slider { background:var(--accent); }
     .toggle input:checked + .toggle-slider:before { transform:translateX(20px); }
-
-    /* MSGS */
     .msg { font-size:12px; margin-top:8px; padding:8px 12px; border-radius:8px; display:none; }
     .msg.success { background:rgba(16,185,129,.1); color:var(--green); display:block; }
     .msg.error { background:rgba(239,68,68,.1); color:var(--red); display:block; }
-
-    /* DANGER */
     .danger-section { border-color:rgba(239,68,68,.2); }
     .danger-section .section-title { color:var(--red); }
-    .danger-row { display:flex; justify-content:space-between; align-items:center; padding:12px 0; border-bottom:1px solid rgba(255,255,255,.04); }
-    .danger-row:last-child { border-bottom:none; }
-    .danger-info { flex:1; padding-right:16px; }
-    .danger-info-title { font-size:13px; font-weight:600; }
-    .danger-info-sub { font-size:12px; color:var(--muted); margin-top:2px; }
-
-    /* MODAL */
     .modal-overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,.7); z-index:200; align-items:center; justify-content:center; backdrop-filter:blur(4px); }
     .modal-overlay.active { display:flex; }
     .modal { background:var(--surface); border:1px solid var(--border); border-radius:16px; padding:28px; width:100%; max-width:400px; margin:16px; }
-    .modal-title { font-size:16px; font-weight:700; margin-bottom:8px; }
-    .modal-body { font-size:13px; color:var(--muted); line-height:1.6; margin-bottom:20px; }
-    .modal-warning { background:rgba(239,68,68,.08); border:1px solid rgba(239,68,68,.2); border-radius:8px; padding:12px; font-size:12px; color:var(--red); margin-bottom:16px; }
-    .modal-actions { display:flex; gap:8px; justify-content:flex-end; }
-
-    /* SITE SELECTOR */
     .site-option { padding:10px 14px; background:var(--bg); border:1px solid var(--border); border-radius:8px; cursor:pointer; font-size:13px; color:var(--muted); word-break:break-all; transition:all .15s; margin-bottom:8px; }
     .site-option:hover { border-color:var(--accent); color:var(--text); }
     .site-option.selected { border-color:var(--accent); color:var(--accent); background:rgba(34,211,238,.06); }
@@ -116,17 +116,15 @@
 
 <div class="header">
   <a href="/" class="logo">
-    <svg width="22" height="22" viewBox="0 0 24 24" fill="none"><rect width="24" height="24" rx="7" fill="#22d3ee" fill-opacity=".12"/><path d="M5 12h4l2-5 2 10 2-5h2" stroke="#22d3ee" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
+      <rect width="24" height="24" rx="7" fill="#22d3ee" fill-opacity=".12"/>
+      <path d="M5 12h4l2-5 2 10 2-5h2" stroke="#22d3ee" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+    </svg>
     traxxo
   </a>
-  <div style="display:flex;gap:8px">
-    <a href="/dashboard.html" class="btn btn-ghost">Dashboard</a>
-    <a href="/" class="btn btn-ghost">← Mi cuenta</a>
-  </div>
 </div>
 
 <div class="container">
-
   <!-- PERFIL -->
   <div class="section">
     <div class="profile-header">
@@ -148,7 +146,7 @@
   <div class="section">
     <div class="section-title">Conexiones de Google</div>
     <p style="font-size:13px;color:var(--muted);margin-bottom:16px">Conecta tu cuenta de Google para que Traxxo lea tus datos de GSC, Ads y Analytics.</p>
-
+    
     <div class="conn-row">
       <div class="conn-icon" style="background:#4285f420;border-color:#4285f440;color:#4285f4">GSC</div>
       <div class="conn-info">
@@ -181,11 +179,12 @@
     <p style="font-size:11px;color:var(--muted);text-align:center;margin-top:8px">Solo pedimos acceso de lectura. Nunca modificamos tus datos.</p>
     <div class="msg" id="google-msg"></div>
   </div>
-    <!-- DEBUG: RECONECTAR GOOGLE SEARCH CONSOLE -->
+
+  <!-- DEBUG RECONECTAR GSC -->
   <div class="section" style="background:rgba(139,92,246,.06);border-color:rgba(139,92,246,.2)">
     <div class="section-title" style="color:#8b5cf6">[DEBUG] Reconectar GSC</div>
-    <p style="font-size:13px;color:var(--muted);margin-bottom:14px">Botón temporal para forzar reconexión OAuth y obtener refresh_token.</p>
-    <button class="btn btn-accent" id="reconnect-gsc-debug" onclick="reconnectGSCDebug()" style="background:#8b5cf6">Reconectar GSC (debug)</button>
+    <p style="font-size:13px;color:var(--muted);margin-bottom:14px">Botón temporal para forzar reconexión OAuth.</p>
+    <button class="btn btn-accent" onclick="reconnectGSCDebug()" style="background:#8b5cf6">Reconectar GSC (debug)</button>
     <div class="msg" id="reconnect-gsc-msg"></div>
   </div>
 
@@ -196,21 +195,18 @@
       <label>Dominio actual</label>
       <input type="text" id="current-domain" disabled />
     </div>
-    <p style="font-size:12px;color:var(--muted);margin-bottom:14px">Para cambiar de web es necesario resetear el proyecto — perderás el historial de análisis.</p>
-    <div style="display:flex;gap:8px">
-      <button class="btn btn-warning" onclick="openResetModal()">Cambiar proyecto</button>
-      <button class="btn btn-ghost" style="opacity:.5;cursor:not-allowed" disabled>Añadir web (Plan Pro)</button>
-    </div>
+    <p style="font-size:12px;color:var(--muted);margin-bottom:14px">Para cambiar de web es necesario resetear el proyecto.</p>
+    <button class="btn btn-warning" onclick="openResetModal()">Cambiar proyecto</button>
   </div>
 
   <!-- SEMRUSH -->
   <div class="section">
     <div class="section-title">Semrush</div>
-    <p style="font-size:13px;color:var(--muted);margin-bottom:4px">API key para ver posiciones orgánicas por tema.</p>
+    <p style="font-size:13px;color:var(--muted);margin-bottom:4px">API key para ver posiciones orgánicas.</p>
     <a href="https://www.semrush.com/user/profile/api/" target="_blank" style="font-size:12px;color:var(--accent);display:block;margin-bottom:12px">¿Dónde encuentro mi API key? →</a>
-    <div class="semrush-row">
-      <div class="field" style="flex:1;margin:0"><input type="password" id="semrush-key" placeholder="Tu API key de Semrush..." /></div>
-      <button class="btn btn-accent" onclick="saveSemrush()" style="margin-top:0;height:40px">Guardar</button>
+    <div style="display:flex;gap:8px">
+      <input type="password" id="semrush-key" placeholder="Tu API key de Semrush..." style="flex:1" />
+      <button class="btn btn-accent" onclick="saveSemrush()">Guardar</button>
     </div>
     <div class="msg" id="semrush-msg"></div>
   </div>
@@ -223,14 +219,20 @@
         <div class="toggle-label">Resumen semanal</div>
         <div class="toggle-sub">Email cada lunes con el análisis actualizado</div>
       </div>
-      <label class="toggle"><input type="checkbox" id="notif-weekly" checked onchange="saveNotifications()"><span class="toggle-slider"></span></label>
+      <label class="toggle">
+        <input type="checkbox" id="notif-weekly" checked onchange="saveNotifications()">
+        <span class="toggle-slider"></span>
+      </label>
     </div>
     <div class="toggle-row">
       <div>
         <div class="toggle-label">Alertas de caídas</div>
-        <div class="toggle-sub">Aviso si detectamos una caída importante de tráfico</div>
+        <div class="toggle-sub">Aviso si detectamos una caída importante</div>
       </div>
-      <label class="toggle"><input type="checkbox" id="notif-alerts" checked onchange="saveNotifications()"><span class="toggle-slider"></span></label>
+      <label class="toggle">
+        <input type="checkbox" id="notif-alerts" checked onchange="saveNotifications()">
+        <span class="toggle-slider"></span>
+      </label>
     </div>
   </div>
 
@@ -245,30 +247,31 @@
       <button class="btn btn-danger" onclick="logout()">Cerrar sesión</button>
     </div>
   </div>
-
 </div>
 
-<!-- MODAL: Seleccionar site GSC -->
+<!-- MODALES -->
 <div class="modal-overlay" id="modal-sites">
   <div class="modal">
     <div class="modal-title">¿Cuál es tu web en GSC?</div>
     <p class="modal-body">Tu cuenta tiene acceso a varios sites. Selecciona el que quieres monitorizar.</p>
     <div class="site-list" id="site-list"></div>
-    <div class="modal-actions">
+    <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:16px">
       <button class="btn btn-ghost" onclick="closeSiteModal()">Cancelar</button>
       <button class="btn btn-accent" id="btn-confirm-site" onclick="confirmSite()" disabled>Confirmar →</button>
     </div>
   </div>
 </div>
 
-<!-- MODAL: Cambiar proyecto -->
 <div class="modal-overlay" id="modal-reset">
   <div class="modal">
     <div class="modal-title">¿Cambiar de proyecto?</div>
-    <p class="modal-body">Esto eliminará todos los datos de análisis del proyecto actual y empezarás desde cero con una nueva web.</p>
-    <div class="modal-warning">⚠️ Esta acción no se puede deshacer. Se borrarán todos los datos históricos.</div>
-    <div class="field"><label>Escribe "CONFIRMAR" para continuar</label><input type="text" id="reset-confirm-input" placeholder="CONFIRMAR" /></div>
-    <div class="modal-actions">
+    <p class="modal-body">Esto eliminará todos los datos del proyecto actual.</p>
+    <div class="modal-warning">⚠️ Esta acción no se puede deshacer.</div>
+    <div class="field">
+      <label>Escribe "CONFIRMAR" para continuar</label>
+      <input type="text" id="reset-confirm-input" placeholder="CONFIRMAR" />
+    </div>
+    <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:16px">
       <button class="btn btn-ghost" onclick="closeResetModal()">Cancelar</button>
       <button class="btn btn-danger" onclick="confirmReset()">Borrar y empezar de nuevo</button>
     </div>
@@ -276,290 +279,274 @@
 </div>
 
 <script>
-const SUPABASE_URL  = 'https://ghqttckqvjptxhihojey.supabase.co';
-const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdocXR0Y2txdmpwdHhoaWhvamV5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU2NDU1OTYsImV4cCI6MjA5MTIyMTU5Nn0.KlPDplMIIWQwx5oafvkfxbsm0dzPb0cbTJpCM83cqK4';
-const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
+  // ==================== CONFIG ====================
+  const SUPABASE_URL = 'https://ghqttckqvjptxhihojey.supabase.co';
+  const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdocXR0Y2txdmpwdHhoaWhvamV5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU2NDU1OTYsImV4cCI6MjA5MTIyMTU5Nn0.KlPDplMIIWQwx5oafvkfxbsm0dzPb0cbTJpCM83cqK4';
+  const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
 
-var _userId = null;
-var _projectId = null;
-var _selectedSite = null;
-var _currentToken = null;
+  let _userId = null;
+  let _projectId = null;
+  let _selectedSite = null;
+  let _currentToken = null;
 
-// ── INIT ──────────────────────────────────────────────────
-sb.auth.getSession().then(async function({ data: { session } }) {
-  if (!session) { window.location.href = '/'; return; }
-  _userId = session.user.id;
-  _currentToken = session.provider_token || null;
+  // ==================== INIT ====================
+  sb.auth.getSession().then(async ({ data: { session } }) => {
+    if (!session) { 
+      window.location.href = '/'; 
+      return; 
+    }
+    
+    _userId = session.user.id;
+    _currentToken = session.provider_token || null;
 
-  // Foto de Google
-  var avatar = session.user.user_metadata?.avatar_url;
-  var avatarEl = document.getElementById('avatar-wrap');
-  if (avatar) {
-    avatarEl.innerHTML = '<img src="' + avatar + '" alt="foto" />';
-  } else {
-    avatarEl.textContent = (session.user.email || '?')[0].toUpperCase();
-  }
+    // Avatar
+    const avatarEl = document.getElementById('avatar-wrap');
+    const avatar = session.user.user_metadata?.avatar_url;
+    if (avatar) {
+      avatarEl.innerHTML = `<img src="${avatar}" alt="foto" />`;
+    } else {
+      avatarEl.textContent = (session.user.email || '?')[0].toUpperCase();
+    }
 
-  // Email
-  document.getElementById('profile-email').textContent = session.user.email || '';
+    document.getElementById('profile-email').textContent = session.user.email || '';
 
-  // Cargar datos de la BD
-  var { data: client } = await sb.from('clients').select('*').eq('id', _userId).single();
-  var { data: project } = await sb.from('projects').select('*').eq('client_id', _userId).limit(1).maybeSingle();
-  if (project) { _projectId = project.id; }
+    // Cargar datos
+    const { data: client } = await sb.from('clients').select('*').eq('id', _userId).single();
+    const { data: project } = await sb.from('projects').select('*').eq('client_id', _userId).limit(1).maybeSingle();
 
-  // Rellenar campos
-  var name = client?.name || session.user.user_metadata?.full_name || '';
-  var company = client?.company || '';
-  document.getElementById('edit-name').value = name;
-  document.getElementById('edit-company').value = company;
-  document.getElementById('profile-display-name').textContent = name || session.user.email?.split('@')[0];
-  document.getElementById('current-domain').value = project?.domain || '—';
+    if (project) _projectId = project.id;
 
-  // Plan
-  var plan = client?.plan || 'early_access';
-  var planEl = document.getElementById('profile-plan');
-  planEl.textContent = { basic:'Basic', pro:'Pro', agency:'Agency' }[plan] || 'Early Access';
+    // Rellenar campos
+    const name = client?.name || session.user.user_metadata?.full_name || '';
+    const company = client?.company || '';
+    document.getElementById('edit-name').value = name;
+    document.getElementById('edit-company').value = company;
+    document.getElementById('profile-display-name').textContent = name || session.user.email?.split('@')[0];
+    document.getElementById('current-domain').value = project?.domain || '—';
 
-  // Notificaciones
-  var notifs = client?.notifications || {};
-  document.getElementById('notif-weekly').checked = notifs.weekly !== false;
-  document.getElementById('notif-alerts').checked = notifs.alerts !== false;
+    // Plan
+    const plan = client?.plan || 'early_access';
+    document.getElementById('profile-plan').textContent = { basic:'Basic', pro:'Pro', agency:'Agency' }[plan] || 'Early Access';
 
-  // Semrush
-  if (project?.semrush_api_key) {
-    document.getElementById('semrush-key').value = project.semrush_api_key;
-  }
+    // Notificaciones
+    const notifs = client?.notifications || {};
+    document.getElementById('notif-weekly').checked = notifs.weekly !== false;
+    document.getElementById('notif-alerts').checked = notifs.alerts !== false;
 
-  // Estado Google
-  if (client?.google_access_token) {
-    markConnected(session.user.email);
-  } else if (_currentToken) {
-    // Token en sesión — guardarlo
-    await saveGoogleToken(_currentToken, session);
-    markConnected(session.user.email);
-  }
-});
+    // Semrush
+    if (project?.semrush_api_key) {
+      document.getElementById('semrush-key').value = project.semrush_api_key;
+    }
 
-// OAuth callback — cuando vuelve de conectar Google
-sb.auth.onAuthStateChange(async function(event, session) {
-  if (event === 'SIGNED_IN' && session?.provider_token) {
-    _currentToken = session.provider_token;
-    await saveGoogleToken(session.provider_token, session);
-    markConnected(session.user.email);
-    // Comprobar sites GSC
-    await checkGSCSites(session.provider_token, session.user.id);
-  }
-});
-
-// ── GOOGLE ────────────────────────────────────────────────
-function connectGoogle() {
-  sb.auth.signInWithOAuth({
-    provider: 'google',
-    options: {
-      scopes: 'email profile https://www.googleapis.com/auth/webmasters.readonly https://www.googleapis.com/auth/adwords https://www.googleapis.com/auth/analytics.readonly',
-      redirectTo: 'https://app.traxxo.ai/perfil.html',
-      queryParams: { access_type: 'offline', prompt: 'consent select_account' }
+    // Google
+    if (client?.google_access_token) {
+      markConnected(session.user.email);
+    } else if (_currentToken) {
+      await saveGoogleToken(_currentToken, session);
+      markConnected(session.user.email);
     }
   });
-}
 
-async function disconnectGoogle() {
-  await sb.from('clients').update({
-    google_access_token: null,
-    google_refresh_token: null,
-    google_token_expires_at: null
-  }).eq('id', _userId);
-  markDisconnected();
-  showMsg('google-msg', 'Google desconectado correctamente.', 'success');
-}
-
-async function saveGoogleToken(token, session) {
-  await sb.from('clients').update({
-    google_access_token: token,
-    google_refresh_token: session.provider_refresh_token || null,
-    google_token_expires_at: session.expires_at ? new Date(session.expires_at * 1000).toISOString() : null
-  }).eq('id', session.user.id);
-}
-
-function markConnected(email) {
-  ['gsc','ads','ga4'].forEach(function(k) {
-    var b = document.getElementById(k + '-badge');
-    var d = document.getElementById(k + '-detail');
-    if (b) { b.textContent = 'Conectado'; b.className = 'conn-badge connected'; }
-    if (d && email) d.textContent = email;
+  // OAuth callback
+  sb.auth.onAuthStateChange(async (event, session) => {
+    if (event === 'SIGNED_IN' && session?.provider_token) {
+      _currentToken = session.provider_token;
+      await saveGoogleToken(session.provider_token, session);
+      markConnected(session.user.email);
+      await checkGSCSites(session.provider_token, session.user.id);
+    }
   });
-  var btnC = document.getElementById('btn-connect');
-  var btnD = document.getElementById('btn-disconnect');
-  if (btnC) btnC.textContent = 'Reconectar / Cambiar cuenta';
-  if (btnD) btnD.style.display = '';
-}
 
-function markDisconnected() {
-  ['gsc','ads','ga4'].forEach(function(k) {
-    var b = document.getElementById(k + '-badge');
-    var d = document.getElementById(k + '-detail');
-    if (b) { b.textContent = 'Sin conectar'; b.className = 'conn-badge disconnected'; }
-    if (d) d.textContent = k === 'gsc' ? 'Clics, impresiones y posiciones' : k === 'ads' ? 'Campañas, gasto y ROAS' : 'Sesiones, usuarios y conversiones';
-  });
-  var btnD = document.getElementById('btn-disconnect');
-  if (btnD) btnD.style.display = 'none';
-  var btnC = document.getElementById('btn-connect');
-  if (btnC) btnC.textContent = 'Conectar con Google';
-}
-
-async function checkGSCSites(token, userId) {
-  try {
-    var res = await fetch('https://www.googleapis.com/webmasters/v3/sites', {
-      headers: { Authorization: 'Bearer ' + token }
+  // ==================== GOOGLE (FUNCIÓN ACTUALIZADA) ====================
+  function connectGoogle() {
+    sb.auth.signInWithOAuth({
+      provider: 'google',
+      options: {
+        scopes: 'email profile https://www.googleapis.com/auth/webmasters.readonly https://www.googleapis.com/auth/adwords https://www.googleapis.com/auth/analytics.readonly',
+        redirectTo: 'https://app.traxxo.ai/perfil.html',
+        queryParams: { access_type: 'offline', prompt: 'consent select_account' }
+      }
     });
-    var data = await res.json();
-    var sites = (data.siteEntry || []).map(function(s) { return s.siteUrl; });
-    if (sites.length > 1) {
-      showSiteModal(sites, userId);
-    } else if (sites.length === 1) {
-      await sb.from('projects').update({ gsc_site_url: sites[0] }).eq('client_id', userId);
-      document.getElementById('current-domain').value = sites[0];
+  }
+
+  async function disconnectGoogle() {
+    await sb.from('clients').update({
+      google_access_token: null,
+      google_refresh_token: null,
+      google_token_expires_at: null
+    }).eq('id', _userId);
+    markDisconnected();
+    showMsg('google-msg', 'Google desconectado correctamente.', 'success');
+  }
+
+  async function saveGoogleToken(token, session) {
+    await sb.from('clients').update({
+      google_access_token: token,
+      google_refresh_token: session.provider_refresh_token || null,
+      google_token_expires_at: session.expires_at ? new Date(session.expires_at * 1000).toISOString() : null
+    }).eq('id', session.user.id);
+  }
+
+  function markConnected(email) {
+    ['gsc','ads','ga4'].forEach(k => {
+      const badge = document.getElementById(k + '-badge');
+      const detail = document.getElementById(k + '-detail');
+      if (badge) { badge.textContent = 'Conectado'; badge.className = 'conn-badge connected'; }
+      if (detail && email) detail.textContent = email;
+    });
+    document.getElementById('btn-connect').textContent = 'Reconectar / Cambiar cuenta';
+    document.getElementById('btn-disconnect').style.display = '';
+  }
+
+  function markDisconnected() {
+    ['gsc','ads','ga4'].forEach(k => {
+      const badge = document.getElementById(k + '-badge');
+      const detail = document.getElementById(k + '-detail');
+      if (badge) { badge.textContent = 'Sin conectar'; badge.className = 'conn-badge disconnected'; }
+      if (detail) detail.textContent = k === 'gsc' ? 'Clics, impresiones y posiciones' : k === 'ads' ? 'Campañas, gasto y ROAS' : 'Sesiones, usuarios y conversiones';
+    });
+    document.getElementById('btn-disconnect').style.display = 'none';
+    document.getElementById('btn-connect').textContent = 'Conectar con Google';
+  }
+
+  async function checkGSCSites(token, userId) {
+    try {
+      const res = await fetch('https://www.googleapis.com/webmasters/v3/sites', {
+        headers: { Authorization: 'Bearer ' + token }
+      });
+      const data = await res.json();
+      const sites = (data.siteEntry || []).map(s => s.siteUrl);
+
+      if (sites.length > 1) {
+        showSiteModal(sites, userId);
+      } else if (sites.length === 1) {
+        await sb.from('projects').update({ gsc_site_url: sites[0] }).eq('client_id', userId);
+        document.getElementById('current-domain').value = sites[0];
+      }
+    } catch(e) {
+      console.error(e);
     }
-  } catch(e) {}
-}
+  }
 
-// ── SITE SELECTOR ─────────────────────────────────────────
-function showSiteModal(sites, userId) {
-  var list = document.getElementById('site-list');
-  list.innerHTML = '';
-  sites.forEach(function(site) {
-    var el = document.createElement('div');
-    el.className = 'site-option';
-    el.textContent = site;
-    el.onclick = function() {
-      list.querySelectorAll('.site-option').forEach(function(o) { o.classList.remove('selected'); });
-      el.classList.add('selected');
-      _selectedSite = site;
-      document.getElementById('btn-confirm-site').disabled = false;
-    };
-    list.appendChild(el);
-  });
-  document.getElementById('modal-sites').classList.add('active');
-}
+  // ==================== SITE SELECTOR ====================
+  function showSiteModal(sites, userId) {
+    const list = document.getElementById('site-list');
+    list.innerHTML = '';
+    sites.forEach(site => {
+      const el = document.createElement('div');
+      el.className = 'site-option';
+      el.textContent = site;
+      el.onclick = () => {
+        list.querySelectorAll('.site-option').forEach(o => o.classList.remove('selected'));
+        el.classList.add('selected');
+        _selectedSite = site;
+        document.getElementById('btn-confirm-site').disabled = false;
+      };
+      list.appendChild(el);
+    });
+    document.getElementById('modal-sites').classList.add('active');
+  }
 
-function closeSiteModal() { document.getElementById('modal-sites').classList.remove('active'); }
+  function closeSiteModal() {
+    document.getElementById('modal-sites').classList.remove('active');
+  }
 
-async function confirmSite() {
-  if (!_selectedSite) return;
-  var btn = document.getElementById('btn-confirm-site');
-  btn.disabled = true; btn.textContent = 'Guardando...';
-  await sb.from('projects').update({ gsc_site_url: _selectedSite }).eq('client_id', _userId);
-  document.getElementById('current-domain').value = _selectedSite;
-  closeSiteModal();
-  btn.textContent = 'Confirmar →';
-}
+  async function confirmSite() {
+    if (!_selectedSite) return;
+    const btn = document.getElementById('btn-confirm-site');
+    btn.disabled = true;
+    btn.textContent = 'Guardando...';
+    await sb.from('projects').update({ gsc_site_url: _selectedSite }).eq('client_id', _userId);
+    document.getElementById('current-domain').value = _selectedSite;
+    closeSiteModal();
+    btn.textContent = 'Confirmar →';
+  }
 
-// ── PERFIL ────────────────────────────────────────────────
-async function saveProfile() {
-  var name = document.getElementById('edit-name').value.trim();
-  var company = document.getElementById('edit-company').value.trim();
-  var btn = document.getElementById('btn-save-profile');
-  btn.disabled = true; btn.textContent = 'Guardando...';
-  var { error } = await sb.from('clients').update({ name, company }).eq('id', _userId);
-  btn.disabled = false; btn.textContent = 'Guardar cambios';
-  if (error) { showMsg('profile-msg', 'Error al guardar: ' + error.message, 'error'); return; }
-  document.getElementById('profile-display-name').textContent = name || 'Sin nombre';
-  showMsg('profile-msg', '✓ Perfil actualizado', 'success');
-}
+  // ==================== OTRAS FUNCIONES ====================
+  async function saveProfile() {
+    const name = document.getElementById('edit-name').value.trim();
+    const company = document.getElementById('edit-company').value.trim();
+    const btn = document.getElementById('btn-save-profile');
+    btn.disabled = true; btn.textContent = 'Guardando...';
 
-// ── SEMRUSH ───────────────────────────────────────────────
-async function saveSemrush() {
-  var key = document.getElementById('semrush-key').value.trim();
-  if (!key) return;
+    const { error } = await sb.from('clients').update({ name, company }).eq('id', _userId);
+    btn.disabled = false; btn.textContent = 'Guardar cambios';
 
-  // Validar key con Semrush
-  showMsg('semrush-msg', 'Validando API key...', '');
-  document.getElementById('semrush-msg').style.display = 'block';
-  document.getElementById('semrush-msg').style.color = 'var(--muted)';
+    if (error) return showMsg('profile-msg', 'Error: ' + error.message, 'error');
+    document.getElementById('profile-display-name').textContent = name || 'Sin nombre';
+    showMsg('profile-msg', '✓ Perfil actualizado', 'success');
+  }
 
-  try {
-    var testRes = await fetch('https://api.semrush.com/?type=domain_organic&key=' + key + '&domain=google.com&database=es&display_limit=1&export_columns=Ph,Po');
-    var text = await testRes.text();
-    if (text.startsWith('ERROR')) {
-      showMsg('semrush-msg', '✗ API key inválida. Verifica que sea correcta.', 'error');
+  async function saveSemrush() {
+    const key = document.getElementById('semrush-key').value.trim();
+    if (!key) return;
+
+    showMsg('semrush-msg', 'Validando...', '');
+    try {
+      const res = await fetch(`https://api.semrush.com/?type=domain_organic&key=${key}&domain=google.com&database=es`);
+      const text = await res.text();
+      if (text.startsWith('ERROR')) {
+        return showMsg('semrush-msg', '✗ API key inválida', 'error');
+      }
+    } catch(e) {
+      return showMsg('semrush-msg', '✗ Error de conexión', 'error');
+    }
+
+    const { error } = await sb.from('projects').update({ semrush_api_key: key }).eq('client_id', _userId);
+    if (error) return showMsg('semrush-msg', 'Error al guardar', 'error');
+    showMsg('semrush-msg', '✓ API key guardada correctamente', 'success');
+  }
+
+  async function saveNotifications() {
+    const weekly = document.getElementById('notif-weekly').checked;
+    const alerts = document.getElementById('notif-alerts').checked;
+    await sb.from('clients').update({ notifications: { weekly, alerts } }).eq('id', _userId);
+  }
+
+  function openResetModal() { document.getElementById('modal-reset').classList.add('active'); }
+  function closeResetModal() {
+    document.getElementById('modal-reset').classList.remove('active');
+    document.getElementById('reset-confirm-input').value = '';
+  }
+
+  async function confirmReset() {
+    if (document.getElementById('reset-confirm-input').value.trim() !== 'CONFIRMAR') {
+      alert('Escribe CONFIRMAR');
       return;
     }
-  } catch(e) {
-    showMsg('semrush-msg', '✗ No se pudo validar. Comprueba tu conexión.', 'error');
-    return;
+    if (_projectId) {
+      await sb.from('weekly_snapshots').delete().eq('project_id', _projectId);
+      await sb.from('projects').delete().eq('id', _projectId);
+    }
+    closeResetModal();
+    window.location.href = '/';
   }
 
-  var { error } = await sb.from('projects').update({ semrush_api_key: key }).eq('client_id', _userId);
-  if (error) { showMsg('semrush-msg', 'Error al guardar: ' + error.message, 'error'); return; }
-  showMsg('semrush-msg', '✓ API key válida y guardada correctamente', 'success');
-}
-
-// ── NOTIFICACIONES ────────────────────────────────────────
-async function saveNotifications() {
-  var weekly = document.getElementById('notif-weekly').checked;
-  var alerts = document.getElementById('notif-alerts').checked;
-  await sb.from('clients').update({ notifications: { weekly, alerts } }).eq('id', _userId);
-}
-
-// ── RESET PROYECTO ────────────────────────────────────────
-function openResetModal() { document.getElementById('modal-reset').classList.add('active'); }
-function closeResetModal() {
-  document.getElementById('modal-reset').classList.remove('active');
-  document.getElementById('reset-confirm-input').value = '';
-}
-
-async function confirmReset() {
-  var input = document.getElementById('reset-confirm-input').value.trim();
-  if (input !== 'CONFIRMAR') {
-    alert('Escribe "CONFIRMAR" para continuar.');
-    return;
-  }
-  // Borrar snapshots y proyecto
-  if (_projectId) {
-    await sb.from('weekly_snapshots').delete().eq('project_id', _projectId);
-    await sb.from('projects').delete().eq('id', _projectId);
-  }
-  closeResetModal();
-  // Redirigir al intake
-  window.location.href = '/';
-}
-// ── DEBUG: RECONECTAR GSC ────────────────────────────────
-function reconnectGSCDebug() {
-  const GOOGLE_CLIENT_ID = '427326769305-839tomo4l4ph33kp0tsvbkf3p16ojbnv.apps.googleusercontent.com';
-  const GOOGLE_REDIRECT_URI = 'https://ghqttckqvjptxhihojey.supabase.co/auth/v1/callback';
-
-  if (!GOOGLE_CLIENT_ID || !GOOGLE_REDIRECT_URI) {
-    console.error('❌ Faltan credenciales de Google');
-    showMsg('reconnect-gsc-msg', '❌ Credenciales no configuradas', 'error');
-    return;
+  function reconnectGSCDebug() {
+    const GOOGLE_CLIENT_ID = '427326769305-839tomo4l4ph33kp0tsvbkf3p16ojbnv.apps.googleusercontent.com';
+    const GOOGLE_REDIRECT_URI = 'https://ghqttckqvjptxhihojey.supabase.co/auth/v1/callback';
+    const authUrl = new URL('https://accounts.google.com/o/oauth2/v2/auth');
+    authUrl.searchParams.set('client_id', GOOGLE_CLIENT_ID);
+    authUrl.searchParams.set('redirect_uri', GOOGLE_REDIRECT_URI);
+    authUrl.searchParams.set('response_type', 'code');
+    authUrl.searchParams.set('scope', 'https://www.googleapis.com/auth/webmasters.readonly');
+    authUrl.searchParams.set('access_type', 'offline');
+    authUrl.searchParams.set('prompt', 'consent');
+    window.location.href = authUrl.toString();
   }
 
-  const authUrl = new URL('https://accounts.google.com/o/oauth2/v2/auth');
-  authUrl.searchParams.set('client_id', GOOGLE_CLIENT_ID);
-  authUrl.searchParams.set('redirect_uri', GOOGLE_REDIRECT_URI);
-  authUrl.searchParams.set('response_type', 'code');
-  authUrl.searchParams.set('scope', 'https://www.googleapis.com/auth/webmasters.readonly');
-  authUrl.searchParams.set('access_type', 'offline');
-  authUrl.searchParams.set('prompt', 'consent');
+  function showMsg(id, text, type = 'success') {
+    const el = document.getElementById(id);
+    if (el) {
+      el.textContent = text;
+      el.className = `msg ${type}`;
+    }
+  }
 
-  console.log('🔗 Redirigiendo a Google OAuth para reconectar GSC...');
-  console.log('URL:', authUrl.toString());
-
-  window.location.href = authUrl.toString();
-}
-// ── HELPERS ───────────────────────────────────────────────
-function showMsg(id, text, type) {
-  var el = document.getElementById(id);
-  if (!el) return;
-  el.textContent = text;
-  el.className = 'msg ' + type;
-}
-
-async function logout() {
-  await sb.auth.signOut();
-  window.location.href = '/';
-}
+  async function logout() {
+    await sb.auth.signOut();
+    window.location.href = '/';
+  }
 </script>
 </body>
 </html>
