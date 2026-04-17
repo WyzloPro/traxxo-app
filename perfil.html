@@ -184,6 +184,9 @@
       <button type="button" class="btn btn-accent" id="btn-connect" onclick="connectGoogle(event)" style="flex:1">Autorizar herramientas de Google</button>
       <button type="button" class="btn btn-ghost" id="btn-disconnect" onclick="disconnectGoogle(event)" style="display:none">Desvincular herramientas</button>
     </div>
+    <div style="display:flex;gap:8px;margin-top:8px">
+      <button type="button" class="btn btn-ghost" id="btn-select-ga4" onclick="loadGA4Properties()" style="display:none;flex:1">Elegir propiedad GA4</button>
+    </div>
     <p style="font-size:11px;color:var(--muted);text-align:center;margin-top:8px">Solo pedimos acceso de lectura. Nunca modificamos tus datos.</p>
     <div class="msg" id="google-msg"></div>
   </div>
@@ -273,6 +276,18 @@
   </div>
 </div>
 
+<div class="modal-overlay" id="modal-ga4">
+  <div class="modal">
+    <div class="modal-title">¿Qué propiedad de GA4 quieres usar?</div>
+    <p class="modal-body">Selecciona la propiedad web y su Measurement ID para este proyecto.</p>
+    <div class="site-list" id="ga4-list"></div>
+    <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:16px">
+      <button class="btn btn-ghost" onclick="closeGa4Modal()">Cancelar</button>
+      <button class="btn btn-accent" id="btn-confirm-ga4" onclick="confirmGa4Property()" disabled>Confirmar →</button>
+    </div>
+  </div>
+</div>
+
 <div class="modal-overlay" id="modal-reset">
   <div class="modal">
     <div class="modal-title">¿Cambiar de proyecto?</div>
@@ -297,7 +312,9 @@
 
   let _userId = null;
   let _projectId = null;
+  let _projectIntakeData = {};
   let _selectedSite = null;
+  let _selectedGa4 = null;
   let _googleConnected = false;
   let _gscSiteUrl = null;
   let _signedInWithGoogle = false;
@@ -358,7 +375,10 @@
     const { data: client } = await sb.from('clients').select('*').eq('id', _userId).single();
     const { data: project } = await sb.from('projects').select('*').eq('client_id', _userId).limit(1).maybeSingle();
 
-    if (project) _projectId = project.id;
+    if (project) {
+      _projectId = project.id;
+      _projectIntakeData = project.intake_data || {};
+    }
 
     // Nombre y Empresa
     const name = client?.name || session.user.user_metadata?.full_name || session.user.user_metadata?.name || '';
@@ -385,7 +405,8 @@
       _gscSiteUrl = project?.gsc_site_url || null;
       markConnected({
         email: session.user.email,
-        gscSiteUrl: project?.gsc_site_url
+        gscSiteUrl: project?.gsc_site_url,
+        ga4: project?.intake_data?.ga4 || null
       });
     } else {
       _googleConnected = false;
@@ -474,6 +495,7 @@
   function markConnected(connectionData) {
     const email = connectionData?.email;
     const gscSiteUrl = connectionData?.gscSiteUrl;
+    const ga4Config = connectionData?.ga4 || null;
     _googleConnected = true;
     _gscSiteUrl = gscSiteUrl || null;
     const sectionCopy = document.getElementById('google-section-copy');
@@ -487,10 +509,22 @@
       setConnectionState('gsc', 'Pendiente', 'Herramientas autorizadas. Falta elegir propiedad.', false);
     }
     setConnectionState('ads', 'Pendiente', email ? 'Herramientas autorizadas. Falta elegir cuenta de Ads.' : 'Falta elegir cuenta de Ads.', false);
-    setConnectionState('ga4', 'Pendiente', email ? 'Herramientas autorizadas. Falta elegir propiedad de GA4.' : 'Falta elegir propiedad de GA4.', false);
+    if (ga4Config?.measurementId || ga4Config?.propertyId) {
+      const ga4Label = ga4Config.measurementId
+        ? `${ga4Config.measurementId}${ga4Config.displayName ? ' · ' + ga4Config.displayName : ''}`
+        : (ga4Config.displayName || ga4Config.propertyId);
+      setConnectionState('ga4', 'Conectado', ga4Label, true);
+    } else {
+      setConnectionState('ga4', 'Pendiente', email ? 'Herramientas autorizadas. Falta elegir propiedad de GA4.' : 'Falta elegir propiedad de GA4.', false);
+    }
     document.getElementById('btn-connect').textContent = gscSiteUrl ? 'Cambiar propiedad GSC' : 'Elegir propiedad GSC';
     document.getElementById('btn-disconnect').style.display = '';
     document.getElementById('btn-disconnect').textContent = 'Desvincular herramientas';
+    var ga4Btn = document.getElementById('btn-select-ga4');
+    if (ga4Btn) {
+      ga4Btn.style.display = '';
+      ga4Btn.textContent = ga4Config?.measurementId || ga4Config?.propertyId ? 'Cambiar propiedad GA4' : 'Elegir propiedad GA4';
+    }
   }
 
   function markDisconnected() {
@@ -510,6 +544,8 @@
     });
     document.getElementById('btn-disconnect').style.display = 'none';
     document.getElementById('btn-connect').textContent = _signedInWithGoogle ? 'Autorizar herramientas de Google' : 'Conectar y autorizar Google';
+    var ga4Btn = document.getElementById('btn-select-ga4');
+    if (ga4Btn) ga4Btn.style.display = 'none';
   }
 
   // ==================== OTRAS FUNCIONES ====================
@@ -583,6 +619,17 @@
     }
   }
 
+  function closeGa4Modal() {
+    document.getElementById('modal-ga4').classList.remove('active');
+    document.getElementById('ga4-list').innerHTML = '';
+    _selectedGa4 = null;
+    const btn = document.getElementById('btn-confirm-ga4');
+    if (btn) {
+      btn.disabled = true;
+      btn.textContent = 'Confirmar →';
+    }
+  }
+
   function openSiteModal(sites) {
     const list = document.getElementById('site-list');
     if (!list) return;
@@ -611,6 +658,36 @@
     document.getElementById('modal-sites').classList.add('active');
   }
 
+  function openGa4Modal(properties) {
+    const list = document.getElementById('ga4-list');
+    if (!list) return;
+    list.innerHTML = '';
+
+    properties.forEach((property) => {
+      const el = document.createElement('div');
+      el.style.cssText = 'padding:12px 14px;background:var(--bg);border:1px solid var(--border);border-radius:10px;cursor:pointer;font-size:13px;color:var(--muted);transition:all .15s;margin-bottom:8px';
+      el.innerHTML = `
+        <div style="font-weight:700;color:var(--text);margin-bottom:4px">${property.displayName || property.propertyId}</div>
+        <div style="font-size:12px;color:var(--accent);margin-bottom:3px">${property.measurementId || 'Sin Measurement ID'}</div>
+        <div style="font-size:11px;color:var(--muted)">${property.accountDisplayName || ''}</div>
+      `;
+      el.onclick = function() {
+        list.querySelectorAll('div').forEach((d) => {
+          d.style.borderColor = 'var(--border)';
+          d.style.background = 'var(--bg)';
+        });
+        el.style.borderColor = 'var(--accent)';
+        el.style.background = 'rgba(34,211,238,.06)';
+        _selectedGa4 = property;
+        const btn = document.getElementById('btn-confirm-ga4');
+        if (btn) btn.disabled = false;
+      };
+      list.appendChild(el);
+    });
+
+    document.getElementById('modal-ga4').classList.add('active');
+  }
+
   async function confirmSite() {
     if (!_selectedSite || !_userId) return;
     const btn = document.getElementById('btn-confirm-site');
@@ -637,6 +714,45 @@
     document.getElementById('btn-connect').textContent = 'Cambiar propiedad GSC';
     closeSiteModal();
     showMsg('google-msg', '✓ Propiedad de Search Console guardada', 'success');
+  }
+
+  async function confirmGa4Property() {
+    if (!_selectedGa4 || !_projectId) return;
+    const btn = document.getElementById('btn-confirm-ga4');
+    if (btn) {
+      btn.disabled = true;
+      btn.textContent = 'Guardando...';
+    }
+
+    const nextIntakeData = {
+      ...(_projectIntakeData || {}),
+      ga4: {
+        propertyId: _selectedGa4.propertyId,
+        measurementId: _selectedGa4.measurementId,
+        displayName: _selectedGa4.displayName,
+        accountDisplayName: _selectedGa4.accountDisplayName
+      }
+    };
+
+    const { error } = await sb
+      .from('projects')
+      .update({ intake_data: nextIntakeData })
+      .eq('id', _projectId);
+
+    if (error) {
+      if (btn) {
+        btn.disabled = false;
+        btn.textContent = 'Confirmar →';
+      }
+      return showMsg('google-msg', 'Error al guardar la propiedad de GA4', 'error');
+    }
+
+    _projectIntakeData = nextIntakeData;
+    setConnectionState('ga4', 'Conectado', `${_selectedGa4.measurementId} · ${_selectedGa4.displayName}`, true);
+    const ga4Btn = document.getElementById('btn-select-ga4');
+    if (ga4Btn) ga4Btn.textContent = 'Cambiar propiedad GA4';
+    closeGa4Modal();
+    showMsg('google-msg', '✓ Propiedad de GA4 guardada', 'success');
   }
 
   async function loadGSCSites() {
@@ -669,6 +785,39 @@
       openSiteModal(data.sites);
     } catch (e) {
       return showMsg('google-msg', 'Error de red al cargar propiedades GSC', 'error');
+    }
+  }
+
+  async function loadGA4Properties() {
+    const { data: { session } } = await sb.auth.getSession();
+    if (!session?.access_token) {
+      return showMsg('google-msg', 'No hay sesión activa para cargar propiedades de GA4', 'error');
+    }
+
+    showMsg('google-msg', 'Cargando propiedades de GA4...', '');
+
+    try {
+      const res = await fetch(`${SUPABASE_URL}/functions/v1/list-ga4-properties`, {
+        method: 'GET',
+        headers: {
+          Authorization: `Bearer ${session.access_token}`
+        }
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        return showMsg('google-msg', data.error || 'No se pudieron cargar las propiedades de GA4', 'error');
+      }
+
+      if (!data.properties || !data.properties.length) {
+        return showMsg('google-msg', 'No se encontraron propiedades web de GA4 en esta cuenta', 'error');
+      }
+
+      showMsg('google-msg', `✓ ${data.properties.length} propiedades de GA4 encontradas`, 'success');
+      openGa4Modal(data.properties);
+    } catch (e) {
+      return showMsg('google-msg', 'Error de red al cargar propiedades de GA4', 'error');
     }
   }
 
