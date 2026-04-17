@@ -747,10 +747,10 @@
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#22d3ee" stroke-width="1.5" stroke-linecap="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
           </div>
           <div style="flex:1">
-            <div style="font-size:14px;font-weight:700;margin-bottom:2px">Conecta tus herramientas</div>
-            <div style="font-size:12px;color:var(--muted)">Vincula Google Search Console, Ads y Analytics para activar tu dashboard.</div>
+            <div style="font-size:14px;font-weight:700;margin-bottom:2px">Autoriza tus herramientas</div>
+            <div style="font-size:12px;color:var(--muted)">Inicia sesión y luego autoriza Google Search Console, Ads y Analytics para activar tu dashboard.</div>
           </div>
-          <a href="/perfil.html" style="background:var(--accent);color:#000;font-size:13px;font-weight:700;padding:9px 16px;border-radius:8px;text-decoration:none;white-space:nowrap;flex-shrink:0">Conectar →</a>
+          <a href="/perfil.html" style="background:var(--accent);color:#000;font-size:13px;font-weight:700;padding:9px 16px;border-radius:8px;text-decoration:none;white-space:nowrap;flex-shrink:0">Autorizar →</a>
         </div>
       </div>
 
@@ -1048,6 +1048,7 @@
   async function checkGoogleConnection() {
     var { data: { session } } = await sb.auth.getSession();
     if (!session) return;
+    var signedInWithGoogle = session.user && session.user.app_metadata && session.user.app_metadata.provider === 'google';
 
     // Leer token guardado en BD (fuente de verdad)
     try {
@@ -1072,6 +1073,14 @@
         if (banner) banner.style.display = 'block';
         var connectArea = document.getElementById('dash-connect-area');
         if (connectArea) connectArea.style.display = 'none';
+        var obEmail = document.getElementById('ob-google-email');
+        var obBadge = document.getElementById('ob-google-badge');
+        if (obEmail) {
+          obEmail.textContent = signedInWithGoogle
+            ? 'Sesion iniciada con Google. Falta autorizar herramientas.'
+            : '';
+        }
+        if (obBadge) obBadge.textContent = signedInWithGoogle ? 'Pendiente' : 'Sin conectar';
       }
     } catch(e) {
       console.log('checkGoogleConnection error:', e);

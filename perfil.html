@@ -152,7 +152,7 @@
   <!-- CONEXIONES GOOGLE -->
   <div class="section">
     <div class="section-title">Conexiones de Google</div>
-    <p style="font-size:13px;color:var(--muted);margin-bottom:16px">Conecta tu cuenta de Google para que Traxxo lea tus datos de GSC, Ads y Analytics.</p>
+    <p id="google-section-copy" style="font-size:13px;color:var(--muted);margin-bottom:16px">Autoriza las herramientas de Google para que Traxxo lea tus datos de GSC, Ads y Analytics.</p>
     
     <div class="conn-row">
       <div class="conn-icon" style="background:#4285f420;border-color:#4285f440;color:#4285f4">GSC</div>
@@ -180,8 +180,8 @@
     </div>
 
     <div style="display:flex;gap:8px;margin-top:16px">
-      <button type="button" class="btn btn-accent" id="btn-connect" onclick="connectGoogle(event)" style="flex:1">Conectar con Google</button>
-      <button type="button" class="btn btn-ghost" id="btn-disconnect" onclick="disconnectGoogle(event)" style="display:none">Desconectar</button>
+      <button type="button" class="btn btn-accent" id="btn-connect" onclick="connectGoogle(event)" style="flex:1">Autorizar herramientas de Google</button>
+      <button type="button" class="btn btn-ghost" id="btn-disconnect" onclick="disconnectGoogle(event)" style="display:none">Desvincular herramientas</button>
     </div>
     <p style="font-size:11px;color:var(--muted);text-align:center;margin-top:8px">Solo pedimos acceso de lectura. Nunca modificamos tus datos.</p>
     <div class="msg" id="google-msg"></div>
@@ -299,6 +299,7 @@
   let _selectedSite = null;
   let _googleConnected = false;
   let _gscSiteUrl = null;
+  let _signedInWithGoogle = false;
 
   // ==================== INIT ====================
   sb.auth.getSession().then(async ({ data: { session } }) => {
@@ -308,6 +309,7 @@
     }
 
     _userId = session.user.id;
+    _signedInWithGoogle = session.user.app_metadata?.provider === 'google';
 
     // Avatar
     const avatarEl = document.getElementById('avatar-wrap');
@@ -369,7 +371,7 @@
     }
 
     if (_googleConnected) {
-      showMsg('google-msg', _gscSiteUrl ? 'Elige otra propiedad de Search Console si quieres cambiarla.' : 'Tu cuenta Google ya está conectada. Ahora elige la propiedad de Search Console.', 'success');
+      showMsg('google-msg', _gscSiteUrl ? 'Las herramientas ya están autorizadas. Elige otra propiedad de Search Console si quieres cambiarla.' : 'Las herramientas ya están autorizadas. Ahora elige la propiedad de Search Console.', 'success');
       loadGSCSites();
       return;
     }
@@ -405,9 +407,9 @@
     if (error) {
       if (btn) {
         btn.disabled = false;
-        btn.textContent = 'Desconectar';
+        btn.textContent = 'Desvincular herramientas';
       }
-      return showMsg('google-msg', 'No se pudo desconectar Google. Inténtalo otra vez.', 'error');
+      return showMsg('google-msg', 'No se pudieron desvincular las herramientas de Google. Inténtalo otra vez.', 'error');
     }
 
     if (_projectId) {
@@ -421,9 +423,9 @@
     markDisconnected();
     if (btn) {
       btn.disabled = false;
-      btn.textContent = 'Desconectar';
+      btn.textContent = 'Desvincular herramientas';
     }
-    showMsg('google-msg', 'Google desconectado correctamente.', 'success');
+    showMsg('google-msg', 'Herramientas de Google desvinculadas correctamente.', 'success');
   }
 
   function setConnectionState(key, badgeText, detailText, isConnected) {
@@ -441,21 +443,32 @@
     const gscSiteUrl = connectionData?.gscSiteUrl;
     _googleConnected = true;
     _gscSiteUrl = gscSiteUrl || null;
+    const sectionCopy = document.getElementById('google-section-copy');
+    if (sectionCopy) {
+      sectionCopy.textContent = 'Tus herramientas de Google ya están autorizadas. Ahora puedes elegir y cambiar las propiedades que usará Traxxo.';
+    }
 
     if (gscSiteUrl) {
       setConnectionState('gsc', 'Conectado', gscSiteUrl, true);
     } else {
-      setConnectionState('gsc', 'Pendiente', 'Cuenta Google conectada. Falta elegir propiedad.', false);
+      setConnectionState('gsc', 'Pendiente', 'Herramientas autorizadas. Falta elegir propiedad.', false);
     }
-    setConnectionState('ads', 'Pendiente', email ? 'Cuenta Google conectada. Falta elegir cuenta de Ads.' : 'Falta elegir cuenta de Ads.', false);
-    setConnectionState('ga4', 'Pendiente', email ? 'Cuenta Google conectada. Falta elegir propiedad de GA4.' : 'Falta elegir propiedad de GA4.', false);
+    setConnectionState('ads', 'Pendiente', email ? 'Herramientas autorizadas. Falta elegir cuenta de Ads.' : 'Falta elegir cuenta de Ads.', false);
+    setConnectionState('ga4', 'Pendiente', email ? 'Herramientas autorizadas. Falta elegir propiedad de GA4.' : 'Falta elegir propiedad de GA4.', false);
     document.getElementById('btn-connect').textContent = gscSiteUrl ? 'Cambiar propiedad GSC' : 'Elegir propiedad GSC';
     document.getElementById('btn-disconnect').style.display = '';
+    document.getElementById('btn-disconnect').textContent = 'Desvincular herramientas';
   }
 
   function markDisconnected() {
     _googleConnected = false;
     _gscSiteUrl = null;
+    const sectionCopy = document.getElementById('google-section-copy');
+    if (sectionCopy) {
+      sectionCopy.textContent = _signedInWithGoogle
+        ? 'Ya has iniciado sesión con Google. Falta autorizar las herramientas para que Traxxo pueda leer GSC, Ads y Analytics.'
+        : 'Autoriza las herramientas de Google para que Traxxo lea tus datos de GSC, Ads y Analytics.';
+    }
     ['gsc','ads','ga4'].forEach(k => {
       const badge = document.getElementById(k + '-badge');
       const detail = document.getElementById(k + '-detail');
@@ -463,7 +476,7 @@
       if (detail) detail.textContent = k === 'gsc' ? 'Clics, impresiones y posiciones' : k === 'ads' ? 'Campañas, gasto y ROAS' : 'Sesiones, usuarios y conversiones';
     });
     document.getElementById('btn-disconnect').style.display = 'none';
-    document.getElementById('btn-connect').textContent = 'Conectar con Google';
+    document.getElementById('btn-connect').textContent = _signedInWithGoogle ? 'Autorizar herramientas de Google' : 'Conectar y autorizar Google';
   }
 
   // ==================== OTRAS FUNCIONES ====================
