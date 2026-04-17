@@ -1337,5 +1337,316 @@
   document.addEventListener('DOMContentLoaded', applyLang);
 
 </script>
+  <script>
+const SUPABASE_URL  = 'https://ghqttckqvjptxhihojey.supabase.co';
+const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdocXR0Y2txdmpwdHhoaWhvamV5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU2NDU1OTYsImV4cCI6MjA5MTIyMTU5Nn0.KlPDplMIIWQwx5oafvkfxbsm0dzPb0cbTJpCM83cqK4';
+const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
+
+var _userId = null;
+var _projectId = null;
+var _selectedSite = null;
+var _currentToken = null;
+
+// ── INIT ──────────────────────────────────────────────────
+sb.auth.getSession().then(async function({ data: { session } }) {
+  if (!session) { window.location.href = '/'; return; }
+  _userId = session.user.id;
+  _currentToken = session.provider_token || null;
+
+  var avatar = session.user.user_metadata?.avatar_url;
+  var avatarEl = document.getElementById('avatar-wrap');
+  if (avatar) {
+    avatarEl.innerHTML = '<img src="' + avatar + '" alt="foto" />';
+  } else {
+    avatarEl.textContent = (session.user.email || '?')[0].toUpperCase();
+  }
+
+  document.getElementById('profile-email').textContent = session.user.email || '';
+
+  var { data: client } = await sb.from('clients').select('*').eq('id', _userId).single();
+  var { data: project } = await sb.from('projects').select('*').eq('client_id', _userId).limit(1).maybeSingle();
+  if (project) { _projectId = project.id; }
+
+  var name = client?.name || session.user.user_metadata?.full_name || '';
+  var company = client?.company || '';
+  document.getElementById('edit-name').value = name;
+  document.getElementById('edit-company').value = company;
+  document.getElementById('profile-display-name').textContent = name || session.user.email?.split('@')[0];
+  document.getElementById('current-domain').value = project?.domain || project?.gsc_site_url || '—';
+
+  var plan = client?.plan || 'early_access';
+  var planEl = document.getElementById('profile-plan');
+  planEl.textContent = { basic:'Basic', pro:'Pro', agency:'Agency' }[plan] || 'Early Access';
+
+  var notifs = client?.notifications || {};
+  document.getElementById('notif-weekly').checked = notifs.weekly !== false;
+  document.getElementById('notif-alerts').checked = notifs.alerts !== false;
+
+  if (project?.semrush_api_key) {
+    document.getElementById('semrush-key').value = project.semrush_api_key;
+  }
+
+  if (client?.google_access_token) {
+    markConnected(session.user.email);
+  } else if (_currentToken) {
+    await saveGoogleToken(_currentToken, session);
+    markConnected(session.user.email);
+  }
+});
+
+// OAuth callback
+sb.auth.onAuthStateChange(async function(event, session) {
+  if (event === 'SIGNED_IN' && session?.provider_token) {
+    _currentToken = session.provider_token;
+    await saveGoogleToken(session.provider_token, session);
+    markConnected(session.user.email);
+    await checkGSCSites(session.provider_token, session.user.id);
+  }
+});
+
+// ── GOOGLE ────────────────────────────────────────────────
+function connectGoogle() {
+  sb.auth.signInWithOAuth({
+    provider: 'google',
+    options: {
+      scopes: 'email profile https://www.googleapis.com/auth/webmasters.readonly https://www.googleapis.com/auth/adwords https://www.googleapis.com/auth/analytics.readonly',
+      redirectTo: 'https://app.traxxo.ai/perfil.html',
+      queryParams: { access_type: 'offline', prompt: 'consent select_account' }
+    }
+  });
+}
+
+async function disconnectGoogle() {
+  await sb.from('clients').update({
+    google_access_token: null,
+    google_refresh_token: null,
+    google_token_expires_at: null
+  }).eq('id', _userId);
+
+  markDisconnected();
+  showMsg('google-msg', 'Google desconectado correctamente.', 'success');
+}
+
+async function saveGoogleToken(token, session) {
+  await sb.from('clients').update({
+    google_access_token: token,
+    google_refresh_token: session.provider_refresh_token || null,
+    google_token_expires_at: session.expires_at ? new Date(session.expires_at * 1000).toISOString() : null
+  }).eq('id', session.user.id);
+}
+
+function markConnected(email) {
+  ['gsc','ads','ga4'].forEach(function(k) {
+    var b = document.getElementById(k + '-badge');
+    var d = document.getElementById(k + '-detail');
+    if (b) { b.textContent = 'Conectado'; b.className = 'conn-badge connected'; }
+    if (d && email) d.textContent = email;
+  });
+  var btnC = document.getElementById('btn-conring() : null
+  }).eq('id', session.usetById('btn-disconnect');
+  if (btnC) btnC.textContent = 'Reconectar / Cambiar cuenta';
+  if (btnD) btnD.style.display = '';
+}
+
+function markDisconnected() {
+  ['gsc','ads','ga4'].forEach(function(k) {
+    var b = document.getElementById(k + '-badge');
+    var d = document.getElementById(k + '-detail');
+    if (b) { b.textContent = 'Sin conectar'; b.className = 'conn-badge disconnected'; }
+    if (d) d.textContent = k === 'gsc'
+      ? 'Clics, impresiones y posiciones'
+      : k === 'ads'
+      ? 'Campañas, gasto y ROAS'
+      : 'Sesiones, usuarios y conversiones';
+  });
+ ring() : null
+  }).eq('id', session.usen-disconnect');
+  if (btnD) btnD.style.display = 'none';
+  var btnC = document.getElementById('btn-connect');
+  if (btnC) btnC.textContent = 'Conectar con Google';
+}
+
+async function checkGSCSites(token, userId) {
+  try {
+    var res = await fetch('https://www.googleapis.com/webmasters/v3/sites', {
+      headers: { Authorization: 'Bearer ' + token }
+    });
+    var data = await res.json();
+    var sites = (data.siteEntry || []).map(function(s) { return s.siteUrl; });
+
+    if (sites.length > 1) {
+      showSiteMring() : null
+  }).eq('id', session.usees.length === 1) {
+      await sb.from('projects').update({
+        gsc_site_url: sites[0],
+        domain: sites[0]
+      }).eq('client_id', ring() : null
+  }).eq('id', session.use'current-domain').value = sites[0];
+    }
+  } catch(e) {
+    console.error('Error oring() : null
+  }).eq('id', session.use ── SITE SELECTOR ─────────────────────────────────────────
+function showSiteModal(sites, userId) {
+  var ring() : null
+  }).eq('id', session.usest');
+  list.innerHTML = '';
+
+  sites.forEach(function(sitring() : null
+  }).eq('id', session.uset('div');
+    el.className = 'site-option';
+    el.ring() : null
+  }).eq('id', session.use', session.use   list.querySelectorAll('.site-option').forEach(function(o) { o.classList.remove('selected'); });
+      el.cring() : null
+  }).eq('id', session.useedSite = site;
+      document.getElementById('btn-confirm-site').disabled = false;
+    };
+    list.appendChild(el);
+  });
+
+  document.getElementById('modal-sites').classList.add('active');
+}
+
+function closeSiteModal() {
+  document.getElementById('modal-sites').classList.remove('active');
+}
+
+async function confirmSite() {
+  if (!_selering() : null
+  }).eq('id', session.use.getElementById('btn-confirm-site');
+  btn.disabled = true;
+  btn.textContent = 'Guardando...';
+
+  await sb.from('projects').update({
+    gsc_site_url: _selectedSite,
+    domain: _selectedSite
+  }).eq('client_id', _userId);
+
+  document.getElementById('current-domain').value = _selectedSite;
+  closeSiteModal();
+  btn.textContent = 'Confirmar →';
+}
+
+// ── PERFIL ────────────────────────────────────────────────
+async function saveProfile() {
+  var name = document.getElementById('edit-name').value.trim();
+  var comparing() : null
+  }).eq('id', session.useany').value.trim();
+  var btn = document.getElementById('btn-save-profile');
+
+  btn.disabled = true;
+  btn.textContent = 'Guardando...';
+
+  var { error } = await sb.from('clients').update({ name, company }).eq('id', _userId);
+
+  btn.disabled = false;
+  btn.textContent = 'Guardar cambios';
+
+  if (error) {
+    showMsg('profile-msg', 'Error al guardar: ' + error.message, 'error');
+    return;
+  }
+
+  document.getElementById('profile-display-name').textContent = name || 'Sin nombre';
+  showMsg('profile-msg', '✓ Perfil actualizado', 'success');
+}
+
+// ── SEMRUSH ───────────────────────────────────────────────
+async function saveSemrush() {
+  var key = document.getElementById('semrush-kering() : null
+  }).eq('id', session.use  showMsg('semrush-msg', 'Validando API key...', '');
+  document.getElementById('semrush-msg').style.display = 'block';
+  document.getElementById('semrush-msg').style.color = 'var(--muted)';
+
+  try {
+    var testRes = await fetch('https://api.semrush.com/?type=domain_organic&key=' + key + '&domain=google.com&database=es&display_limit=1&export_columns=Ph,Po');
+    var text = await testRes.text();
+
+    if (text.startsWith('ERROR')) {
+      showMsg('semrush-msg', '✗ API key inválida. Verifica que sea correcta.', 'error');
+      return;
+    }
+  } catch(e) {
+    showMsg('semrush-msg', '✗ No se pudo validar. Comprueba tu conexión.ring() : null
+  }).eq('id', session.userror } = await sb.from('projects').update({ semrush_api_key: key }).eq('client_id', _userId);
+  if (error) {
+    showMsg('semrush-msg', 'Error al guardar: ' + error.message, 'error');
+    return;
+  }
+
+  showMsg('semrush-msg', '✓ API key válida y guardada correctamente', 'success');
+}
+
+// ── NOTIFICACIONES ────────────────────────────────────────
+async function saveNotifications() {
+  var weekly = documentring() : null
+  }).eq('id', session.use  }).eq('id', session.usesession.useById('notif-alerts').checked;
+
+  await sb.from('clients').updaring() : null
+  }).eq('id', session.uses }
+  }).eq('id', _userId);
+}
+
+// ── RESET PROYECTO ────────────────────────────────────────
+function openResetModal() {
+  document.getElementById('modal-reset').classList.add('activring() : null
+  }).eq('id', session.usedocument.getElementById('modal-reset').classList.remove('active');
+  document.getElementById('reset-confirm-input').value = '';
+}
+
+async function confirmReset() {
+  var input = document.getElementById('reset-confirm-input').value.trim();
+  if (input !== 'CONFIRMAR') {
+    alert('Escribe "CONFIRMAR" para continuar.');
+    return;
+  }
+
+  if (_projectId) {
+    await sb.from('weekly_snapshots').delete().eq('project_id', _projectId);
+    await sb.from('projects').delete().eq('id', _projectId);
+  }
+
+  closeResetModal();
+  window.location.href = '/';
+}
+
+// ── DEBUG: RECONECTAR GSC ────────────────────────────────
+function reconnectGSCDebug() {
+  const GOring() : null
+  }).eq('id', session.usel4ph33kp0tsvbkf3p16ojbnv.apps.googleusercontent.com';
+  const GOOGLE_REDIRECT_URI = 'https://ghqttckqvjptxhihojey.supabase.co/auth/v1/callback';
+
+  if (!GOOGLE_CLIENT_ID || !GOOGLE_REDIRECT_URI) {
+    console.error('❌ Faltan credenciales de Google');
+    showMsg('reconnect-gsc-msg', '❌ Credenciales no configuradas', 'error');
+    return;
+  }
+
+  const authUrl = new URL('https://accounts.google.com/o/oauth2/v2/auth');
+  authUrl.searchParams.set('client_id', GOOGLE_CLIENT_ID);
+  authUrl.searchParams.set('redirect_uri', GOOGLE_REDIRECT_URI);
+  authUrl.searchParams.set('response_type', 'code');
+  authUrl.searchParams.set('scope', 'https://www.googleapis.com/auth/webmasring() : null
+  }).eq('id', session.use.set('access_type', 'offline');
+  authUrl.searchParams.set('prompt', 'consent');
+
+  console.log('🔗 Redirigiendo a Google OAuth para reconectar GSC...');
+  console.log('URL:', authUrl.toString());
+
+  window.location.href = authUrl.toString();
+}
+
+// ── HELPERS ───────────────────────────────────────────────
+function showMsg(id, text, type) {
+  var el = document.getElementById(id);
+  if (!el) return;
+  el.textContent = text;
+  el.className = 'msg ' + type;
+}
+
+async function logout() {
+  await sb.auth.signOut();
+  window.location.href = '/';
+}
+</script>
 </body>
 </html>
