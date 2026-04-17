@@ -208,7 +208,7 @@
       </svg>
       Actualizar
     </button>
-    <a href="/" class="btn btn-ghost">← Mi cuenta</a>
+    <a href="/perfil.html" class="btn btn-ghost">← Mi cuenta</a>
   </div>
 </div>
 
@@ -251,7 +251,12 @@ sb.auth.getSession().then(async function({ data: { session } }) {
   }
 
   currentProject = projects[0];
-  document.getElementById('header-domain').textContent = currentProject.domain;
+  var projectDomain = currentProject.domain
+    || currentProject.gsc_site_url
+    || (currentProject.intake_data && currentProject.intake_data.url
+      ? currentProject.intake_data.url.replace(/^https?:\/\//, '').replace(/\/$/, '').split('/')[0]
+      : 'Sin dominio');
+  document.getElementById('header-domain').textContent = projectDomain;
 
   // Cargar plan del cliente
   var { data: client } = await sb.from('clients')
