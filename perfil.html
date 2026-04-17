@@ -181,6 +181,13 @@
     <p style="font-size:11px;color:var(--muted);text-align:center;margin-top:8px">Solo pedimos acceso de lectura. Nunca modificamos tus datos.</p>
     <div class="msg" id="google-msg"></div>
   </div>
+    <!-- DEBUG: RECONECTAR GOOGLE SEARCH CONSOLE -->
+  <div class="section" style="background:rgba(139,92,246,.06);border-color:rgba(139,92,246,.2)">
+    <div class="section-title" style="color:#8b5cf6">[DEBUG] Reconectar GSC</div>
+    <p style="font-size:13px;color:var(--muted);margin-bottom:14px">Botón temporal para forzar reconexión OAuth y obtener refresh_token.</p>
+    <button class="btn btn-accent" id="reconnect-gsc-debug" onclick="reconnectGSCDebug()" style="background:#8b5cf6">Reconectar GSC (debug)</button>
+    <div class="msg" id="reconnect-gsc-msg"></div>
+  </div>
 
   <!-- WEB MONITORIZADA -->
   <div class="section">
