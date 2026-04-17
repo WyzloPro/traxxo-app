@@ -211,17 +211,6 @@
     <div class="msg" id="google-msg"></div>
   </div>
 
-  <!-- DEBUG RECONECTAR GSC -->
-  <div class="section" style="background:rgba(139,92,246,.06);border-color:rgba(139,92,246,.2)">
-    <div class="section-title" style="color:#8b5cf6">[DEBUG] Reconectar GSC</div>
-    <p style="font-size:13px;color:var(--muted);margin-bottom:14px">Botón temporal para forzar reconexión OAuth.</p>
-    <div style="display:flex;gap:8px;flex-wrap:wrap">
-      <button type="button" class="btn btn-accent" onclick="reconnectGSCDebug()" style="background:#8b5cf6">Reconectar GSC (debug)</button>
-      <button type="button" class="btn btn-ghost" onclick="loadGSCSites()">Cargar propiedades GSC</button>
-    </div>
-    <div class="msg" id="reconnect-gsc-msg"></div>
-  </div>
-
   <!-- WEB MONITORIZADA -->
   <div class="section">
     <div class="section-title">Web monitorizada</div>
@@ -852,19 +841,6 @@
     } catch (e) {
       return showMsg('google-msg', 'Error de red al cargar propiedades de GA4', 'error');
     }
-  }
-
-  function reconnectGSCDebug() {
-    const GOOGLE_CLIENT_ID = '427326769305-839tomo4l4ph33kp0tsvbkf3p16ojbnv.apps.googleusercontent.com';
-    const GOOGLE_REDIRECT_URI = 'https://ghqttckqvjptxhihojey.supabase.co/auth/v1/callback';
-    const authUrl = new URL('https://accounts.google.com/o/oauth2/v2/auth');
-    authUrl.searchParams.set('client_id', GOOGLE_CLIENT_ID);
-    authUrl.searchParams.set('redirect_uri', GOOGLE_REDIRECT_URI);
-    authUrl.searchParams.set('response_type', 'code');
-    authUrl.searchParams.set('scope', 'https://www.googleapis.com/auth/webmasters.readonly');
-    authUrl.searchParams.set('access_type', 'offline');
-    authUrl.searchParams.set('prompt', 'consent');
-    window.location.href = authUrl.toString();
   }
 
   function showMsg(id, text, type = 'success') {
