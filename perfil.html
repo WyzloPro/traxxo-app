@@ -145,7 +145,7 @@
     <div class="section-title">Información personal</div>
     <div class="field"><label>Nombre</label><input type="text" id="edit-name" placeholder="Tu nombre" /></div>
     <div class="field"><label>Empresa</label><input type="text" id="edit-company" placeholder="Tu empresa o agencia" /></div>
-    <button class="btn btn-accent" onclick="saveProfile()" id="btn-save-profile">Guardar cambios</button>
+    <button type="button" class="btn btn-accent" onclick="saveProfile()" id="btn-save-profile">Guardar cambios</button>
     <div class="msg" id="profile-msg"></div>
   </div>
 
@@ -180,8 +180,8 @@
     </div>
 
     <div style="display:flex;gap:8px;margin-top:16px">
-      <button class="btn btn-accent" id="btn-connect" onclick="connectGoogle()" style="flex:1">Conectar con Google</button>
-      <button class="btn btn-ghost" id="btn-disconnect" onclick="disconnectGoogle()" style="display:none">Desconectar</button>
+      <button type="button" class="btn btn-accent" id="btn-connect" onclick="connectGoogle(event)" style="flex:1">Conectar con Google</button>
+      <button type="button" class="btn btn-ghost" id="btn-disconnect" onclick="disconnectGoogle(event)" style="display:none">Desconectar</button>
     </div>
     <p style="font-size:11px;color:var(--muted);text-align:center;margin-top:8px">Solo pedimos acceso de lectura. Nunca modificamos tus datos.</p>
     <div class="msg" id="google-msg"></div>
@@ -192,8 +192,8 @@
     <div class="section-title" style="color:#8b5cf6">[DEBUG] Reconectar GSC</div>
     <p style="font-size:13px;color:var(--muted);margin-bottom:14px">Botón temporal para forzar reconexión OAuth.</p>
     <div style="display:flex;gap:8px;flex-wrap:wrap">
-      <button class="btn btn-accent" onclick="reconnectGSCDebug()" style="background:#8b5cf6">Reconectar GSC (debug)</button>
-      <button class="btn btn-ghost" onclick="loadGSCSites()">Cargar propiedades GSC</button>
+      <button type="button" class="btn btn-accent" onclick="reconnectGSCDebug()" style="background:#8b5cf6">Reconectar GSC (debug)</button>
+      <button type="button" class="btn btn-ghost" onclick="loadGSCSites()">Cargar propiedades GSC</button>
     </div>
     <div class="msg" id="reconnect-gsc-msg"></div>
   </div>
@@ -206,7 +206,7 @@
       <input type="text" id="current-domain" disabled />
     </div>
     <p style="font-size:12px;color:var(--muted);margin-bottom:14px">Para cambiar de web es necesario resetear el proyecto.</p>
-    <button class="btn btn-warning" onclick="openResetModal()">Cambiar proyecto</button>
+    <button type="button" class="btn btn-warning" onclick="openResetModal()">Cambiar proyecto</button>
   </div>
 
   <!-- SEMRUSH -->
@@ -297,6 +297,8 @@
   let _userId = null;
   let _projectId = null;
   let _selectedSite = null;
+  let _googleConnected = false;
+  let _gscSiteUrl = null;
 
   // ==================== INIT ====================
   sb.auth.getSession().then(async ({ data: { session } }) => {
@@ -346,15 +348,32 @@
 
     // Google
     if (client?.google_access_token) {
+      _googleConnected = true;
+      _gscSiteUrl = project?.gsc_site_url || null;
       markConnected({
         email: session.user.email,
         gscSiteUrl: project?.gsc_site_url
       });
+    } else {
+      _googleConnected = false;
+      _gscSiteUrl = null;
+      markDisconnected();
     }
   });
 
   // ==================== GOOGLE ====================
-  function connectGoogle() {
+  function connectGoogle(event) {
+    if (event) {
+      event.preventDefault();
+      event.stopPropagation();
+    }
+
+    if (_googleConnected) {
+      showMsg('google-msg', _gscSiteUrl ? 'Elige otra propiedad de Search Console si quieres cambiarla.' : 'Tu cuenta Google ya está conectada. Ahora elige la propiedad de Search Console.', 'success');
+      loadGSCSites();
+      return;
+    }
+
     sb.auth.signInWithOAuth({
       provider: 'google',
       options: {
@@ -365,13 +384,45 @@
     });
   }
 
-  async function disconnectGoogle() {
-    await sb.from('clients').update({
+  async function disconnectGoogle(event) {
+    if (event) {
+      event.preventDefault();
+      event.stopPropagation();
+    }
+
+    const btn = document.getElementById('btn-disconnect');
+    if (btn) {
+      btn.disabled = true;
+      btn.textContent = 'Desconectando...';
+    }
+
+    const { error } = await sb.from('clients').update({
       google_access_token: null,
       google_refresh_token: null,
       google_token_expires_at: null
     }).eq('id', _userId);
+
+    if (error) {
+      if (btn) {
+        btn.disabled = false;
+        btn.textContent = 'Desconectar';
+      }
+      return showMsg('google-msg', 'No se pudo desconectar Google. Inténtalo otra vez.', 'error');
+    }
+
+    if (_projectId) {
+      await sb.from('projects').update({
+        gsc_site_url: null
+      }).eq('id', _projectId);
+    }
+
+    _googleConnected = false;
+    _gscSiteUrl = null;
     markDisconnected();
+    if (btn) {
+      btn.disabled = false;
+      btn.textContent = 'Desconectar';
+    }
     showMsg('google-msg', 'Google desconectado correctamente.', 'success');
   }
 
@@ -388,6 +439,8 @@
   function markConnected(connectionData) {
     const email = connectionData?.email;
     const gscSiteUrl = connectionData?.gscSiteUrl;
+    _googleConnected = true;
+    _gscSiteUrl = gscSiteUrl || null;
 
     if (gscSiteUrl) {
       setConnectionState('gsc', 'Conectado', gscSiteUrl, true);
@@ -396,11 +449,13 @@
     }
     setConnectionState('ads', 'Pendiente', email ? 'Cuenta Google conectada. Falta elegir cuenta de Ads.' : 'Falta elegir cuenta de Ads.', false);
     setConnectionState('ga4', 'Pendiente', email ? 'Cuenta Google conectada. Falta elegir propiedad de GA4.' : 'Falta elegir propiedad de GA4.', false);
-    document.getElementById('btn-connect').textContent = 'Reconectar / Cambiar cuenta';
+    document.getElementById('btn-connect').textContent = gscSiteUrl ? 'Cambiar propiedad GSC' : 'Elegir propiedad GSC';
     document.getElementById('btn-disconnect').style.display = '';
   }
 
   function markDisconnected() {
+    _googleConnected = false;
+    _gscSiteUrl = null;
     ['gsc','ads','ga4'].forEach(k => {
       const badge = document.getElementById(k + '-badge');
       const detail = document.getElementById(k + '-detail');
@@ -532,6 +587,8 @@
     }
 
     setConnectionState('gsc', 'Conectado', _selectedSite, true);
+    _gscSiteUrl = _selectedSite;
+    document.getElementById('btn-connect').textContent = 'Cambiar propiedad GSC';
     closeSiteModal();
     showMsg('google-msg', '✓ Propiedad de Search Console guardada', 'success');
   }
