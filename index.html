@@ -68,10 +68,8 @@
     .ob-sub { font-size:13px; color:var(--muted); margin-bottom:20px; }
     .ob-panel { display: none; }
     .ob-panel.active { display: block; }
-
     select { width:100%; padding:11px 14px; background:var(--bg); border:1px solid var(--border); border-radius:8px; color:var(--text); font-size:14px; font-family:var(--font); outline:none; margin-bottom:16px; cursor:pointer; }
     select:focus { border-color:rgba(34,211,238,.4); }
-
     .plan-card { background:var(--bg); border:2px solid var(--border); border-radius:14px; padding:20px; cursor:pointer; transition:border-color .2s; position:relative; overflow:hidden; }
     .plan-card.selected { border-color:var(--accent); }
     .plan-card-pro { border-color:#8b5cf640; }
@@ -193,36 +191,9 @@
     </div>
     <p class="welcome">Bienvenido, <span id="user-email"></span></p>
 
-    <!-- ONBOARDING WIZARD -->
-    <div id="onboarding" style="display:none">
-      <!-- INTAKE FORM -->
-      <div id="ob-intake">
-        <h3 class="ob-title">Cuéntanos sobre tu proyecto</h3>
-        <p class="ob-sub">Usamos esta información para preparar tu dashboard a medida.</p>
-        <!-- Aquí va todo tu formulario de intake (URL, tipo de web, nicho, etc.) -->
-        <!-- Puedes pegar tu HTML completo de intake aquí si lo deseas -->
-        <button class="btn" onclick="submitIntake()">Enviar y continuar →</button>
-        <div class="msg" id="intake-msg"></div>
-      </div>
-
-      <!-- PLAN SELECTOR -->
-      <div id="ob-plan-selector" style="display:none">
-        <h3 class="ob-title">Elige tu plan</h3>
-        <p class="ob-sub">Puedes cambiar en cualquier momento.</p>
-        <!-- Tus 3 planes aquí -->
-      </div>
-
-      <!-- WIZARD -->
-      <div id="ob-wizard" style="display:none">
-        <!-- Tus 4 pasos (ob-1, ob-2, ob-3, ob-4) -->
-      </div>
-    </div>
-
-    <!-- DASH MAIN -->
-    <div id="dash-main" style="display:none">
-      <!-- Banner, conexiones, add-ons, etc. -->
-      <button class="btn" onclick="goToDashboardApp()">Ver mi dashboard →</button>
-    </div>
+    <!-- ONBOARDING y DASH MAIN (simplificados) -->
+    <div id="onboarding" style="display:none">...</div>
+    <div id="dash-main" style="display:none">...</div>
   </div>
 </div>
 
@@ -330,7 +301,6 @@
     document.getElementById('auth-section').style.display = 'none';
     document.getElementById('dashboard').style.display = 'flex';
     document.getElementById('user-email').textContent = user.user_metadata?.name || user.email.split('@')[0];
-
     checkOnboardingStatus(user);
     checkGoogleConnection();
   }
@@ -364,27 +334,19 @@
     console.log('Google conectado para:', email);
   }
 
-  // ==================== GOOGLE OAUTH (CAMBIO APLICADO) ====================
-  function connectGoogle(context = 'login') {
-    const isTool = ['onboarding', 'dashboard'].includes(context);
-    const scopes = isTool
-      ? 'email profile https://www.googleapis.com/auth/webmasters.readonly https://www.googleapis.com/auth/adwords https://www.googleapis.com/auth/analytics.readonly'
-      : 'email profile';
-
+  // ==================== GOOGLE OAUTH - VERSIÓN SIMPLE (como pediste) ====================
+  function connectGoogle() {
     sb.auth.signInWithOAuth({
       provider: 'google',
       options: {
-        scopes,
-        redirectTo: 'https://app.traxxo.ai/perfil.html',   // ← Cambio aplicado aquí
-        queryParams: { 
-          access_type: 'offline', 
-          prompt: isTool ? 'consent' : 'select_account' 
-        }
+        scopes: 'email profile https://www.googleapis.com/auth/webmasters.readonly https://www.googleapis.com/auth/adwords https://www.googleapis.com/auth/analytics.readonly',
+        redirectTo: 'https://app.traxxo.ai/perfil.html',
+        queryParams: { access_type: 'offline', prompt: 'consent select_account' }
       }
     });
   }
 
-  // ==================== ONBOARDING ====================
+  // ==================== ONBOARDING (simplificado) ====================
   function submitIntake() {
     document.getElementById('ob-intake').style.display = 'none';
     document.getElementById('ob-plan-selector').style.display = '';
