@@ -229,8 +229,8 @@
       <label>Dominio actual</label>
       <input type="text" id="current-domain" disabled />
     </div>
-    <p style="font-size:12px;color:var(--muted);margin-bottom:14px">Para cambiar de web es necesario resetear el proyecto.</p>
-    <button type="button" class="btn btn-warning" onclick="openResetModal()">Cambiar proyecto</button>
+    <p style="font-size:12px;color:var(--muted);margin-bottom:14px">Aquí ves la web que Traxxo está siguiendo ahora mismo. Si quieres trabajar otra web, tendrás que borrar este proyecto y crear uno nuevo.</p>
+    <button type="button" class="btn btn-warning" onclick="openResetModal()">Eliminar proyecto actual</button>
   </div>
 
   <!-- SEMRUSH -->
@@ -275,10 +275,10 @@
     <div class="section-title">Zona peligrosa</div>
     <div class="danger-row">
       <div class="danger-info">
-        <div class="danger-info-title">Cerrar sesión</div>
-        <div class="danger-info-sub">Salir de tu cuenta en este dispositivo</div>
+        <div class="danger-info-title">Eliminar proyecto</div>
+        <div class="danger-info-sub">Borra la web actual, sus snapshots y la configuración asociada. Tu cuenta seguirá existiendo.</div>
       </div>
-      <button class="btn btn-danger" onclick="logout()">Cerrar sesión</button>
+      <button class="btn btn-danger" onclick="openResetModal()">Eliminar proyecto</button>
     </div>
   </div>
 </div>
@@ -310,8 +310,8 @@
 
 <div class="modal-overlay" id="modal-reset">
   <div class="modal">
-    <div class="modal-title">¿Cambiar de proyecto?</div>
-    <p class="modal-body">Esto eliminará todos los datos del proyecto actual.</p>
+    <div class="modal-title">¿Eliminar proyecto actual?</div>
+    <p class="modal-body">Esto eliminará todos los datos del proyecto actual para que puedas crear y monitorizar otra web.</p>
     <div class="modal-warning">⚠️ Esta acción no se puede deshacer.</div>
     <div class="field">
       <label>Escribe "CONFIRMAR" para continuar</label>
@@ -398,6 +398,10 @@
     if (project) {
       _projectId = project.id;
       _projectIntakeData = project.intake_data || {};
+    }
+    const currentDomainInput = document.getElementById('current-domain');
+    if (currentDomainInput) {
+      currentDomainInput.value = project?.domain || project?.gsc_site_url || '';
     }
 
     // Nombre y Empresa
