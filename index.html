@@ -3,6 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+  <link rel="apple-touch-icon" href="/favicon.svg" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Traxxo — Login</title>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght:300;400;500;600;700&display=swap" rel="stylesheet" />
@@ -13,123 +14,145 @@
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     :root {
-      --bg: #09090b; 
-      --surface: #111113; 
-      --border: #1f1f23;
-      --text: #fafafa; 
-      --muted: #71717a; 
-      --accent: #22d3ee;
+      --bg: #09090b; --surface: #111113; --border: #1f1f23;
+      --text: #fafafa; --muted: #71717a; --accent: #22d3ee;
       --font: 'Inter', system-ui, sans-serif;
     }
-    body { 
-      background: var(--bg); 
-      color: var(--text); 
-      font-family: var(--font); 
-      min-height: 100vh; 
-      display: flex; 
-      align-items: center; 
-      justify-content: center; 
-      padding: 24px; 
-    }
+    body { background: var(--bg); color: var(--text); font-family: var(--font); min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 24px; -webkit-font-smoothing: antialiased; }
     .card {
-      background: var(--surface); 
-      border: 1px solid var(--border);
-      border-radius: 16px; 
-      padding: 40px; 
-      width: 100%; 
-      max-width: 400px;
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: 16px; padding: 40px; width: 100%; max-width: 400px;
     }
     .logo {
-      display: flex; 
-      align-items: center; 
-      gap: 10px;
-      font-size: 18px; 
-      font-weight: 700; 
-      margin-bottom: 32px;
+      display: flex; align-items: center; gap: 10px;
+      font-size: 18px; font-weight: 700; margin-bottom: 32px;
     }
+    .logo svg { flex-shrink: 0; }
+    h1 { font-size: 22px; font-weight: 700; margin-bottom: 6px; }
+    .subtitle { font-size: 14px; color: var(--muted); margin-bottom: 28px; }
+    .tabs { display: flex; gap: 0; margin-bottom: 28px; border: 1px solid var(--border); border-radius: 8px; overflow: hidden; }
+    .tab-btn { flex: 1; padding: 9px; font-size: 13px; font-weight: 600; background: none; border: none; color: var(--muted); cursor: pointer; transition: all .15s; font-family: var(--font); }
+    .tab-btn.active { background: var(--border); color: var(--text); }
+    label { display: block; font-size: 12px; font-weight: 500; color: var(--muted); margin-bottom: 6px; letter-spacing: .04em; text-transform: uppercase; }
+    input {
+      width: 100%; padding: 11px 14px; background: var(--bg);
+      border: 1px solid var(--border); border-radius: 8px;
+      color: var(--text); font-size: 14px; font-family: var(--font);
+      outline: none; transition: border-color .15s; margin-bottom: 16px;
+    }
+    input:focus { border-color: rgba(34,211,238,.4); }
+    input::placeholder { color: var(--muted); }
+    .btn {
+      width: 100%; padding: 12px; border-radius: 8px; border: none;
+      background: var(--accent); color: #000; font-size: 14px;
+      font-weight: 600; font-family: var(--font); cursor: pointer;
+      transition: opacity .15s; margin-top: 4px;
+    }
+    .btn:hover { opacity: .85; }
+    .btn:disabled { opacity: .5; cursor: not-allowed; }
     .btn-google {
-      width: 100%; 
-      padding: 14px; 
-      border-radius: 8px; 
-      border: none;
-      background: #4285f4; 
-      color: white; 
-      font-size: 15px; 
-      font-weight: 500; 
-      cursor: pointer;
+      width: 100%; padding: 12px; border-radius: 8px; border: none;
+      background: #4285f4; color: white; font-size: 14px;
+      font-weight: 600; font-family: var(--font); cursor: pointer;
+      transition: opacity .15s; margin-bottom: 16px;
       display: flex;
       align-items: center;
       justify-content: center;
-      gap: 10px;
-      margin-bottom: 16px;
+      gap: 8px;
     }
-    .btn-google:hover { opacity: 0.9; }
-    .btn {
-      width: 100%; 
-      padding: 12px; 
-      border-radius: 8px; 
-      border: none;
-      background: var(--accent); 
-      color: #000; 
-      font-size: 14px;
-      font-weight: 600; 
-      cursor: pointer;
-    }
-    .msg { 
-      font-size: 13px; 
-      margin-top: 16px; 
-      padding: 10px 14px; 
-      border-radius: 8px; 
-      display: none; 
-    }
-    .msg.success { background: rgba(34,211,238,.15); color: var(--accent); }
-    .msg.error { background: rgba(239,68,68,.15); color: #f87171; }
+    .msg { font-size: 13px; margin-top: 16px; padding: 10px 14px; border-radius: 8px; display: none; }
+    .msg.success { background: rgba(34,211,238,.08); color: var(--accent); border: 1px solid rgba(34,211,238,.2); display: block; }
+    .msg.error { background: rgba(239,68,68,.08); color: #f87171; border: 1px solid rgba(239,68,68,.2); display: block; }
+
+    #dashboard { display: none; }
+    .dash-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 32px; }
+    .logout-btn { padding: 8px 16px; border-radius: 8px; border: 1px solid var(--border); background: none; color: var(--muted); font-size: 13px; font-family: var(--font); cursor: pointer; }
+    .welcome { font-size: 14px; color: var(--muted); margin-bottom: 24px; }
+    .welcome span { color: var(--accent); font-weight: 500; }
   </style>
 </head>
 <body>
 
-<div class="card">
-  <div class="logo">
-    <span style="font-size:24px;">📊</span>
-    traxxo
+<div id="auth-section">
+  <div class="card">
+    <div class="logo">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+        <rect width="24" height="24" rx="7" fill="#22d3ee" fill-opacity=".12"/>
+        <path d="M5 12h4l2-5 2 10 2-5h2" stroke="#22d3ee" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+      traxxo
+    </div>
+
+    <div class="tabs">
+      <button class="tab-btn active" onclick="switchTab('login')">Entrar</button>
+      <button class="tab-btn" onclick="switchTab('register')">Registro</button>
+    </div>
+
+    <!-- ==================== LOGIN FORM ==================== -->
+    <div id="login-form">
+      <!-- Botón Google - Solo esto cambié -->
+      <button class="btn-google" onclick="connectGoogle()" type="button">
+        <span style="font-size:18px;">🔵</span>
+        Continuar con Google
+      </button>
+
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px">
+        <div style="flex:1;height:1px;background:var(--border)"></div>
+        <span style="font-size:12px;color:var(--muted)">o con email</span>
+        <div style="flex:1;height:1px;background:var(--border)"></div>
+      </div>
+
+      <form method="POST" action="/login">
+        <label>Email</label>
+        <input type="email" name="email" id="login-email" placeholder="tu@empresa.com" required />
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
+          <label style="margin:0">Contraseña</label>
+          <a href="#" onclick="showReset();return false;" style="font-size:11px;color:var(--muted);text-decoration:none">¿Olvidaste tu contraseña?</a>
+        </div>
+        <input type="password" name="password" id="login-password" placeholder="••••••••" required />
+        <input type="hidden" name="next" value="{{ request.args.get('next', '') }}">
+        <button type="submit" class="btn">Entrar</button>
+      </form>
+
+      <div class="msg" id="login-msg"></div>
+    </div>
+
+    <!-- Reset Password -->
+    <div id="reset-form" style="display:none">
+      <p style="font-size:13px;color:var(--muted);margin-bottom:20px">Introduce tu email y te enviamos un enlace para restablecer tu contraseña.</p>
+      <label>Email</label>
+      <input type="email" id="reset-email" placeholder="tu@empresa.com" />
+      <button class="btn" onclick="sendReset()">Enviar enlace</button>
+      <div style="margin-top:12px">
+        <a href="#" onclick="hideReset();return false;">← Volver al login</a>
+      </div>
+      <div class="msg" id="reset-msg"></div>
+    </div>
+
+    <!-- Register Form -->
+    <div id="register-form" style="display:none">
+      <!-- Pega aquí tu formulario de registro si lo tienes -->
+      <button class="btn" onclick="register()">Crear cuenta</button>
+      <div class="msg" id="register-msg"></div>
+    </div>
   </div>
-
-  <button onclick="connectGoogle()" class="btn-google" type="button">
-    <span>🔵</span> Continuar con Google
-  </button>
-
-  <div style="text-align:center; color:var(--muted); font-size:13px; margin:16px 0;">
-    o con email
-  </div>
-
-  <!-- Tu formulario de email/password -->
-  <form method="POST" action="/login">
-    <label style="font-size:12px; color:var(--muted);">EMAIL</label>
-    <input type="email" name="email" value="danielpetermanns@gmail.com" style="margin-bottom:12px;" />
-
-    <label style="font-size:12px; color:var(--muted);">CONTRASEÑA</label>
-    <input type="password" name="password" placeholder="••••••••" />
-
-    <button type="submit" class="btn" style="margin-top:16px;">Entrar</button>
-  </form>
-
-  <div class="msg" id="login-msg"></div>
 </div>
 
 <script>
-// ==================== GOOGLE LOGIN ====================
+// ==================== GOOGLE LOGIN CON SUPABASE ====================
 async function connectGoogle() {
-  console.log("✅ Botón Google clickeado - Iniciando login...");
+  console.log("✅ Botón Google clickeado");
 
   const msg = document.getElementById('login-msg');
-
-  try {
+  if (msg) {
     msg.textContent = "Redirigiendo a Google...";
     msg.className = "msg success";
     msg.style.display = "block";
+  }
 
-    // ←←← PON AQUÍ TUS DATOS REALES DE SUPABASE ←←←
-    const supabaseUrl = 'https://TU-PROJECT.supabase.co'; 
+  try {
+    // ←←← CAMBIA ESTOS DOS VALORES CON LOS TUYOS ←←←
+    const supabaseUrl = 'https://TU-PROJECT-ID.supabase.co';
     const supabaseAnonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...'; // tu anon key completa
 
     const supabase = window.supabase.createClient(supabaseUrl, supabaseAnonKey);
@@ -137,22 +160,42 @@ async function connectGoogle() {
     const { error } = await supabase.auth.signInWithOAuth({
       provider: 'google',
       options: {
-        redirectTo: window.location.origin + window.location.pathname  // vuelve a esta misma página
+        redirectTo: window.location.origin + '/index.html'
       }
     });
 
-    if (error) throw error;
-
+    if (error) {
+      throw error;
+    }
   } catch (err) {
-    console.error("❌ Error en Google login:", err);
-    msg.textContent = "Error: " + (err.message || err);
-    msg.className = "msg error";
-    msg.style.display = "block";
+    console.error("❌ Error Google:", err);
+    if (msg) {
+      msg.textContent = "Error: " + (err.message || "No se pudo conectar con Google");
+      msg.className = "msg error";
+    }
   }
 }
 
-// Para depuración
-console.log("Traxxo login page cargada - Botón Google listo");
+// Tus funciones originales
+function switchTab(tab) {
+  document.querySelectorAll('.tab-btn').forEach((b, i) => b.classList.toggle('active', (i === 0 && tab === 'login') || (i === 1 && tab === 'register')));
+  document.getElementById('login-form').style.display = tab === 'login' ? '' : 'none';
+  document.getElementById('register-form').style.display = tab === 'register' ? '' : 'none';
+}
+
+function showReset() {
+  document.getElementById('login-form').style.display = 'none';
+  document.getElementById('reset-form').style.display = 'block';
+}
+
+function hideReset() {
+  document.getElementById('reset-form').style.display = 'none';
+  document.getElementById('login-form').style.display = 'block';
+}
+
+// Añade aquí register() y sendReset() si los tienes
+
+console.log("Traxxo login cargado - Botón Google listo");
 </script>
 
 </body>
