@@ -191,7 +191,10 @@
   <div class="section" style="background:rgba(139,92,246,.06);border-color:rgba(139,92,246,.2)">
     <div class="section-title" style="color:#8b5cf6">[DEBUG] Reconectar GSC</div>
     <p style="font-size:13px;color:var(--muted);margin-bottom:14px">Botón temporal para forzar reconexión OAuth.</p>
-    <button class="btn btn-accent" onclick="reconnectGSCDebug()" style="background:#8b5cf6">Reconectar GSC (debug)</button>
+    <div style="display:flex;gap:8px;flex-wrap:wrap">
+      <button class="btn btn-accent" onclick="reconnectGSCDebug()" style="background:#8b5cf6">Reconectar GSC (debug)</button>
+      <button class="btn btn-ghost" onclick="loadGSCSites()">Cargar propiedades GSC</button>
+    </div>
     <div class="msg" id="reconnect-gsc-msg"></div>
   </div>
 
@@ -343,7 +346,10 @@
 
     // Google
     if (client?.google_access_token) {
-      markConnected(session.user.email);
+      markConnected({
+        email: session.user.email,
+        gscSiteUrl: project?.gsc_site_url
+      });
     }
   });
 
@@ -369,13 +375,27 @@
     showMsg('google-msg', 'Google desconectado correctamente.', 'success');
   }
 
-  function markConnected(email) {
-    ['gsc','ads','ga4'].forEach(k => {
-      const badge = document.getElementById(k + '-badge');
-      const detail = document.getElementById(k + '-detail');
-      if (badge) { badge.textContent = 'Conectado'; badge.className = 'conn-badge connected'; }
-      if (detail && email) detail.textContent = email;
-    });
+  function setConnectionState(key, badgeText, detailText, isConnected) {
+    const badge = document.getElementById(key + '-badge');
+    const detail = document.getElementById(key + '-detail');
+    if (badge) {
+      badge.textContent = badgeText;
+      badge.className = isConnected ? 'conn-badge connected' : 'conn-badge disconnected';
+    }
+    if (detail && detailText) detail.textContent = detailText;
+  }
+
+  function markConnected(connectionData) {
+    const email = connectionData?.email;
+    const gscSiteUrl = connectionData?.gscSiteUrl;
+
+    if (gscSiteUrl) {
+      setConnectionState('gsc', 'Conectado', gscSiteUrl, true);
+    } else {
+      setConnectionState('gsc', 'Pendiente', 'Cuenta Google conectada. Falta elegir propiedad.', false);
+    }
+    setConnectionState('ads', 'Pendiente', email ? 'Cuenta Google conectada. Falta elegir cuenta de Ads.' : 'Falta elegir cuenta de Ads.', false);
+    setConnectionState('ga4', 'Pendiente', email ? 'Cuenta Google conectada. Falta elegir propiedad de GA4.' : 'Falta elegir propiedad de GA4.', false);
     document.getElementById('btn-connect').textContent = 'Reconectar / Cambiar cuenta';
     document.getElementById('btn-disconnect').style.display = '';
   }
@@ -449,6 +469,104 @@
     }
     closeResetModal();
     window.location.href = '/';
+  }
+
+  function closeSiteModal() {
+    document.getElementById('modal-sites').classList.remove('active');
+    document.getElementById('site-list').innerHTML = '';
+    _selectedSite = null;
+    const btn = document.getElementById('btn-confirm-site');
+    if (btn) {
+      btn.disabled = true;
+      btn.textContent = 'Confirmar →';
+    }
+  }
+
+  function openSiteModal(sites) {
+    const list = document.getElementById('site-list');
+    if (!list) return;
+    list.innerHTML = '';
+
+    sites.forEach((site) => {
+      const el = document.createElement('div');
+      el.style.cssText = 'padding:10px 14px;background:var(--bg);border:1px solid var(--border);border-radius:10px;cursor:pointer;font-size:13px;color:var(--muted);transition:all .15s;word-break:break-all;margin-bottom:8px';
+      el.textContent = site.siteUrl;
+      el.onclick = function() {
+        list.querySelectorAll('div').forEach((d) => {
+          d.style.borderColor = 'var(--border)';
+          d.style.color = 'var(--muted)';
+          d.style.background = 'var(--bg)';
+        });
+        el.style.borderColor = 'var(--accent)';
+        el.style.color = 'var(--accent)';
+        el.style.background = 'rgba(34,211,238,.06)';
+        _selectedSite = site.siteUrl;
+        const btn = document.getElementById('btn-confirm-site');
+        if (btn) btn.disabled = false;
+      };
+      list.appendChild(el);
+    });
+
+    document.getElementById('modal-sites').classList.add('active');
+  }
+
+  async function confirmSite() {
+    if (!_selectedSite || !_userId) return;
+    const btn = document.getElementById('btn-confirm-site');
+    if (btn) {
+      btn.disabled = true;
+      btn.textContent = 'Guardando...';
+    }
+
+    const { error } = await sb
+      .from('projects')
+      .update({ gsc_site_url: _selectedSite })
+      .eq('client_id', _userId);
+
+    if (error) {
+      if (btn) {
+        btn.disabled = false;
+        btn.textContent = 'Confirmar →';
+      }
+      return showMsg('google-msg', 'Error al guardar la propiedad GSC', 'error');
+    }
+
+    setConnectionState('gsc', 'Conectado', _selectedSite, true);
+    closeSiteModal();
+    showMsg('google-msg', '✓ Propiedad de Search Console guardada', 'success');
+  }
+
+  async function loadGSCSites() {
+    const { data: { session } } = await sb.auth.getSession();
+    if (!session?.access_token) {
+      return showMsg('google-msg', 'No hay sesión activa para cargar propiedades GSC', 'error');
+    }
+
+    showMsg('google-msg', 'Cargando propiedades GSC...', '');
+
+    try {
+      const res = await fetch(`${SUPABASE_URL}/functions/v1/list-gsc-sites`, {
+        method: 'GET',
+        headers: {
+          Authorization: `Bearer ${session.access_token}`
+        }
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        return showMsg('google-msg', data.error || 'No se pudieron cargar las propiedades GSC', 'error');
+      }
+
+      if (!data.sites || !data.sites.length) {
+        return showMsg('google-msg', 'No se encontraron propiedades de Search Console en esta cuenta', 'error');
+      }
+
+      showMsg('google-msg', `✓ ${data.sites.length} propiedades GSC encontradas`, 'success');
+      openSiteModal(data.sites);
+    } catch (e) {
+      return showMsg('google-msg', 'Error de red al cargar propiedades GSC', 'error');
+    }
   }
 
   function reconnectGSCDebug() {
