@@ -17,7 +17,7 @@
     }
     body { background: var(--bg); color: var(--text); font-family: var(--font); min-height: 100vh; -webkit-font-smoothing: antialiased; }
 
-    /* HEADER - SOLO LOGO (como pediste) */
+    /* HEADER */
     .header { 
       display:flex; 
       align-items:center; 
@@ -287,77 +287,60 @@
   let _userId = null;
   let _projectId = null;
   let _selectedSite = null;
-  let _currentToken = null;
 
   // ==================== INIT ====================
   sb.auth.getSession().then(async ({ data: { session } }) => {
-    if (!session) { 
-      window.location.href = '/'; 
-      return; 
+    if (!session) {
+      window.location.href = '/';
+      return;
     }
-    
+
     _userId = session.user.id;
-    _currentToken = session.provider_token || null;
 
     // Avatar
     const avatarEl = document.getElementById('avatar-wrap');
-    const avatar = session.user.user_metadata?.avatar_url;
-    if (avatar) {
-      avatarEl.innerHTML = `<img src="${avatar}" alt="foto" />`;
+    const avatarUrl = session.user.user_metadata?.avatar_url;
+    if (avatarUrl) {
+      avatarEl.innerHTML = `<img src="${avatarUrl}" alt="foto" style="width:100%;height:100%;object-fit:cover;">`;
     } else {
       avatarEl.textContent = (session.user.email || '?')[0].toUpperCase();
     }
 
-    document.getElementById('profile-email').textContent = session.user.email || '';
+    // Email
+    document.getElementById('profile-email').textContent = session.user.email || '—';
 
-    // Cargar datos
+    // Cargar datos del usuario
     const { data: client } = await sb.from('clients').select('*').eq('id', _userId).single();
     const { data: project } = await sb.from('projects').select('*').eq('client_id', _userId).limit(1).maybeSingle();
 
     if (project) _projectId = project.id;
 
-    // Rellenar campos
-    const name = client?.name || session.user.user_metadata?.full_name || '';
+    // Nombre y Empresa
+    const name = client?.name || session.user.user_metadata?.full_name || session.user.user_metadata?.name || '';
     const company = client?.company || '';
     document.getElementById('edit-name').value = name;
     document.getElementById('edit-company').value = company;
-    document.getElementById('profile-display-name').textContent = name || session.user.email?.split('@')[0];
-    document.getElementById('current-domain').value = project?.domain || '—';
+    document.getElementById('profile-display-name').textContent = name || 'Sin nombre';
 
     // Plan
     const plan = client?.plan || 'early_access';
-    document.getElementById('profile-plan').textContent = { basic:'Basic', pro:'Pro', agency:'Agency' }[plan] || 'Early Access';
-
-    // Notificaciones
-    const notifs = client?.notifications || {};
-    document.getElementById('notif-weekly').checked = notifs.weekly !== false;
-    document.getElementById('notif-alerts').checked = notifs.alerts !== false;
+    document.getElementById('profile-plan').textContent = 
+      plan === 'basic' ? 'Basic' : 
+      plan === 'pro' ? 'Pro' : 
+      plan === 'agency' ? 'Agency' : 'Early Access';
 
     // Semrush
     if (project?.semrush_api_key) {
       document.getElementById('semrush-key').value = project.semrush_api_key;
     }
 
-    // Google
+    // Estado de Google
     if (client?.google_access_token) {
       markConnected(session.user.email);
-    } else if (_currentToken) {
-      await saveGoogleToken(_currentToken, session);
-      markConnected(session.user.email);
     }
   });
 
-  // OAuth callback
-  sb.auth.onAuthStateChange(async (event, session) => {
-    if (event === 'SIGNED_IN' && session?.provider_token) {
-      _currentToken = session.provider_token;
-      await saveGoogleToken(session.provider_token, session);
-      markConnected(session.user.email);
-      await checkGSCSites(session.provider_token, session.user.id);
-    }
-  });
-
-  // ==================== GOOGLE (FUNCIÓN ACTUALIZADA) ====================
+  // ==================== GOOGLE ====================
   function connectGoogle() {
     sb.auth.signInWithOAuth({
       provider: 'google',
@@ -407,59 +390,6 @@
     });
     document.getElementById('btn-disconnect').style.display = 'none';
     document.getElementById('btn-connect').textContent = 'Conectar con Google';
-  }
-
-  async function checkGSCSites(token, userId) {
-    try {
-      const res = await fetch('https://www.googleapis.com/webmasters/v3/sites', {
-        headers: { Authorization: 'Bearer ' + token }
-      });
-      const data = await res.json();
-      const sites = (data.siteEntry || []).map(s => s.siteUrl);
-
-      if (sites.length > 1) {
-        showSiteModal(sites, userId);
-      } else if (sites.length === 1) {
-        await sb.from('projects').update({ gsc_site_url: sites[0] }).eq('client_id', userId);
-        document.getElementById('current-domain').value = sites[0];
-      }
-    } catch(e) {
-      console.error(e);
-    }
-  }
-
-  // ==================== SITE SELECTOR ====================
-  function showSiteModal(sites, userId) {
-    const list = document.getElementById('site-list');
-    list.innerHTML = '';
-    sites.forEach(site => {
-      const el = document.createElement('div');
-      el.className = 'site-option';
-      el.textContent = site;
-      el.onclick = () => {
-        list.querySelectorAll('.site-option').forEach(o => o.classList.remove('selected'));
-        el.classList.add('selected');
-        _selectedSite = site;
-        document.getElementById('btn-confirm-site').disabled = false;
-      };
-      list.appendChild(el);
-    });
-    document.getElementById('modal-sites').classList.add('active');
-  }
-
-  function closeSiteModal() {
-    document.getElementById('modal-sites').classList.remove('active');
-  }
-
-  async function confirmSite() {
-    if (!_selectedSite) return;
-    const btn = document.getElementById('btn-confirm-site');
-    btn.disabled = true;
-    btn.textContent = 'Guardando...';
-    await sb.from('projects').update({ gsc_site_url: _selectedSite }).eq('client_id', _userId);
-    document.getElementById('current-domain').value = _selectedSite;
-    closeSiteModal();
-    btn.textContent = 'Confirmar →';
   }
 
   // ==================== OTRAS FUNCIONES ====================
