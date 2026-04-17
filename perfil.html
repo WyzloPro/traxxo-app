@@ -301,9 +301,11 @@
   let _googleConnected = false;
   let _gscSiteUrl = null;
   let _signedInWithGoogle = false;
+  const GOOGLE_TOOLS_AUTH_FLAG = 'traxxo_google_tools_auth';
 
   async function syncGoogleTokensFromSession(session) {
-    if (!_userId || !session?.provider_token) return false;
+    const toolsAuthStarted = localStorage.getItem(GOOGLE_TOOLS_AUTH_FLAG) === '1';
+    if (!_userId || !session?.provider_token || !toolsAuthStarted) return false;
 
     const tokenExpiresAt = new Date(Date.now() + 55 * 60 * 1000).toISOString();
     const payload = {
@@ -325,6 +327,7 @@
       return false;
     }
 
+    localStorage.removeItem(GOOGLE_TOOLS_AUTH_FLAG);
     return true;
   }
 
@@ -404,6 +407,7 @@
       return;
     }
 
+    localStorage.setItem(GOOGLE_TOOLS_AUTH_FLAG, '1');
     sb.auth.signInWithOAuth({
       provider: 'google',
       options: {
@@ -448,6 +452,7 @@
 
     _googleConnected = false;
     _gscSiteUrl = null;
+    localStorage.removeItem(GOOGLE_TOOLS_AUTH_FLAG);
     markDisconnected();
     if (btn) {
       btn.disabled = false;
