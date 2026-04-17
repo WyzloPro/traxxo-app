@@ -373,22 +373,21 @@
     console.log('Google conectado para:', email);
   }
 
-  function connectGoogle(context = 'login') {
-    const isTool = ['onboarding', 'dashboard'].includes(context);
-    const scopes = isTool 
-      ? 'email profile https://www.googleapis.com/auth/webmasters.readonly https://www.googleapis.com/auth/adwords https://www.googleapis.com/auth/analytics.readonly'
-      : 'email profile';
+ function connectGoogle(context = 'login') {
+  const isTool = ['onboarding', 'dashboard'].includes(context);
+  const scopes = isTool 
+    ? 'email profile https://www.googleapis.com/auth/webmasters.readonly https://www.googleapis.com/auth/adwords https://www.googleapis.com/auth/analytics.readonly'
+    : 'email profile';
 
-    sb.auth.signInWithOAuth({
-      provider: 'google',
-      options: {
-        scopes,
-        redirectTo: 'https://app.traxxo.ai',
-        queryParams: { access_type: 'offline', prompt: isTool ? 'consent' : 'select_account' }
-      }
-    });
-  }
-
+  sb.auth.signInWithOAuth({
+    provider: 'google',
+    options: {
+      scopes,
+      redirectTo: 'https://app.traxxo.ai',
+      queryParams: { access_type: 'offline', prompt: isTool ? 'consent' : 'select_account' }
+    }
+  });
+}
   // ==================== ONBOARDING ====================
   function submitIntake() {
     // Aquí puedes agregar validación adicional
