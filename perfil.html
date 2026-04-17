@@ -38,7 +38,10 @@
       text-decoration:none; 
       color:var(--text); 
     }
-
+    .header-buttons {
+      display: flex;
+      gap: 8px;
+    }
     .btn { 
       padding:8px 16px; 
       border-radius:8px; 
@@ -122,6 +125,10 @@
     </svg>
     traxxo
   </a>
+  
+  <div class="header-buttons">
+    <a href="/dashboard.html" class="btn btn-ghost">Dashboard</a>
+  </div>
 </div>
 
 <div class="container">
@@ -334,7 +341,7 @@
       document.getElementById('semrush-key').value = project.semrush_api_key;
     }
 
-    // Estado de Google
+    // Google
     if (client?.google_access_token) {
       markConnected(session.user.email);
     }
@@ -360,14 +367,6 @@
     }).eq('id', _userId);
     markDisconnected();
     showMsg('google-msg', 'Google desconectado correctamente.', 'success');
-  }
-
-  async function saveGoogleToken(token, session) {
-    await sb.from('clients').update({
-      google_access_token: token,
-      google_refresh_token: session.provider_refresh_token || null,
-      google_token_expires_at: session.expires_at ? new Date(session.expires_at * 1000).toISOString() : null
-    }).eq('id', session.user.id);
   }
 
   function markConnected(email) {
