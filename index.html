@@ -170,19 +170,19 @@
 
     <!-- LOGIN -->
     <div id="login-form">
-      <button class="btn btn-google" onclick="connectGoogle('login')" style="margin-bottom:16px">
+      <button class="btn btn-google" id="btn-google-login" onclick="connectGoogle('login')" style="margin-bottom:16px">
         <svg width="16" height="16" viewBox="0 0 18 18"><path fill="#4285F4" d="M17.64 9.2c0-.637-.057-1.251-.164-1.84H9v3.481h4.844c-.209 1.125-.843 2.078-1.796 2.716v2.259h2.908c1.702-1.567 2.684-3.875 2.684-6.615z"/><path fill="#34A853" d="M9 18c2.43 0 4.467-.806 5.956-2.184l-2.908-2.259c-.806.54-1.837.86-3.048.86-2.344 0-4.328-1.584-5.036-3.711H.957v2.332C2.438 15.983 5.482 18 9 18z"/><path fill="#FBBC05" d="M3.964 10.706c-.18-.54-.282-1.117-.282-1.706s.102-1.166.282-1.706V4.962H.957C.347 6.175 0 7.55 0 9s.348 2.825.957 4.038l3.007-2.332z"/><path fill="#EA4335" d="M9 3.58c1.321 0 2.508.454 3.44 1.345l2.582-2.58C13.463.891 11.426 0 9 0 5.482 0 2.438 2.017.957 4.962L3.964 7.294C4.672 5.163 6.656 3.58 9 3.58z"/></svg>
         Continuar con Google
       </button>
       <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px">
         <div style="flex:1;height:1px;background:var(--border)"></div>
-        <span style="font-size:12px;color:var(--muted)" class="or-sep">o con email</span>
+        <span style="font-size:12px;color:var(--muted)" class="or-sep" id="login-or-sep">o con email</span>
         <div style="flex:1;height:1px;background:var(--border)"></div>
       </div>
       <label id="label-email-l">Email</label>
       <input type="email" id="login-email" placeholder="tu@empresa.com" />
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
-        <label style="margin:0">Contraseña</label>
+        <label style="margin:0" id="label-password-l">Contraseña</label>
         <a href="#" onclick="showReset();return false;" style="font-size:11px;color:var(--muted);text-decoration:none;transition:color .15s" onmouseover="this.style.color='var(--accent)'" onmouseout="this.style.color='var(--muted)'" id="label-forgot">¿Olvidaste tu contraseña?</a>
       </div>
       <input type="password" id="login-password" placeholder="••••••••" />
@@ -192,25 +192,25 @@
 
     <!-- RESET PASSWORD -->
     <div id="reset-form" style="display:none">
-      <p style="font-size:13px;color:var(--muted);margin-bottom:20px">Introduce tu email y te enviamos un enlace para restablecer tu contraseña.</p>
-      <label>Email</label>
+      <p style="font-size:13px;color:var(--muted);margin-bottom:20px" id="reset-copy">Introduce tu email y te enviamos un enlace para restablecer tu contraseña.</p>
+      <label id="label-reset-email">Email</label>
       <input type="email" id="reset-email" placeholder="tu@empresa.com" />
       <button class="btn" id="btn-reset" onclick="sendReset()">Enviar enlace</button>
       <div style="margin-top:12px">
-        <a href="#" onclick="hideReset();return false;" style="font-size:12px;color:var(--muted);text-decoration:none">← Volver al login</a>
+        <a href="#" onclick="hideReset();return false;" id="reset-back" style="font-size:12px;color:var(--muted);text-decoration:none">← Volver al login</a>
       </div>
       <div class="msg" id="reset-msg"></div>
     </div>
 
     <!-- REGISTER -->
     <div id="register-form" style="display:none">
-      <button class="btn btn-google" onclick="connectGoogle('register')" style="margin-bottom:16px">
+      <button class="btn btn-google" id="btn-google-register" onclick="connectGoogle('register')" style="margin-bottom:16px">
         <svg width="16" height="16" viewBox="0 0 18 18"><path fill="#4285F4" d="M17.64 9.2c0-.637-.057-1.251-.164-1.84H9v3.481h4.844c-.209 1.125-.843 2.078-1.796 2.716v2.259h2.908c1.702-1.567 2.684-3.875 2.684-6.615z"/><path fill="#34A853" d="M9 18c2.43 0 4.467-.806 5.956-2.184l-2.908-2.259c-.806.54-1.837.86-3.048.86-2.344 0-4.328-1.584-5.036-3.711H.957v2.332C2.438 15.983 5.482 18 9 18z"/><path fill="#FBBC05" d="M3.964 10.706c-.18-.54-.282-1.117-.282-1.706s.102-1.166.282-1.706V4.962H.957C.347 6.175 0 7.55 0 9s.348 2.825.957 4.038l3.007-2.332z"/><path fill="#EA4335" d="M9 3.58c1.321 0 2.508.454 3.44 1.345l2.582-2.58C13.463.891 11.426 0 9 0 5.482 0 2.438 2.017.957 4.962L3.964 7.294C4.672 5.163 6.656 3.58 9 3.58z"/></svg>
         Registrarse con Google
       </button>
       <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px">
         <div style="flex:1;height:1px;background:var(--border)"></div>
-        <span style="font-size:12px;color:var(--muted)">o con email</span>
+        <span style="font-size:12px;color:var(--muted)" id="register-or-sep">o con email</span>
         <div style="flex:1;height:1px;background:var(--border)"></div>
       </div>
       <label id="label-name">Nombre</label>
@@ -233,7 +233,7 @@
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
         </button>
       </div>
-      <div style="text-align:center;margin:14px 0 2px;font-size:12px;color:var(--muted);line-height:1.6">
+      <div id="terms-text" style="text-align:center;margin:14px 0 2px;font-size:12px;color:var(--muted);line-height:1.6">
         <input type="checkbox" id="reg-terms" style="accent-color:var(--accent);vertical-align:middle;margin-right:6px;width:13px;height:13px" />
         Acepto los <a href="https://traxxo.ai/terminos.html" target="_blank" style="color:var(--accent)">Términos</a> y la <a href="https://traxxo.ai/privacidad.html" target="_blank" style="color:var(--accent)">Privacidad</a>
       </div>
@@ -920,12 +920,12 @@
     var email = document.getElementById('login-email').value.trim();
     var pass  = document.getElementById('login-password').value;
     if (!email || !pass) { showMsg('login-msg', 'Rellena email y contraseña', 'error'); return; }
-    var btn = document.querySelector('#login-form .btn');
+    var btn = document.getElementById('btn-login');
     btn.disabled = true; btn.textContent = 'Entrando...';
     var { data, error } = await sb.auth.signInWithPassword({ email, password: pass });
     btn.disabled = false; btn.textContent = 'Entrar';
     if (error) { showMsg('login-msg', error.message, 'error'); return; }
-    showDashboard(data.user);
+    window.location.href = '/perfil.html';
   }
 
   function togglePwd(inputId, btn) {
@@ -950,7 +950,14 @@
     if (!terms) { showMsg('register-msg', 'Debes aceptar los términos y la política de privacidad', 'error'); return; }
     var btn = document.querySelector('#register-form .btn:last-of-type');
     btn.disabled = true; btn.textContent = 'Creando cuenta...';
-    var { data, error } = await sb.auth.signUp({ email, password: pass, options: { data: { name, company } } });
+    var { data, error } = await sb.auth.signUp({
+      email: email,
+      password: pass,
+      options: {
+        data: { name, company },
+        emailRedirectTo: 'https://app.traxxo.ai/perfil.html'
+      }
+    });
     btn.disabled = false; btn.textContent = 'Crear cuenta';
     if (error) { showMsg('register-msg', error.message, 'error'); return; }
     // Mostrar pantalla de confirmación con carrusel
@@ -1048,9 +1055,17 @@
         .select('google_access_token, email')
         .eq('id', session.user.id)
         .single();
+      var { data: project } = await sb.from('projects')
+        .select('gsc_site_url')
+        .eq('client_id', session.user.id)
+        .limit(1)
+        .maybeSingle();
 
       if (client && client.google_access_token) {
-        markGoogleConnected(client.email || session.user.email);
+        markGoogleConnected({
+          email: client.email || session.user.email,
+          gscSiteUrl: project && project.gsc_site_url
+        });
       } else {
         // Mostrar banner para conectar
         var banner = document.getElementById('banner-connect');
@@ -1063,18 +1078,32 @@
     }
   }
 
-  function markGoogleConnected(email) {
+  function setConnectionState(key, badgeText, detailText, isConnected) {
+    var statusEl = document.getElementById('conn-' + key + '-status');
+    var detailEl = document.getElementById('conn-' + key + '-detail');
+    if (statusEl) {
+      statusEl.textContent = badgeText;
+      statusEl.className = isConnected ? 'connection-status connected' : 'connection-status';
+    }
+    if (detailEl && detailText) detailEl.textContent = detailText;
+  }
+
+  function markGoogleConnected(connectionData) {
+    var email = connectionData && connectionData.email;
+    var gscSiteUrl = connectionData && connectionData.gscSiteUrl;
+
     // Ocultar banner
     var banner = document.getElementById('banner-connect');
     if (banner) banner.style.display = 'none';
 
-    // Marcar GSC, Ads y GA4 como conectados
-    ['gsc','ads','ga4'].forEach(function(key) {
-      var statusEl = document.getElementById('conn-' + key + '-status');
-      var detailEl = document.getElementById('conn-' + key + '-detail');
-      if (statusEl) { statusEl.textContent = 'Conectado'; statusEl.className = 'connection-status connected'; }
-      if (detailEl && email) detailEl.textContent = email;
-    });
+    // No marcar todo como conectado solo por tener una cuenta Google.
+    if (gscSiteUrl) {
+      setConnectionState('gsc', 'Conectado', gscSiteUrl, true);
+    } else {
+      setConnectionState('gsc', 'Pendiente', 'Cuenta Google conectada. Falta elegir propiedad.', false);
+    }
+    setConnectionState('ads', 'Pendiente', email ? 'Cuenta Google conectada. Falta elegir cuenta de Ads.' : 'Falta elegir cuenta de Ads.', false);
+    setConnectionState('ga4', 'Pendiente', email ? 'Cuenta Google conectada. Falta elegir propiedad de GA4.' : 'Falta elegir propiedad de GA4.', false);
 
     // Ocultar botón de conectar
     var connectArea = document.getElementById('dash-connect-area');
@@ -1088,7 +1117,10 @@
     if (pendingEl) pendingEl.style.display = 'none';
     if (okEl) okEl.style.display = '';
     if (emailEl) emailEl.textContent = email;
-    if (badgeEl) { badgeEl.textContent = 'Conectado'; badgeEl.className = 'connection-status connected'; }
+    if (badgeEl) {
+      badgeEl.textContent = gscSiteUrl ? 'Conectado' : 'Pendiente';
+      badgeEl.className = gscSiteUrl ? 'connection-status connected' : 'connection-status';
+    }
   }
 
 
@@ -1097,7 +1129,7 @@
   // Verificar sesión al cargar
   sb.auth.getSession().then(function({ data: { session } }) {
     if (session) {
-      showDashboard(session.user);
+      window.location.replace('/perfil.html');
     } else {
       showLogin();
     }
@@ -1110,7 +1142,7 @@
       if (window.location.hash.includes('access_token')) {
         history.replaceState(null, '', window.location.pathname);
       }
-      showDashboard(session.user);
+      window.location.replace('/perfil.html');
     } else if (event === 'SIGNED_OUT') {
       showLogin();
     }
@@ -1201,7 +1233,7 @@
       provider: 'google',
       options: {
         scopes: scopeList,
-        redirectTo: 'https://app.traxxo.ai',
+        redirectTo: 'https://app.traxxo.ai/perfil.html',
         queryParams: { access_type: 'offline', prompt: isToolConnection ? 'consent' : 'select_account' }
       }
     });
@@ -1306,8 +1338,8 @@
 
   // ─── i18n ────────────────────────────────────────────────
   var TRANSLATIONS = {
-    es: { login:'Entrar', register:'Registro', google_login:'Continuar con Google', google_register:'Registrarse con Google', or_email:'o con email', name:'Nombre', company:'Empresa', email:'Email', password:'Contraseña', password_ph:'Mínimo 8 caracteres', repeat_pass:'Repite la contraseña', repeat_ph:'Repite tu contraseña', terms_text:'Acepto los', terms_link:'Términos', and:'y la', privacy_link:'Privacidad', create_account:'Crear cuenta', sign_in:'Entrar', forgot:'¿Olvidaste tu contraseña?', intake_title:'Cuéntanos sobre tu proyecto', intake_sub:'Usamos esta información para preparar tu dashboard a medida.', intake_url:'URL de tu web', intake_btn:'Enviar y continuar →', plan_title:'Elige tu plan', plan_sub:'Puedes cambiar en cualquier momento.', welcome:'Bienvenido,', logout:'Cerrar sesión' },
-    en: { login:'Sign in', register:'Sign up', google_login:'Continue with Google', google_register:'Sign up with Google', or_email:'or with email', name:'Name', company:'Company', email:'Email', password:'Password', password_ph:'Minimum 8 characters', repeat_pass:'Repeat password', repeat_ph:'Repeat your password', terms_text:'I accept the', terms_link:'Terms', and:'and', privacy_link:'Privacy Policy', create_account:'Create account', sign_in:'Sign in', forgot:'Forgot your password?', intake_title:'Tell us about your project', intake_sub:'We use this info to prepare your custom dashboard.', intake_url:'Your website URL', intake_btn:'Submit and continue →', plan_title:'Choose your plan', plan_sub:'Change anytime.', welcome:'Welcome,', logout:'Sign out' }
+    es: { login:'Entrar', register:'Registro', google_login:'Continuar con Google', google_register:'Registrarse con Google', or_email:'o con email', name:'Nombre', company:'Empresa', email:'Email', password:'Contraseña', password_ph:'Mínimo 8 caracteres', repeat_pass:'Repite la contraseña', repeat_ph:'Repite tu contraseña', terms_text:'Acepto los', terms_link:'Términos', and:'y la', privacy_link:'Privacidad', create_account:'Crear cuenta', sign_in:'Entrar', forgot:'¿Olvidaste tu contraseña?', reset_copy:'Introduce tu email y te enviamos un enlace para restablecer tu contraseña.', reset_cta:'Enviar enlace', reset_back:'← Volver al login', intake_title:'Cuéntanos sobre tu proyecto', intake_sub:'Usamos esta información para preparar tu dashboard a medida.', intake_url:'URL de tu web', intake_btn:'Enviar y continuar →', plan_title:'Elige tu plan', plan_sub:'Puedes cambiar en cualquier momento.', welcome:'Bienvenido,', logout:'Cerrar sesión' },
+    en: { login:'Sign in', register:'Sign up', google_login:'Continue with Google', google_register:'Sign up with Google', or_email:'or with email', name:'Name', company:'Company', email:'Email', password:'Password', password_ph:'Minimum 8 characters', repeat_pass:'Repeat password', repeat_ph:'Repeat your password', terms_text:'I accept the', terms_link:'Terms', and:'and', privacy_link:'Privacy Policy', create_account:'Create account', sign_in:'Sign in', forgot:'Forgot your password?', reset_copy:'Enter your email and we will send you a password reset link.', reset_cta:'Send link', reset_back:'← Back to login', intake_title:'Tell us about your project', intake_sub:'We use this info to prepare your custom dashboard.', intake_url:'Your website URL', intake_btn:'Submit and continue →', plan_title:'Choose your plan', plan_sub:'Change anytime.', welcome:'Welcome,', logout:'Sign out' }
   };
 
   var _lang = localStorage.getItem('traxxo_lang') || (navigator.language && navigator.language.startsWith('en') ? 'en' : 'es');
@@ -1322,10 +1354,31 @@
     var btnEn = document.getElementById('lang-en');
     if (btnEs) { btnEs.style.color = _lang==='es'?'var(--accent)':'var(--muted)'; btnEs.style.borderColor = _lang==='es'?'var(--accent)':'var(--border)'; }
     if (btnEn) { btnEn.style.color = _lang==='en'?'var(--accent)':'var(--muted)'; btnEn.style.borderColor = _lang==='en'?'var(--accent)':'var(--border)'; }
-    var tabLogin = document.querySelector('[onclick="showLogin()"]');
-    var tabReg = document.querySelector('[onclick="showRegister()"]');
+    var tabLogin = document.querySelector('[data-i18n="login"] span') || document.querySelector('[data-i18n="login"]');
+    var tabReg = document.querySelector('[data-i18n="register"] span') || document.querySelector('[data-i18n="register"]');
     if (tabLogin) tabLogin.textContent = T.login;
     if (tabReg) tabReg.textContent = T.register;
+    var textMap = {
+      'btn-google-login':'google_login',
+      'btn-google-register':'google_register',
+      'login-or-sep':'or_email',
+      'register-or-sep':'or_email',
+      'label-name':'name',
+      'label-email-l':'email',
+      'label-email-r':'email',
+      'label-password':'password',
+      'label-password-l':'password',
+      'label-repeat':'repeat_pass',
+      'label-forgot':'forgot',
+      'reset-copy':'reset_copy',
+      'label-reset-email':'email',
+      'btn-reset':'reset_cta',
+      'reset-back':'reset_back'
+    };
+    Object.keys(textMap).forEach(function(id) {
+      var el = document.getElementById(id);
+      if (el) el.textContent = T[textMap[id]];
+    });
     var idMap = { 'btn-create':'create_account','btn-login':'sign_in','btn-intake':'intake_btn' };
     Object.keys(idMap).forEach(function(id) { var el=document.getElementById(id); if(el) el.textContent=T[idMap[id]]; });
     var phMap = { 'reg-password':'password_ph','reg-password2':'repeat_ph','login-password':'password_ph','intake-url':'intake_url' };
