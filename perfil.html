@@ -524,7 +524,30 @@ async function confirmReset() {
   // Redirigir al intake
   window.location.href = '/';
 }
+// ── DEBUG: RECONECTAR GSC ────────────────────────────────
+function reconnectGSCDebug() {
+  const GOOGLE_CLIENT_ID = '427326769305-839tomo4l4ph33kp0tsvbkf3p16ojbnv.apps.googleusercontent.com';
+  const GOOGLE_REDIRECT_URI = 'https://ghqttckqvjptxhihojey.supabase.co/auth/v1/callback';
 
+  if (!GOOGLE_CLIENT_ID || !GOOGLE_REDIRECT_URI) {
+    console.error('❌ Faltan credenciales de Google');
+    showMsg('reconnect-gsc-msg', '❌ Credenciales no configuradas', 'error');
+    return;
+  }
+
+  const authUrl = new URL('https://accounts.google.com/o/oauth2/v2/auth');
+  authUrl.searchParams.set('client_id', GOOGLE_CLIENT_ID);
+  authUrl.searchParams.set('redirect_uri', GOOGLE_REDIRECT_URI);
+  authUrl.searchParams.set('response_type', 'code');
+  authUrl.searchParams.set('scope', 'https://www.googleapis.com/auth/webmasters.readonly');
+  authUrl.searchParams.set('access_type', 'offline');
+  authUrl.searchParams.set('prompt', 'consent');
+
+  console.log('🔗 Redirigiendo a Google OAuth para reconectar GSC...');
+  console.log('URL:', authUrl.toString());
+
+  window.location.href = authUrl.toString();
+}
 // ── HELPERS ───────────────────────────────────────────────
 function showMsg(id, text, type) {
   var el = document.getElementById(id);
