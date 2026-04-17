@@ -88,6 +88,20 @@
     .conn-info { flex:1; }
     .conn-name { font-size:14px; font-weight:600; }
     .conn-detail { font-size:12px; color:var(--muted); margin-top:2px; }
+    .conn-actions { display:flex; align-items:center; gap:8px; flex-shrink:0; }
+    .btn-row {
+      padding:6px 12px;
+      border-radius:999px;
+      font-size:11px;
+      font-weight:700;
+      border:1px solid var(--border);
+      background:var(--bg);
+      color:var(--muted);
+      cursor:pointer;
+      transition:all .15s;
+      white-space:nowrap;
+    }
+    .btn-row:hover { border-color:var(--accent); color:var(--accent); }
     .conn-badge { font-size:11px; font-weight:700; padding:3px 10px; border-radius:20px; white-space:nowrap; }
     .conn-badge.connected { background:rgba(16,185,129,.1); color:var(--green); border:1px solid rgba(16,185,129,.2); }
     .conn-badge.disconnected { background:var(--bg); color:var(--muted); border:1px solid var(--border); }
@@ -161,7 +175,10 @@
         <div class="conn-name">Google Search Console</div>
         <div class="conn-detail" id="gsc-detail">Clics, impresiones y posiciones</div>
       </div>
-      <span class="conn-badge disconnected" id="gsc-badge">Sin conectar</span>
+      <div class="conn-actions">
+        <button type="button" class="btn-row" id="btn-gsc-row" onclick="loadGSCSites()" style="display:none">Vincular</button>
+        <span class="conn-badge disconnected" id="gsc-badge">Sin conectar</span>
+      </div>
     </div>
     <div class="conn-row">
       <div class="conn-icon" style="background:#fbbc0420;border-color:#fbbc0440;color:#fbbc04">ADS</div>
@@ -169,7 +186,10 @@
         <div class="conn-name">Google Ads</div>
         <div class="conn-detail" id="ads-detail">Campañas, gasto y ROAS</div>
       </div>
-      <span class="conn-badge disconnected" id="ads-badge">Sin conectar</span>
+      <div class="conn-actions">
+        <button type="button" class="btn-row" id="btn-ads-row" onclick="showAdsPending()" style="display:none">Vincular</button>
+        <span class="conn-badge disconnected" id="ads-badge">Sin conectar</span>
+      </div>
     </div>
     <div class="conn-row">
       <div class="conn-icon" style="background:#e8710a20;border-color:#e8710a40;color:#e8710a">GA4</div>
@@ -177,15 +197,15 @@
         <div class="conn-name">Google Analytics 4</div>
         <div class="conn-detail" id="ga4-detail">Sesiones, usuarios y conversiones</div>
       </div>
-      <span class="conn-badge disconnected" id="ga4-badge">Sin conectar</span>
+      <div class="conn-actions">
+        <button type="button" class="btn-row" id="btn-ga4-row" onclick="loadGA4Properties()" style="display:none">Vincular</button>
+        <span class="conn-badge disconnected" id="ga4-badge">Sin conectar</span>
+      </div>
     </div>
 
     <div style="display:flex;gap:8px;margin-top:16px">
       <button type="button" class="btn btn-accent" id="btn-connect" onclick="connectGoogle(event)" style="flex:1">Autorizar herramientas de Google</button>
       <button type="button" class="btn btn-ghost" id="btn-disconnect" onclick="disconnectGoogle(event)" style="display:none">Desvincular herramientas</button>
-    </div>
-    <div style="display:flex;gap:8px;margin-top:8px">
-      <button type="button" class="btn btn-ghost" id="btn-select-ga4" onclick="loadGA4Properties()" style="display:none;flex:1">Elegir propiedad GA4</button>
     </div>
     <p style="font-size:11px;color:var(--muted);text-align:center;margin-top:8px">Solo pedimos acceso de lectura. Nunca modificamos tus datos.</p>
     <div class="msg" id="google-msg"></div>
@@ -485,11 +505,18 @@
   function setConnectionState(key, badgeText, detailText, isConnected) {
     const badge = document.getElementById(key + '-badge');
     const detail = document.getElementById(key + '-detail');
+    const rowBtn = document.getElementById(`btn-${key}-row`);
     if (badge) {
       badge.textContent = badgeText;
       badge.className = isConnected ? 'conn-badge connected' : 'conn-badge disconnected';
     }
     if (detail && detailText) detail.textContent = detailText;
+    if (rowBtn) {
+      rowBtn.style.display = _googleConnected ? '' : 'none';
+      if (key === 'gsc') rowBtn.textContent = isConnected ? 'Cambiar' : 'Vincular';
+      if (key === 'ga4') rowBtn.textContent = isConnected ? 'Cambiar' : 'Vincular';
+      if (key === 'ads') rowBtn.textContent = 'Vincular';
+    }
   }
 
   function markConnected(connectionData) {
@@ -517,14 +544,10 @@
     } else {
       setConnectionState('ga4', 'Pendiente', email ? 'Herramientas autorizadas. Falta elegir propiedad de GA4.' : 'Falta elegir propiedad de GA4.', false);
     }
-    document.getElementById('btn-connect').textContent = gscSiteUrl ? 'Cambiar propiedad GSC' : 'Elegir propiedad GSC';
+    document.getElementById('btn-connect').textContent = 'Reautorizar herramientas de Google';
     document.getElementById('btn-disconnect').style.display = '';
     document.getElementById('btn-disconnect').textContent = 'Desvincular herramientas';
-    var ga4Btn = document.getElementById('btn-select-ga4');
-    if (ga4Btn) {
-      ga4Btn.style.display = '';
-      ga4Btn.textContent = ga4Config?.measurementId || ga4Config?.propertyId ? 'Cambiar propiedad GA4' : 'Elegir propiedad GA4';
-    }
+    document.getElementById('btn-connect').style.display = 'none';
   }
 
   function markDisconnected() {
@@ -539,13 +562,17 @@
     ['gsc','ads','ga4'].forEach(k => {
       const badge = document.getElementById(k + '-badge');
       const detail = document.getElementById(k + '-detail');
+      const rowBtn = document.getElementById(`btn-${k}-row`);
       if (badge) { badge.textContent = 'Sin conectar'; badge.className = 'conn-badge disconnected'; }
       if (detail) detail.textContent = k === 'gsc' ? 'Clics, impresiones y posiciones' : k === 'ads' ? 'Campañas, gasto y ROAS' : 'Sesiones, usuarios y conversiones';
+      if (rowBtn) {
+        rowBtn.style.display = 'none';
+        rowBtn.textContent = 'Vincular';
+      }
     });
     document.getElementById('btn-disconnect').style.display = 'none';
     document.getElementById('btn-connect').textContent = _signedInWithGoogle ? 'Autorizar herramientas de Google' : 'Conectar y autorizar Google';
-    var ga4Btn = document.getElementById('btn-select-ga4');
-    if (ga4Btn) ga4Btn.style.display = 'none';
+    document.getElementById('btn-connect').style.display = '';
   }
 
   // ==================== OTRAS FUNCIONES ====================
@@ -749,10 +776,12 @@
 
     _projectIntakeData = nextIntakeData;
     setConnectionState('ga4', 'Conectado', `${_selectedGa4.measurementId} · ${_selectedGa4.displayName}`, true);
-    const ga4Btn = document.getElementById('btn-select-ga4');
-    if (ga4Btn) ga4Btn.textContent = 'Cambiar propiedad GA4';
     closeGa4Modal();
     showMsg('google-msg', '✓ Propiedad de GA4 guardada', 'success');
+  }
+
+  function showAdsPending() {
+    showMsg('google-msg', 'El selector de cuentas de Google Ads es el siguiente paso. Ya he dejado la pantalla preparada para conectarlo.', 'success');
   }
 
   async function loadGSCSites() {
