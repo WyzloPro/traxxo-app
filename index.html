@@ -1290,7 +1290,47 @@
   }
 
   function goToDashboardApp() {
-    window.location.href = '/dashboard.html';
+    sb.auth.getSession().then(async function({ data: { session } }) {
+      if (!session) {
+        window.location.href = '/';
+        return;
+      }
+      var { data: projects } = await sb.from('projects')
+        .select('*')
+        .eq('client_id', session.user.id)
+        .eq('active', true)
+        .limit(1);
+      if (!projects || !projects.length) {
+        window.location.href = '/dashboard.html';
+        return;
+      }
+      window.location.href = getProjectPath(projects[0]);
+    });
+  }
+
+  function normalizeProjectDomain(project) {
+    var raw = project?.domain || project?.gsc_site_url || project?.intake_data?.url || '';
+    return String(raw || '')
+      .trim()
+      .toLowerCase()
+      .replace(/^https?:\/\//, '')
+      .replace(/^www\./, '')
+      .replace(/\/$/, '');
+  }
+
+  function getProjectSlug(project) {
+    var hostname = normalizeProjectDomain(project);
+    if (!hostname) return 'project';
+    var first = (hostname.split('.')[0] || hostname)
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '')
+      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/^-+|-+$/g, '');
+    return first || 'project';
+  }
+
+  function getProjectPath(project) {
+    return '/project/' + getProjectSlug(project);
   }
 
   function showAddCountryModal() {

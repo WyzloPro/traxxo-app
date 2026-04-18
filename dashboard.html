@@ -258,20 +258,25 @@ let dashboardBrain = null;
 sb.auth.getSession().then(async function({ data: { session } }) {
   if (!session) { window.location.href = '/'; return; }
   currentSession = session;
+  var requestedProjectSlug = getRequestedProjectSlug();
 
-  // Cargar proyecto del cliente
+  // Cargar proyectos del cliente
   var { data: projects } = await sb.from('projects')
     .select('*')
     .eq('client_id', session.user.id)
-    .eq('active', true)
-    .limit(1);
+    .eq('active', true);
 
   if (!projects || projects.length === 0) {
     renderNoProject();
     return;
   }
 
-  currentProject = projects[0];
+  currentProject = resolveProject(projects, requestedProjectSlug);
+  if (!currentProject) {
+    renderNoProject('No se ha encontrado ese proyecto.');
+    return;
+  }
+  syncProjectPath(currentProject);
   var projectDomain = currentProject.domain
     || currentProject.gsc_site_url
     || (currentProject.intake_data && currentProject.intake_data.url
@@ -585,11 +590,11 @@ function renderActionRow(item) {
     </div>`;
 }
 
-function renderNoProject() {
+function renderNoProject(customMessage) {
   document.getElementById('main-container').innerHTML = `
     <div style="text-align:center;padding:80px 24px">
       <div style="font-size:15px;font-weight:600;margin-bottom:8px">No hay proyectos configurados</div>
-      <div style="font-size:13px;color:var(--muted);margin-bottom:24px">Completa el onboarding para ver tu dashboard.</div>
+      <div style="font-size:13px;color:var(--muted);margin-bottom:24px">${customMessage || 'Completa el onboarding para ver tu dashboard.'}</div>
       <a href="/" class="btn btn-accent">Ir al onboarding</a>
     </div>`;
 }
@@ -681,6 +686,50 @@ async function loadDashboardBrain(projectId) {
   } catch (e) {
     console.error('Brain load failed', e);
     return null;
+  }
+}
+
+function normalizeProjectDomain(project) {
+  var raw = project?.domain || project?.gsc_site_url || project?.intake_data?.url || '';
+  var clean = String(raw || '').trim().toLowerCase();
+  clean = clean.replace(/^https?:\/\//, '').replace(/^www\./, '').replace(/\/$/, '');
+  return clean;
+}
+
+function getProjectSlug(project) {
+  var hostname = normalizeProjectDomain(project);
+  if (!hostname) return 'project';
+  var first = hostname.split('.')[0] || hostname;
+  return first
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '') || 'project';
+}
+
+function getProjectPath(project) {
+  return '/project/' + getProjectSlug(project);
+}
+
+function getRequestedProjectSlug() {
+  var match = window.location.pathname.match(/^\/project\/([^/]+)$/);
+  if (match && match[1]) return decodeURIComponent(match[1]).toLowerCase();
+  var params = new URLSearchParams(window.location.search);
+  return (params.get('project') || '').toLowerCase() || null;
+}
+
+function resolveProject(projects, requestedSlug) {
+  if (!projects || !projects.length) return null;
+  if (!requestedSlug) return projects[0];
+  return projects.find(function(project) {
+    return getProjectSlug(project) === requestedSlug || String(project.id).toLowerCase() === requestedSlug;
+  }) || null;
+}
+
+function syncProjectPath(project) {
+  var target = getProjectPath(project);
+  if (window.location.pathname !== target) {
+    window.history.replaceState({}, '', target);
   }
 }
 

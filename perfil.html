@@ -141,7 +141,7 @@
   </a>
   
   <div class="header-buttons">
-    <a href="/dashboard.html" class="btn btn-ghost">Dashboard</a>
+    <a href="/dashboard.html" class="btn btn-ghost" id="dashboard-link">Dashboard</a>
     <button type="button" class="btn btn-ghost" onclick="logout()">Cerrar sesión</button>
   </div>
 </div>
@@ -387,6 +387,8 @@
     if (project) {
       _projectId = project.id;
       _projectIntakeData = project.intake_data || {};
+      const dashboardLink = document.getElementById('dashboard-link');
+      if (dashboardLink) dashboardLink.href = getProjectPath(project);
     }
     const currentDomainInput = document.getElementById('current-domain');
     if (currentDomainInput) {
@@ -626,6 +628,31 @@
     }
     closeResetModal();
     window.location.href = '/';
+  }
+
+  function normalizeProjectDomain(project) {
+    const raw = project?.domain || project?.gsc_site_url || project?.intake_data?.url || '';
+    return String(raw || '')
+      .trim()
+      .toLowerCase()
+      .replace(/^https?:\/\//, '')
+      .replace(/^www\./, '')
+      .replace(/\/$/, '');
+  }
+
+  function getProjectSlug(project) {
+    const hostname = normalizeProjectDomain(project);
+    if (!hostname) return 'project';
+    const first = (hostname.split('.')[0] || hostname)
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '')
+      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/^-+|-+$/g, '');
+    return first || 'project';
+  }
+
+  function getProjectPath(project) {
+    return '/project/' + getProjectSlug(project);
   }
 
   function closeSiteModal() {
