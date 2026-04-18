@@ -117,6 +117,8 @@
     let currentProject = null;
     let allSnapshots = [];
     let currentClient = null;
+    let currentPages = [];
+    let currentQueries = [];
 
     sb.auth.getSession().then(async function({ data: { session } }) {
       if (!session) { window.location.href = '/'; return; }
@@ -152,6 +154,7 @@
       document.getElementById('analysis-link').href = getProjectPath(currentProject);
 
       await loadSnapshots();
+      await loadDetailData();
       renderGoogleData();
     });
 
@@ -162,6 +165,31 @@
         .order('week_start', { ascending: false })
         .limit(26);
       allSnapshots = snapshots || [];
+    }
+
+    async function loadDetailData() {
+      if (!allSnapshots.length) {
+        currentPages = [];
+        currentQueries = [];
+        return;
+      }
+
+      var latest = allSnapshots[0];
+      var [{ data: pages }, { data: queries }] = await Promise.all([
+        sb.from('snapshot_pages')
+          .select('*')
+          .eq('snapshot_id', latest.id)
+          .order('clicks', { ascending: false })
+          .limit(25),
+        sb.from('snapshot_queries')
+          .select('*')
+          .eq('snapshot_id', latest.id)
+          .order('clicks', { ascending: false })
+          .limit(25),
+      ]);
+
+      currentPages = pages || [];
+      currentQueries = queries || [];
     }
 
     function renderGoogleData() {
@@ -224,6 +252,23 @@
         <div class="grid-2">
           <div class="card">
             <div class="card-header">
+              <div class="card-title">Top páginas GSC</div>
+              <span class="badge">${currentPages.length} filas</span>
+            </div>
+            ${renderPagesTable(currentPages)}
+          </div>
+          <div class="card">
+            <div class="card-header">
+              <div class="card-title">Top queries GSC</div>
+              <span class="badge">${currentQueries.length} filas</span>
+            </div>
+            ${renderQueriesTable(currentQueries)}
+          </div>
+        </div>
+
+        <div class="grid-2">
+          <div class="card">
+            <div class="card-header">
               <div class="card-title">Histórico de snapshots GSC</div>
             </div>
             <div class="table-wrap">
@@ -260,8 +305,8 @@
             <div class="list-item"><div class="list-label">Resumen semanal GSC</div><div class="pill ok">Disponible</div></div>
             <div class="list-item"><div class="list-label">Histórico semanal guardado</div><div class="pill ok">${allSnapshots.length} snapshots</div></div>
             <div class="list-item"><div class="list-label">Topics configurados</div><div class="pill ${currentProject.topics && currentProject.topics.length ? 'ok' : 'partial'}">${currentProject.topics && currentProject.topics.length ? currentProject.topics.length + ' topics' : 'Todavía vacío'}</div></div>
-            <div class="list-item"><div class="list-label">Pages</div><div class="pill missing">Pendiente</div></div>
-            <div class="list-item"><div class="list-label">Queries</div><div class="pill missing">Pendiente</div></div>
+            <div class="list-item"><div class="list-label">Pages</div><div class="pill ${currentPages.length ? 'ok' : 'missing'}">${currentPages.length ? currentPages.length + ' filas' : 'Pendiente'}</div></div>
+            <div class="list-item"><div class="list-label">Queries</div><div class="pill ${currentQueries.length ? 'ok' : 'missing'}">${currentQueries.length ? currentQueries.length + ' filas' : 'Pendiente'}</div></div>
             <div class="list-item"><div class="list-label">Countries</div><div class="pill missing">Pendiente</div></div>
             <div class="list-item"><div class="list-label">Devices</div><div class="pill missing">Pendiente</div></div>
             <div class="list-item"><div class="list-label">Search appearance</div><div class="pill missing">Pendiente</div></div>
@@ -363,6 +408,66 @@
         </div>`;
     }
 
+    function renderPagesTable(rows) {
+      if (!rows.length) return '<div class="empty">Todavía no hay detalle de páginas guardado para este snapshot.</div>';
+      return `
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Página</th>
+                <th>Clics</th>
+                <th>Impresiones</th>
+                <th>CTR</th>
+                <th>Posición</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${rows.map(function(row) {
+                return `
+                  <tr>
+                    <td class="mono">${escapeHtml(row.page_url || '')}</td>
+                    <td>${fmtNum(row.clicks || 0)}</td>
+                    <td>${fmtNum(row.impressions || 0)}</td>
+                    <td>${Number(row.ctr || 0).toFixed(2)}%</td>
+                    <td>${row.position == null ? '—' : Number(row.position).toFixed(1)}</td>
+                  </tr>`;
+              }).join('')}
+            </tbody>
+          </table>
+        </div>`;
+    }
+
+    function renderQueriesTable(rows) {
+      if (!rows.length) return '<div class="empty">Todavía no hay detalle de queries guardado para este snapshot.</div>';
+      return `
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Query</th>
+                <th>Clics</th>
+                <th>Impresiones</th>
+                <th>CTR</th>
+                <th>Posición</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${rows.map(function(row) {
+                return `
+                  <tr>
+                    <td>${escapeHtml(row.query_text || '')}</td>
+                    <td>${fmtNum(row.clicks || 0)}</td>
+                    <td>${fmtNum(row.impressions || 0)}</td>
+                    <td>${Number(row.ctr || 0).toFixed(2)}%</td>
+                    <td>${row.position == null ? '—' : Number(row.position).toFixed(1)}</td>
+                  </tr>`;
+              }).join('')}
+            </tbody>
+          </table>
+        </div>`;
+    }
+
     async function refreshGoogleData() {
       var btn = document.getElementById('refresh-btn');
       btn.disabled = true;
@@ -386,6 +491,7 @@
         }
 
         await loadSnapshots();
+        await loadDetailData();
         renderGoogleData();
         showMsg('Datos de GSC actualizados para este proyecto.', 'success');
       } catch (e) {
