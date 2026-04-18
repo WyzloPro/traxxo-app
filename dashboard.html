@@ -164,6 +164,26 @@
     .addon-price { font-size:24px; font-weight:800; color:var(--accent); margin-bottom:4px; }
     .addon-per { font-size:12px; color:var(--muted); margin-bottom:16px; }
 
+    /* BRAIN */
+    .brain-grid { display:grid; grid-template-columns:1.2fr .8fr; gap:16px; margin-bottom:16px; }
+    @media(max-width:768px) { .brain-grid { grid-template-columns:1fr; } }
+    .brain-list { display:flex; flex-direction:column; gap:10px; }
+    .brain-item { background:var(--bg); border:1px solid var(--border); border-radius:10px; padding:14px; }
+    .brain-item-title { font-size:13px; font-weight:700; margin-bottom:4px; }
+    .brain-item-body { font-size:13px; color:var(--muted); line-height:1.5; }
+    .brain-kind { display:inline-flex; align-items:center; gap:6px; font-size:10px; font-weight:700; letter-spacing:.05em; text-transform:uppercase; padding:3px 7px; border-radius:999px; margin-bottom:8px; }
+    .brain-kind-highlight { background:rgba(34,211,238,.1); color:var(--accent); border:1px solid rgba(34,211,238,.2); }
+    .brain-kind-risk { background:rgba(239,68,68,.1); color:var(--red); border:1px solid rgba(239,68,68,.2); }
+    .brain-kind-setup { background:rgba(245,158,11,.1); color:#f59e0b; border:1px solid rgba(245,158,11,.2); }
+    .brain-kind-status { background:var(--bg); color:var(--muted); border:1px solid var(--border); }
+    .brain-action { display:flex; align-items:flex-start; gap:10px; padding:12px 0; border-bottom:1px solid rgba(255,255,255,.05); }
+    .brain-action:last-child { border-bottom:none; padding-bottom:0; }
+    .brain-action-priority { font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:.05em; min-width:48px; padding-top:2px; }
+    .brain-action-priority.high { color:var(--red); }
+    .brain-action-priority.medium { color:#f59e0b; }
+    .brain-action-priority.low { color:var(--muted); }
+    .brain-action-title { font-size:13px; color:var(--text); line-height:1.4; }
+
     /* SKELETON */
     @keyframes shimmer { 0%{background-position:-200% 0} 100%{background-position:200% 0} }
     .sk { background:linear-gradient(90deg, #1f1f23 25%, #2a2a2e 50%, #1f1f23 75%); background-size:200% 100%; animation:shimmer 1.8s infinite; border-radius:6px; display:block; }
@@ -232,6 +252,7 @@ let currentProject = null;
 let allSnapshots = [];
 let currentWeekIdx = 0;
 let currentSession = null;
+let dashboardBrain = null;
 
 // ── INIT ─────────────────────────────────────────────────────
 sb.auth.getSession().then(async function({ data: { session } }) {
@@ -269,6 +290,14 @@ sb.auth.getSession().then(async function({ data: { session } }) {
   planEl.textContent = plan.charAt(0).toUpperCase() + plan.slice(1);
   if (plan === 'pro') { planEl.style.background='#8b5cf620'; planEl.style.color='#8b5cf6'; planEl.style.borderColor='#8b5cf640'; }
   if (plan === 'agency') { planEl.style.background='rgba(245,158,11,.1)'; planEl.style.color='#f59e0b'; planEl.style.borderColor='rgba(245,158,11,.2)'; }
+
+  dashboardBrain = await loadDashboardBrain(currentProject.id);
+  if (dashboardBrain?.header?.domain_label) {
+    document.getElementById('header-domain').textContent = dashboardBrain.header.domain_label;
+  }
+  if (dashboardBrain?.header?.plan_label) {
+    planEl.textContent = dashboardBrain.header.plan_label;
+  }
 
   // Cargar snapshots
   var { data: snapshots } = await sb.from('weekly_snapshots')
@@ -386,6 +415,8 @@ function renderDashboard(plan) {
     <!-- ADS -->
     ${hasAds ? renderAdsSection(snap) : renderAdsUpsell()}
 
+    ${renderBrainSection()}
+
     <!-- FEEDBACK -->
     ${renderFeedbackSection()}
 
@@ -502,6 +533,58 @@ function renderFeedbackSection() {
     </div>`;
 }
 
+function renderBrainSection() {
+  if (!dashboardBrain) return '';
+
+  var insights = dashboardBrain.insights || [];
+  var actions = dashboardBrain.actions || [];
+
+  return `
+    <div class="brain-grid">
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">Lectura Traxxo</div>
+          <span class="card-badge badge-muted">${dashboardBrain.status || 'ready'}</span>
+        </div>
+        <div class="brain-list">
+          ${insights.length ? insights.map(renderInsightCard).join('') : '<div style="font-size:13px;color:var(--muted)">Todavía no hay insights disponibles.</div>'}
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">Siguientes pasos</div>
+          <span class="card-badge badge-muted">${actions.length} acciones</span>
+        </div>
+        <div>
+          ${actions.length ? actions.map(renderActionRow).join('') : '<div style="font-size:13px;color:var(--muted)">No hay acciones sugeridas.</div>'}
+        </div>
+      </div>
+    </div>`;
+}
+
+function renderInsightCard(item) {
+  var kind = item.kind || 'status';
+  var cls = kind === 'highlight' ? 'brain-kind-highlight'
+    : kind === 'risk' ? 'brain-kind-risk'
+    : kind === 'setup' ? 'brain-kind-setup'
+    : 'brain-kind-status';
+  return `
+    <div class="brain-item">
+      <div class="brain-kind ${cls}">${kind}</div>
+      <div class="brain-item-title">${item.title || 'Insight'}</div>
+      <div class="brain-item-body">${item.body || ''}</div>
+    </div>`;
+}
+
+function renderActionRow(item) {
+  var priority = item.priority || 'low';
+  return `
+    <div class="brain-action">
+      <div class="brain-action-priority ${priority}">${priority}</div>
+      <div class="brain-action-title">${item.title || 'Acción'}</div>
+    </div>`;
+}
+
 function renderNoProject() {
   document.getElementById('main-container').innerHTML = `
     <div style="text-align:center;padding:80px 24px">
@@ -541,6 +624,7 @@ async function refreshData() {
         .order('week_start', { ascending: false })
         .limit(26);
       allSnapshots = snapshots || [];
+      dashboardBrain = await loadDashboardBrain(currentProject.id);
       currentWeekIdx = 0;
       renderDashboard(document.getElementById('header-plan').textContent.toLowerCase());
     }
@@ -580,6 +664,24 @@ function bindFeedback() {
 async function addAdsAddon() {
   // Redirigir a gestión de plan (donde estará Stripe)
   window.location.href = '/?addon=ads';
+}
+
+async function loadDashboardBrain(projectId) {
+  try {
+    var res = await fetch(`${SUPABASE_URL}/functions/v1/build-dashboard-snapshot`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer ' + SUPABASE_ANON
+      },
+      body: JSON.stringify({ project_id: projectId })
+    });
+    if (!res.ok) return null;
+    return await res.json();
+  } catch (e) {
+    console.error('Brain load failed', e);
+    return null;
+  }
 }
 
 // ── HELPERS ───────────────────────────────────────────────────
