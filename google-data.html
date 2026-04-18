@@ -130,8 +130,10 @@
     let currentClient = null;
     let currentPages = [];
     let currentQueries = [];
+    let currentCountries = [];
     let currentPagesTotal = 0;
     let currentQueriesTotal = 0;
+    let currentCountriesTotal = 0;
 
     sb.auth.getSession().then(async function({ data: { session } }) {
       if (!session) { window.location.href = '/'; return; }
@@ -184,17 +186,22 @@
       if (!allSnapshots.length) {
         currentPages = [];
         currentQueries = [];
+        currentCountries = [];
         currentPagesTotal = 0;
         currentQueriesTotal = 0;
+        currentCountriesTotal = 0;
         return;
       }
 
       var latest = allSnapshots[0];
-      var [{ count: pagesCount }, { count: queriesCount }, { data: pages }, { data: queries }] = await Promise.all([
+      var [{ count: pagesCount }, { count: queriesCount }, { count: countriesCount }, { data: pages }, { data: queries }, { data: countries }] = await Promise.all([
         sb.from('snapshot_pages')
           .select('*', { count: 'exact', head: true })
           .eq('snapshot_id', latest.id),
         sb.from('snapshot_queries')
+          .select('*', { count: 'exact', head: true })
+          .eq('snapshot_id', latest.id),
+        sb.from('snapshot_countries')
           .select('*', { count: 'exact', head: true })
           .eq('snapshot_id', latest.id),
         sb.from('snapshot_pages')
@@ -203,6 +210,11 @@
           .order('clicks', { ascending: false })
           .limit(10),
         sb.from('snapshot_queries')
+          .select('*')
+          .eq('snapshot_id', latest.id)
+          .order('clicks', { ascending: false })
+          .limit(10),
+        sb.from('snapshot_countries')
           .select('*')
           .eq('snapshot_id', latest.id)
           .order('clicks', { ascending: false })
@@ -211,8 +223,10 @@
 
       currentPages = pages || [];
       currentQueries = queries || [];
+      currentCountries = countries || [];
       currentPagesTotal = pagesCount || 0;
       currentQueriesTotal = queriesCount || 0;
+      currentCountriesTotal = countriesCount || 0;
     }
 
     function renderGoogleData() {
@@ -273,6 +287,13 @@
             </div>
             ${renderQueriesTable(currentQueries)}
           </div>
+          <div class="card">
+            <div class="card-header">
+              <div class="card-title">Top countries GSC</div>
+              <span class="badge">${currentCountries.length} visibles · ${currentCountriesTotal} recogidos</span>
+            </div>
+            ${renderCountriesTable(currentCountries)}
+          </div>
         </div>
 
         <div class="grid-2">
@@ -316,7 +337,7 @@
             <div class="list-item"><div class="list-label">Topics configurados</div><div class="pill ${currentProject.topics && currentProject.topics.length ? 'ok' : 'partial'}">${currentProject.topics && currentProject.topics.length ? currentProject.topics.length + ' topics' : 'Todavía vacío'}</div></div>
             <div class="list-item"><div class="list-label">Pages</div><div class="pill ${currentPagesTotal ? 'ok' : 'missing'}">${currentPagesTotal ? currentPages.length + ' visibles · ' + currentPagesTotal + ' recogidas' : 'Pendiente'}</div></div>
             <div class="list-item"><div class="list-label">Queries</div><div class="pill ${currentQueriesTotal ? 'ok' : 'missing'}">${currentQueriesTotal ? currentQueries.length + ' visibles · ' + currentQueriesTotal + ' recogidas' : 'Pendiente'}</div></div>
-            <div class="list-item"><div class="list-label">Countries</div><div class="pill missing">Pendiente</div></div>
+            <div class="list-item"><div class="list-label">Countries</div><div class="pill ${currentCountriesTotal ? 'ok' : 'missing'}">${currentCountriesTotal ? currentCountries.length + ' visibles · ' + currentCountriesTotal + ' recogidos' : 'Pendiente'}</div></div>
             <div class="list-item"><div class="list-label">Devices</div><div class="pill missing">Pendiente</div></div>
             <div class="list-item"><div class="list-label">Search appearance</div><div class="pill missing">Pendiente</div></div>
             <div class="list-item"><div class="list-label">Backfill de 4 meses</div><div class="pill missing">Pendiente de estabilizar</div></div>
@@ -497,6 +518,36 @@
         </div>`;
     }
 
+    function renderCountriesTable(rows) {
+      if (!rows.length) return '<div class="empty">Todavía no hay detalle de países guardado para este snapshot.</div>';
+      return `
+        <div class="table-wrap">
+          <table class="detail-table">
+            <thead>
+              <tr>
+                <th>País</th>
+                <th>Clics</th>
+                <th>Impresiones</th>
+                <th>CTR</th>
+                <th>Posición</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${rows.map(function(row) {
+                return `
+                  <tr>
+                    <td>${escapeHtml(formatCountry(row.country_code || ''))}</td>
+                    <td>${fmtNum(row.clicks || 0)}</td>
+                    <td>${fmtNum(row.impressions || 0)}</td>
+                    <td>${Number(row.ctr || 0).toFixed(2)}%</td>
+                    <td>${row.position == null ? '—' : Number(row.position).toFixed(1)}</td>
+                  </tr>`;
+              }).join('')}
+            </tbody>
+          </table>
+        </div>`;
+    }
+
     async function refreshGoogleData() {
       var btn = document.getElementById('refresh-btn');
       btn.disabled = true;
@@ -633,6 +684,18 @@
     function formatPlan(plan) {
       plan = String(plan || 'basic');
       return plan.charAt(0).toUpperCase() + plan.slice(1);
+    }
+
+    function formatCountry(code) {
+      if (!code) return '—';
+      var upper = String(code).toUpperCase();
+      try {
+        var display = new Intl.DisplayNames(['es'], { type: 'region' });
+        var label = display.of(upper);
+        return label ? label + ' (' + upper + ')' : upper;
+      } catch (_) {
+        return upper;
+      }
     }
 
     function escapeHtml(text) {
