@@ -515,7 +515,7 @@
         var data = await res.json();
 
         if (!res.ok || data.error) {
-          showMsg(data.error || 'No se pudieron actualizar los datos de GSC.', 'error');
+          showMsg(mapCollectGscError(data), 'error');
           return;
         }
 
@@ -537,6 +537,17 @@
       if (!msg) return;
       msg.className = 'msg show ' + (type || 'info');
       msg.textContent = text;
+    }
+
+    function mapCollectGscError(data) {
+      if (!data) return 'No se pudieron actualizar los datos de GSC.';
+      if (data.code === 'reauthorization_required' || data.code === 'missing_refresh_token' || data.code === 'missing_google_connection') {
+        return 'La conexión de Google necesita reautorización. Ve a Mi cuenta para reconectar las herramientas.';
+      }
+      if (data.code === 'refresh_failed') {
+        return 'No se pudo renovar el acceso de Google. Ve a Mi cuenta si necesitas reconectar las herramientas.';
+      }
+      return data.error || 'No se pudieron actualizar los datos de GSC.';
     }
 
     function renderNoProject(customMessage) {
