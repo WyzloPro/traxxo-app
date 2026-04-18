@@ -130,6 +130,8 @@
     let currentClient = null;
     let currentPages = [];
     let currentQueries = [];
+    let currentPagesTotal = 0;
+    let currentQueriesTotal = 0;
 
     sb.auth.getSession().then(async function({ data: { session } }) {
       if (!session) { window.location.href = '/'; return; }
@@ -182,25 +184,35 @@
       if (!allSnapshots.length) {
         currentPages = [];
         currentQueries = [];
+        currentPagesTotal = 0;
+        currentQueriesTotal = 0;
         return;
       }
 
       var latest = allSnapshots[0];
-      var [{ data: pages }, { data: queries }] = await Promise.all([
+      var [{ count: pagesCount }, { count: queriesCount }, { data: pages }, { data: queries }] = await Promise.all([
+        sb.from('snapshot_pages')
+          .select('*', { count: 'exact', head: true })
+          .eq('snapshot_id', latest.id),
+        sb.from('snapshot_queries')
+          .select('*', { count: 'exact', head: true })
+          .eq('snapshot_id', latest.id),
         sb.from('snapshot_pages')
           .select('*')
           .eq('snapshot_id', latest.id)
           .order('clicks', { ascending: false })
-          .limit(25),
+          .limit(10),
         sb.from('snapshot_queries')
           .select('*')
           .eq('snapshot_id', latest.id)
           .order('clicks', { ascending: false })
-          .limit(25),
+          .limit(10),
       ]);
 
       currentPages = pages || [];
       currentQueries = queries || [];
+      currentPagesTotal = pagesCount || 0;
+      currentQueriesTotal = queriesCount || 0;
     }
 
     function renderGoogleData() {
@@ -250,14 +262,14 @@
           <div class="card">
             <div class="card-header">
               <div class="card-title">Top páginas GSC</div>
-              <span class="badge">${currentPages.length} filas</span>
+              <span class="badge">${currentPages.length} visibles · ${currentPagesTotal} recogidas</span>
             </div>
             ${renderPagesTable(currentPages)}
           </div>
           <div class="card">
             <div class="card-header">
               <div class="card-title">Top queries GSC</div>
-              <span class="badge">${currentQueries.length} filas</span>
+              <span class="badge">${currentQueries.length} visibles · ${currentQueriesTotal} recogidas</span>
             </div>
             ${renderQueriesTable(currentQueries)}
           </div>
@@ -302,8 +314,8 @@
             <div class="list-item"><div class="list-label">Resumen semanal GSC</div><div class="pill ok">Disponible</div></div>
             <div class="list-item"><div class="list-label">Histórico semanal guardado</div><div class="pill ok">${allSnapshots.length} snapshots</div></div>
             <div class="list-item"><div class="list-label">Topics configurados</div><div class="pill ${currentProject.topics && currentProject.topics.length ? 'ok' : 'partial'}">${currentProject.topics && currentProject.topics.length ? currentProject.topics.length + ' topics' : 'Todavía vacío'}</div></div>
-            <div class="list-item"><div class="list-label">Pages</div><div class="pill ${currentPages.length ? 'ok' : 'missing'}">${currentPages.length ? currentPages.length + ' filas' : 'Pendiente'}</div></div>
-            <div class="list-item"><div class="list-label">Queries</div><div class="pill ${currentQueries.length ? 'ok' : 'missing'}">${currentQueries.length ? currentQueries.length + ' filas' : 'Pendiente'}</div></div>
+            <div class="list-item"><div class="list-label">Pages</div><div class="pill ${currentPagesTotal ? 'ok' : 'missing'}">${currentPagesTotal ? currentPages.length + ' visibles · ' + currentPagesTotal + ' recogidas' : 'Pendiente'}</div></div>
+            <div class="list-item"><div class="list-label">Queries</div><div class="pill ${currentQueriesTotal ? 'ok' : 'missing'}">${currentQueriesTotal ? currentQueries.length + ' visibles · ' + currentQueriesTotal + ' recogidas' : 'Pendiente'}</div></div>
             <div class="list-item"><div class="list-label">Countries</div><div class="pill missing">Pendiente</div></div>
             <div class="list-item"><div class="list-label">Devices</div><div class="pill missing">Pendiente</div></div>
             <div class="list-item"><div class="list-label">Search appearance</div><div class="pill missing">Pendiente</div></div>
