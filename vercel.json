@@ -3,6 +3,10 @@
     {
       "source": "/project/:slug",
       "destination": "/dashboard.html"
+    },
+    {
+      "source": "/project/:slug/google",
+      "destination": "/google-data.html"
     }
   ]
 }

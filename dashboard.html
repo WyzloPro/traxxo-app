@@ -222,6 +222,7 @@
   </div>
   <div class="header-right">
     <span class="plan-badge" id="header-plan">Basic</span>
+    <a href="/google-data.html" class="btn btn-ghost" id="google-data-link">Datos Google</a>
     <button class="btn btn-accent" id="refresh-btn" onclick="refreshData()">
       <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
         <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/>
@@ -277,6 +278,8 @@ sb.auth.getSession().then(async function({ data: { session } }) {
     return;
   }
   syncProjectPath(currentProject);
+  var googleDataLink = document.getElementById('google-data-link');
+  if (googleDataLink) googleDataLink.href = getGoogleDataPath(currentProject);
   var projectDomain = currentProject.domain
     || currentProject.gsc_site_url
     || (currentProject.intake_data && currentProject.intake_data.url
@@ -709,6 +712,10 @@ function getProjectSlug(project) {
 
 function getProjectPath(project) {
   return '/project/' + getProjectSlug(project);
+}
+
+function getGoogleDataPath(project) {
+  return getProjectPath(project) + '/google';
 }
 
 function getRequestedProjectSlug() {
