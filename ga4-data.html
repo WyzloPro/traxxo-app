@@ -34,6 +34,11 @@
     .hero h1 { font-size:28px; line-height:1.1; margin-bottom:8px; }
     .hero p { font-size:14px; color:var(--muted); max-width:760px; line-height:1.5; }
     .badge { font-size:11px; font-weight:700; padding:4px 10px; border-radius:999px; background:rgba(34,211,238,.08); border:1px solid rgba(34,211,238,.2); color:var(--accent); }
+    .card-header-wrap { display:flex; align-items:center; justify-content:space-between; gap:12px; margin-bottom:14px; flex-wrap:wrap; }
+    .pager { display:flex; align-items:center; gap:8px; }
+    .pager-btn { width:28px; height:28px; border-radius:8px; border:1px solid var(--border); background:var(--bg); color:var(--text); cursor:pointer; font-size:13px; font-weight:700; }
+    .pager-btn:disabled { opacity:.35; cursor:not-allowed; }
+    .pager-meta { font-size:11px; color:var(--muted); white-space:nowrap; }
     .grid-4, .grid-3, .grid-2 { display:grid; gap:16px; margin-bottom:16px; }
     .grid-4 { grid-template-columns:repeat(4,1fr); }
     .grid-3 { grid-template-columns:repeat(3,1fr); }
@@ -142,6 +147,17 @@
     let currentSourceMediumsTotal = 0;
     let currentCampaignsTotal = 0;
     let currentItemsTotal = 0;
+    const PAGE_SIZE = 10;
+    let pageState = {
+      sourceMediums: 1,
+      campaigns: 1,
+      channels: 1,
+      landingPages: 1,
+      countries: 1,
+      devices: 1,
+      conversionEvents: 1,
+      items: 1,
+    };
 
     sb.auth.getSession().then(async function({ data: { session } }) {
       if (!session) { window.location.href = '/'; return; }
@@ -211,87 +227,23 @@
 
       var latest = allSnapshots[0];
       var [
-        { count: channelsCount },
-        { count: landingPagesCount },
-        { count: countriesCount },
-        { count: devicesCount },
-        { count: conversionEventsCount },
-        { count: sourceMediumsCount },
-        { count: campaignsCount },
-        { count: itemsCount },
-        { data: channels },
-        { data: landingPages },
-        { data: countries },
-        { data: devices },
-        { data: conversionEvents },
-        { data: sourceMediums },
-        { data: campaigns },
-        { data: items }
+        channels,
+        landingPages,
+        countries,
+        devices,
+        conversionEvents,
+        sourceMediums,
+        campaigns,
+        items
       ] = await Promise.all([
-        sb.from('snapshot_ga4_channels')
-          .select('*', { count: 'exact', head: true })
-          .eq('snapshot_id', latest.id),
-        sb.from('snapshot_ga4_landing_pages')
-          .select('*', { count: 'exact', head: true })
-          .eq('snapshot_id', latest.id),
-        sb.from('snapshot_ga4_countries')
-          .select('*', { count: 'exact', head: true })
-          .eq('snapshot_id', latest.id),
-        sb.from('snapshot_ga4_devices')
-          .select('*', { count: 'exact', head: true })
-          .eq('snapshot_id', latest.id),
-        sb.from('snapshot_ga4_conversion_events')
-          .select('*', { count: 'exact', head: true })
-          .eq('snapshot_id', latest.id),
-        sb.from('snapshot_ga4_source_mediums')
-          .select('*', { count: 'exact', head: true })
-          .eq('snapshot_id', latest.id),
-        sb.from('snapshot_ga4_campaigns')
-          .select('*', { count: 'exact', head: true })
-          .eq('snapshot_id', latest.id),
-        sb.from('snapshot_ga4_items')
-          .select('*', { count: 'exact', head: true })
-          .eq('snapshot_id', latest.id),
-        sb.from('snapshot_ga4_channels')
-          .select('*')
-          .eq('snapshot_id', latest.id)
-          .order('sessions', { ascending: false })
-          .limit(10),
-        sb.from('snapshot_ga4_landing_pages')
-          .select('*')
-          .eq('snapshot_id', latest.id)
-          .order('sessions', { ascending: false })
-          .limit(10),
-        sb.from('snapshot_ga4_countries')
-          .select('*')
-          .eq('snapshot_id', latest.id)
-          .order('sessions', { ascending: false })
-          .limit(10),
-        sb.from('snapshot_ga4_devices')
-          .select('*')
-          .eq('snapshot_id', latest.id)
-          .order('sessions', { ascending: false })
-          .limit(10),
-        sb.from('snapshot_ga4_conversion_events')
-          .select('*')
-          .eq('snapshot_id', latest.id)
-          .order('key_events', { ascending: false })
-          .limit(10),
-        sb.from('snapshot_ga4_source_mediums')
-          .select('*')
-          .eq('snapshot_id', latest.id)
-          .order('sessions', { ascending: false })
-          .limit(25),
-        sb.from('snapshot_ga4_campaigns')
-          .select('*')
-          .eq('snapshot_id', latest.id)
-          .order('sessions', { ascending: false })
-          .limit(25),
-        sb.from('snapshot_ga4_items')
-          .select('*')
-          .eq('snapshot_id', latest.id)
-          .order('item_revenue', { ascending: false })
-          .limit(25),
+        fetchAllSnapshotRows('snapshot_ga4_channels', latest.id, 'sessions'),
+        fetchAllSnapshotRows('snapshot_ga4_landing_pages', latest.id, 'sessions'),
+        fetchAllSnapshotRows('snapshot_ga4_countries', latest.id, 'sessions'),
+        fetchAllSnapshotRows('snapshot_ga4_devices', latest.id, 'sessions'),
+        fetchAllSnapshotRows('snapshot_ga4_conversion_events', latest.id, 'key_events'),
+        fetchAllSnapshotRows('snapshot_ga4_source_mediums', latest.id, 'sessions'),
+        fetchAllSnapshotRows('snapshot_ga4_campaigns', latest.id, 'sessions'),
+        fetchAllSnapshotRows('snapshot_ga4_items', latest.id, 'item_revenue'),
       ]);
 
       currentChannels = channels || [];
@@ -302,14 +254,15 @@
       currentSourceMediums = sourceMediums || [];
       currentCampaigns = campaigns || [];
       currentItems = items || [];
-      currentChannelsTotal = channelsCount || 0;
-      currentLandingPagesTotal = landingPagesCount || 0;
-      currentCountriesTotal = countriesCount || 0;
-      currentDevicesTotal = devicesCount || 0;
-      currentConversionEventsTotal = conversionEventsCount || 0;
-      currentSourceMediumsTotal = sourceMediumsCount || 0;
-      currentCampaignsTotal = campaignsCount || 0;
-      currentItemsTotal = itemsCount || 0;
+      currentChannelsTotal = currentChannels.length;
+      currentLandingPagesTotal = currentLandingPages.length;
+      currentCountriesTotal = currentCountries.length;
+      currentDevicesTotal = currentDevices.length;
+      currentConversionEventsTotal = currentConversionEvents.length;
+      currentSourceMediumsTotal = currentSourceMediums.length;
+      currentCampaignsTotal = currentCampaigns.length;
+      currentItemsTotal = currentItems.length;
+      resetPageStateForCurrentData();
     }
 
     function renderGa4Data() {
@@ -378,60 +331,84 @@
 
         <div class="detail-stack">
           <div class="card">
-            <div class="card-header">
+            <div class="card-header-wrap">
               <div class="card-title">Top source / medium GA4</div>
-              <span class="badge">${currentSourceMediums.length} visibles · ${currentSourceMediumsTotal} recogidos</span>
+              <div class="pager">
+                <span class="badge">${getVisibleRows(currentSourceMediums, 'sourceMediums').length} visibles · ${currentSourceMediumsTotal} recogidos</span>
+                ${renderPager('sourceMediums', currentSourceMediums)}
+              </div>
             </div>
-            ${renderSourceMediumsTable(currentSourceMediums)}
+            ${renderSourceMediumsTable(getVisibleRows(currentSourceMediums, 'sourceMediums'))}
           </div>
           <div class="card">
-            <div class="card-header">
+            <div class="card-header-wrap">
               <div class="card-title">Top campaigns GA4</div>
-              <span class="badge">${currentCampaigns.length} visibles · ${currentCampaignsTotal} recogidas</span>
+              <div class="pager">
+                <span class="badge">${getVisibleRows(currentCampaigns, 'campaigns').length} visibles · ${currentCampaignsTotal} recogidas</span>
+                ${renderPager('campaigns', currentCampaigns)}
+              </div>
             </div>
-            ${renderCampaignsTable(currentCampaigns)}
+            ${renderCampaignsTable(getVisibleRows(currentCampaigns, 'campaigns'))}
           </div>
           <div class="card">
-            <div class="card-header">
+            <div class="card-header-wrap">
               <div class="card-title">Top channels GA4</div>
-              <span class="badge">${currentChannels.length} visibles · ${currentChannelsTotal} recogidos</span>
+              <div class="pager">
+                <span class="badge">${getVisibleRows(currentChannels, 'channels').length} visibles · ${currentChannelsTotal} recogidos</span>
+                ${renderPager('channels', currentChannels)}
+              </div>
             </div>
-            ${renderChannelsTable(currentChannels)}
+            ${renderChannelsTable(getVisibleRows(currentChannels, 'channels'))}
           </div>
           <div class="card">
-            <div class="card-header">
+            <div class="card-header-wrap">
               <div class="card-title">Top landing pages GA4</div>
-              <span class="badge">${currentLandingPages.length} visibles · ${currentLandingPagesTotal} recogidas</span>
+              <div class="pager">
+                <span class="badge">${getVisibleRows(currentLandingPages, 'landingPages').length} visibles · ${currentLandingPagesTotal} recogidas</span>
+                ${renderPager('landingPages', currentLandingPages)}
+              </div>
             </div>
-            ${renderLandingPagesTable(currentLandingPages)}
+            ${renderLandingPagesTable(getVisibleRows(currentLandingPages, 'landingPages'))}
           </div>
           <div class="card">
-            <div class="card-header">
+            <div class="card-header-wrap">
               <div class="card-title">Top countries GA4</div>
-              <span class="badge">${currentCountries.length} visibles · ${currentCountriesTotal} recogidos</span>
+              <div class="pager">
+                <span class="badge">${getVisibleRows(currentCountries, 'countries').length} visibles · ${currentCountriesTotal} recogidos</span>
+                ${renderPager('countries', currentCountries)}
+              </div>
             </div>
-            ${renderCountriesTable(currentCountries)}
+            ${renderCountriesTable(getVisibleRows(currentCountries, 'countries'))}
           </div>
           <div class="card">
-            <div class="card-header">
+            <div class="card-header-wrap">
               <div class="card-title">Top devices GA4</div>
-              <span class="badge">${currentDevices.length} visibles · ${currentDevicesTotal} recogidos</span>
+              <div class="pager">
+                <span class="badge">${getVisibleRows(currentDevices, 'devices').length} visibles · ${currentDevicesTotal} recogidos</span>
+                ${renderPager('devices', currentDevices)}
+              </div>
             </div>
-            ${renderDevicesTable(currentDevices)}
+            ${renderDevicesTable(getVisibleRows(currentDevices, 'devices'))}
           </div>
           <div class="card">
-            <div class="card-header">
+            <div class="card-header-wrap">
               <div class="card-title">Top eventos y conversiones GA4</div>
-              <span class="badge">${currentConversionEvents.length} visibles · ${currentConversionEventsTotal} recogidos</span>
+              <div class="pager">
+                <span class="badge">${getVisibleRows(currentConversionEvents, 'conversionEvents').length} visibles · ${currentConversionEventsTotal} recogidos</span>
+                ${renderPager('conversionEvents', currentConversionEvents)}
+              </div>
             </div>
-            ${renderConversionEventsTable(currentConversionEvents)}
+            ${renderConversionEventsTable(getVisibleRows(currentConversionEvents, 'conversionEvents'))}
           </div>
           <div class="card">
-            <div class="card-header">
+            <div class="card-header-wrap">
               <div class="card-title">Top items e-commerce GA4</div>
-              <span class="badge">${currentItems.length} visibles · ${currentItemsTotal} recogidos</span>
+              <div class="pager">
+                <span class="badge">${getVisibleRows(currentItems, 'items').length} visibles · ${currentItemsTotal} recogidos</span>
+                ${renderPager('items', currentItems)}
+              </div>
             </div>
-            ${renderItemsTable(currentItems)}
+            ${renderItemsTable(getVisibleRows(currentItems, 'items'))}
           </div>
         </div>
 
@@ -503,6 +480,73 @@
 
     function renderKPI(label, value, sub) {
       return `<div class="card"><div class="card-title">${label}</div><div class="kpi-value">${value}</div><div class="kpi-sub">${sub}</div></div>`;
+    }
+
+    async function fetchAllSnapshotRows(tableName, snapshotId, orderColumn) {
+      var pageSize = 1000;
+      var from = 0;
+      var allRows = [];
+
+      while (true) {
+        var result = await sb.from(tableName)
+          .select('*')
+          .eq('snapshot_id', snapshotId)
+          .order(orderColumn, { ascending: false })
+          .range(from, from + pageSize - 1);
+
+        var rows = result.data || [];
+        allRows = allRows.concat(rows);
+
+        if (rows.length < pageSize) break;
+        from += pageSize;
+      }
+
+      return allRows;
+    }
+
+    function getDatasetRows(key) {
+      if (key === 'sourceMediums') return currentSourceMediums;
+      if (key === 'campaigns') return currentCampaigns;
+      if (key === 'channels') return currentChannels;
+      if (key === 'landingPages') return currentLandingPages;
+      if (key === 'countries') return currentCountries;
+      if (key === 'devices') return currentDevices;
+      if (key === 'conversionEvents') return currentConversionEvents;
+      if (key === 'items') return currentItems;
+      return [];
+    }
+
+    function resetPageStateForCurrentData() {
+      Object.keys(pageState).forEach(function(key) {
+        var rows = getDatasetRows(key);
+        var totalPages = Math.max(1, Math.ceil(rows.length / PAGE_SIZE));
+        pageState[key] = Math.min(pageState[key], totalPages);
+      });
+    }
+
+    function getVisibleRows(rows, key) {
+      var currentPage = pageState[key] || 1;
+      var start = (currentPage - 1) * PAGE_SIZE;
+      return rows.slice(start, start + PAGE_SIZE);
+    }
+
+    function renderPager(key, rows) {
+      var totalPages = Math.max(1, Math.ceil(rows.length / PAGE_SIZE));
+      if (totalPages <= 1) return '';
+      var currentPage = pageState[key] || 1;
+      return `
+        <div class="pager">
+          <button class="pager-btn" onclick="changePage('${key}', -1)" ${currentPage <= 1 ? 'disabled' : ''}>←</button>
+          <span class="pager-meta">${currentPage}/${totalPages}</span>
+          <button class="pager-btn" onclick="changePage('${key}', 1)" ${currentPage >= totalPages ? 'disabled' : ''}>→</button>
+        </div>`;
+    }
+
+    function changePage(key, direction) {
+      var rows = getDatasetRows(key);
+      var totalPages = Math.max(1, Math.ceil(rows.length / PAGE_SIZE));
+      pageState[key] = Math.max(1, Math.min(totalPages, (pageState[key] || 1) + direction));
+      renderGa4Data();
     }
 
     function renderWeeklySeries(snaps) {
