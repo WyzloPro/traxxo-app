@@ -222,6 +222,15 @@
     <button type="button" class="btn btn-warning" onclick="openResetModal()">Eliminar proyecto actual</button>
   </div>
 
+  <!-- CONEXIONES WEB / E-COMMERCE -->
+  <div class="section" id="web-connections-section" style="display:none">
+    <div class="section-title">Conexiones web y e-commerce</div>
+    <p id="web-connections-copy" style="font-size:13px;color:var(--muted);margin-bottom:14px">Completa las credenciales de tu web o tienda para que Traxxo pueda usar esa fuente cuando haga falta.</p>
+    <div id="web-connections-fields"></div>
+    <button type="button" class="btn btn-accent" onclick="saveWebConnections()" id="btn-save-web-connections">Guardar conexiones web</button>
+    <div class="msg" id="web-connections-msg"></div>
+  </div>
+
   <!-- SEMRUSH -->
   <div class="section">
     <div class="section-title">Semrush</div>
@@ -326,6 +335,7 @@
   let _userId = null;
   let _projectId = null;
   let _projectIntakeData = {};
+  let _projectRecord = null;
   let _selectedSite = null;
   let _selectedGa4 = null;
   let _googleConnected = false;
@@ -389,6 +399,7 @@
     const { data: project } = await sb.from('projects').select('*').eq('client_id', _userId).limit(1).maybeSingle();
 
     if (project) {
+      _projectRecord = project;
       _projectId = project.id;
       _projectIntakeData = project.intake_data || {};
       const dashboardLink = document.getElementById('dashboard-link');
@@ -420,6 +431,8 @@
     if (project?.semrush_project_id) {
       document.getElementById('semrush-project-id').value = project.semrush_project_id;
     }
+
+    renderWebConnections(project);
 
     // Google
     if (client?.google_access_token || syncedGoogleTools) {
@@ -680,6 +693,168 @@
 
   function getProjectPath(project) {
     return '/project/' + getProjectSlug(project);
+  }
+
+  function normalizePlatformValue(value) {
+    return String(value || '').trim().toLowerCase();
+  }
+
+  function getProjectPlatforms(project) {
+    var value = project?.platform || project?.intake_data?.wizard?.platform || '';
+    if (Array.isArray(value)) {
+      return value.map(normalizePlatformValue).filter(Boolean);
+    }
+    return String(value || '')
+      .split(',')
+      .map(function(item) { return normalizePlatformValue(item); })
+      .filter(Boolean);
+  }
+
+  function renderWebConnections(project) {
+    const section = document.getElementById('web-connections-section');
+    const fields = document.getElementById('web-connections-fields');
+    if (!section || !fields) return;
+
+    const platforms = getProjectPlatforms(project);
+    const saved = project?.intake_data?.web_integrations || {};
+    if (!platforms.length) {
+      section.style.display = 'none';
+      return;
+    }
+
+    const blocks = [];
+    platforms.forEach(function(platform) {
+      if (platform === 'woocommerce') blocks.push(renderWooCommerceFields(saved.woocommerce || {}));
+      else if (platform === 'shopify') blocks.push(renderShopifyFields(saved.shopify || {}));
+      else if (platform === 'wordpress') blocks.push(renderWordPressFields(saved.wordpress || {}));
+      else if (platform === 'prestashop') blocks.push(renderPrestaShopFields(saved.prestashop || {}));
+    });
+
+    if (!blocks.length) {
+      section.style.display = 'none';
+      return;
+    }
+
+    section.style.display = '';
+    fields.innerHTML = blocks.join('');
+  }
+
+  function renderIntegrationBlock(title, hint, fieldsHtml) {
+    return `
+      <div style="border:1px solid var(--border);border-radius:12px;padding:16px;background:var(--bg);margin-bottom:12px">
+        <div style="font-size:14px;font-weight:700;margin-bottom:4px">${title}</div>
+        <div style="font-size:12px;color:var(--muted);margin-bottom:14px">${hint}</div>
+        ${fieldsHtml}
+      </div>`;
+  }
+
+  function renderWooCommerceFields(values) {
+    return renderIntegrationBlock(
+      'WooCommerce',
+      'URL de la tienda y credenciales REST API de WooCommerce.',
+      `
+        <div class="field"><label>Store URL</label><input type="text" id="wc-url" placeholder="https://tutienda.com" value="${escapeAttr(values.url || '')}" /></div>
+        <div class="field"><label>Consumer key</label><input type="password" id="wc-key" placeholder="ck_..." value="${escapeAttr(values.key || '')}" /></div>
+        <div class="field"><label>Consumer secret</label><input type="password" id="wc-secret" placeholder="cs_..." value="${escapeAttr(values.secret || '')}" /></div>
+      `
+    );
+  }
+
+  function renderShopifyFields(values) {
+    return renderIntegrationBlock(
+      'Shopify',
+      'Dominio de la tienda y Admin API access token.',
+      `
+        <div class="field"><label>Store domain</label><input type="text" id="shopify-domain" placeholder="midominio.myshopify.com" value="${escapeAttr(values.domain || '')}" /></div>
+        <div class="field"><label>Admin API access token</label><input type="password" id="shopify-token" placeholder="shpat_..." value="${escapeAttr(values.token || '')}" /></div>
+      `
+    );
+  }
+
+  function renderWordPressFields(values) {
+    return renderIntegrationBlock(
+      'WordPress',
+      'URL del sitio, usuario y Application Password para REST API.',
+      `
+        <div class="field"><label>Site URL</label><input type="text" id="wp-url" placeholder="https://blog.midominio.com" value="${escapeAttr(values.url || '')}" /></div>
+        <div class="field"><label>Usuario</label><input type="text" id="wp-user" placeholder="usuario_wp" value="${escapeAttr(values.username || '')}" /></div>
+        <div class="field"><label>Application Password</label><input type="password" id="wp-app-password" placeholder="xxxx xxxx xxxx xxxx" value="${escapeAttr(values.app_password || '')}" /></div>
+      `
+    );
+  }
+
+  function renderPrestaShopFields(values) {
+    return renderIntegrationBlock(
+      'PrestaShop',
+      'URL base y clave de la Webservice API de PrestaShop.',
+      `
+        <div class="field"><label>Store URL</label><input type="text" id="ps-url" placeholder="https://tienda.com" value="${escapeAttr(values.url || '')}" /></div>
+        <div class="field"><label>API key</label><input type="password" id="ps-key" placeholder="Tu API key de PrestaShop" value="${escapeAttr(values.key || '')}" /></div>
+      `
+    );
+  }
+
+  async function saveWebConnections() {
+    if (!_projectId) return showMsg('web-connections-msg', 'No hay proyecto activo para guardar estas conexiones.', 'error');
+
+    const btn = document.getElementById('btn-save-web-connections');
+    btn.disabled = true;
+    btn.textContent = 'Guardando...';
+
+    const platforms = getProjectPlatforms(_projectRecord || {});
+    const nextIntegrations = Object.assign({}, _projectIntakeData.web_integrations || {});
+
+    if (platforms.includes('woocommerce')) {
+      nextIntegrations.woocommerce = {
+        url: document.getElementById('wc-url')?.value?.trim() || '',
+        key: document.getElementById('wc-key')?.value?.trim() || '',
+        secret: document.getElementById('wc-secret')?.value?.trim() || '',
+      };
+    }
+    if (platforms.includes('shopify')) {
+      nextIntegrations.shopify = {
+        domain: document.getElementById('shopify-domain')?.value?.trim() || '',
+        token: document.getElementById('shopify-token')?.value?.trim() || '',
+      };
+    }
+    if (platforms.includes('wordpress')) {
+      nextIntegrations.wordpress = {
+        url: document.getElementById('wp-url')?.value?.trim() || '',
+        username: document.getElementById('wp-user')?.value?.trim() || '',
+        app_password: document.getElementById('wp-app-password')?.value?.trim() || '',
+      };
+    }
+    if (platforms.includes('prestashop')) {
+      nextIntegrations.prestashop = {
+        url: document.getElementById('ps-url')?.value?.trim() || '',
+        key: document.getElementById('ps-key')?.value?.trim() || '',
+      };
+    }
+
+    const nextIntakeData = Object.assign({}, _projectIntakeData || {}, {
+      web_integrations: nextIntegrations
+    });
+
+    const { error } = await sb.from('projects')
+      .update({ intake_data: nextIntakeData })
+      .eq('id', _projectId);
+
+    btn.disabled = false;
+    btn.textContent = 'Guardar conexiones web';
+
+    if (error) return showMsg('web-connections-msg', 'Error al guardar las conexiones web.', 'error');
+
+    _projectIntakeData = nextIntakeData;
+    if (_projectRecord) _projectRecord.intake_data = nextIntakeData;
+    showMsg('web-connections-msg', '✓ Conexiones web guardadas correctamente', 'success');
+  }
+
+  function escapeAttr(value) {
+    return String(value || '')
+      .replace(/&/g, '&amp;')
+      .replace(/"/g, '&quot;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;');
   }
 
   function closeSiteModal() {
