@@ -7,6 +7,10 @@
     {
       "source": "/project/:slug/google",
       "destination": "/google-data.html"
+    },
+    {
+      "source": "/project/:slug/ga4",
+      "destination": "/ga4-data.html"
     }
   ]
 }
