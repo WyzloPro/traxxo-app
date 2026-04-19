@@ -777,12 +777,28 @@ function renderOperationalContext() {
 
   var context = dashboardBrain.context || {};
   var competitors = Array.isArray(context.known_competitors) ? context.known_competitors : [];
+  var contextValues = [
+    context.site_type,
+    context.business_model,
+    context.main_market,
+    context.platform,
+    context.priority_focus,
+    context.seasonal_peaks,
+    context.monthly_seo_budget,
+    competitors.length ? 'competitors' : ''
+  ];
+  var completedCount = contextValues.filter(Boolean).length;
 
   return `
     <div class="card" style="margin-bottom:16px">
-      <div class="card-header">
-        <div class="card-title">Contexto operativo del proyecto</div>
-        <span class="card-badge badge-muted">base declarada</span>
+      <div class="status-topline" style="margin-bottom:8px">
+        <div>
+          <div class="section-kicker"><span class="section-kicker-dot"></span>Contexto operativo del proyecto</div>
+          <div class="status-summary" style="max-width:none;margin-top:8px">
+            Esta es la base declarada del proyecto: le dice a Traxxo qué negocio está analizando, en qué mercado opera y qué foco debe priorizar.
+          </div>
+        </div>
+        <span class="meta-pill"><strong>${completedCount}/8</strong> campos clave</span>
       </div>
       <div class="context-grid">
         ${renderContextItem('Tipo de web', formatContextValue(context.site_type, {
