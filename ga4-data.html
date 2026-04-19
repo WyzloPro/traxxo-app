@@ -128,8 +128,14 @@
     let allSnapshots = [];
     let currentChannels = [];
     let currentLandingPages = [];
+    let currentCountries = [];
+    let currentDevices = [];
+    let currentConversionEvents = [];
     let currentChannelsTotal = 0;
     let currentLandingPagesTotal = 0;
+    let currentCountriesTotal = 0;
+    let currentDevicesTotal = 0;
+    let currentConversionEventsTotal = 0;
 
     sb.auth.getSession().then(async function({ data: { session } }) {
       if (!session) { window.location.href = '/'; return; }
@@ -169,7 +175,10 @@
         return Number(snapshot.ga4_sessions || 0) > 0
           || Number(snapshot.ga4_users || 0) > 0
           || Number(snapshot.ga4_conversions || 0) > 0
-          || Number(snapshot.ga4_revenue || 0) > 0;
+          || Number(snapshot.ga4_revenue || 0) > 0
+          || Number(snapshot.ga4_engaged_sessions || 0) > 0
+          || Number(snapshot.ga4_engagement_rate || 0) > 0
+          || Number(snapshot.ga4_avg_session_duration || 0) > 0;
       });
     }
 
@@ -177,17 +186,43 @@
       if (!allSnapshots.length) {
         currentChannels = [];
         currentLandingPages = [];
+        currentCountries = [];
+        currentDevices = [];
+        currentConversionEvents = [];
         currentChannelsTotal = 0;
         currentLandingPagesTotal = 0;
+        currentCountriesTotal = 0;
+        currentDevicesTotal = 0;
+        currentConversionEventsTotal = 0;
         return;
       }
 
       var latest = allSnapshots[0];
-      var [{ count: channelsCount }, { count: landingPagesCount }, { data: channels }, { data: landingPages }] = await Promise.all([
+      var [
+        { count: channelsCount },
+        { count: landingPagesCount },
+        { count: countriesCount },
+        { count: devicesCount },
+        { count: conversionEventsCount },
+        { data: channels },
+        { data: landingPages },
+        { data: countries },
+        { data: devices },
+        { data: conversionEvents }
+      ] = await Promise.all([
         sb.from('snapshot_ga4_channels')
           .select('*', { count: 'exact', head: true })
           .eq('snapshot_id', latest.id),
         sb.from('snapshot_ga4_landing_pages')
+          .select('*', { count: 'exact', head: true })
+          .eq('snapshot_id', latest.id),
+        sb.from('snapshot_ga4_countries')
+          .select('*', { count: 'exact', head: true })
+          .eq('snapshot_id', latest.id),
+        sb.from('snapshot_ga4_devices')
+          .select('*', { count: 'exact', head: true })
+          .eq('snapshot_id', latest.id),
+        sb.from('snapshot_ga4_conversion_events')
           .select('*', { count: 'exact', head: true })
           .eq('snapshot_id', latest.id),
         sb.from('snapshot_ga4_channels')
@@ -199,13 +234,34 @@
           .select('*')
           .eq('snapshot_id', latest.id)
           .order('sessions', { ascending: false })
+          .limit(10),
+        sb.from('snapshot_ga4_countries')
+          .select('*')
+          .eq('snapshot_id', latest.id)
+          .order('sessions', { ascending: false })
+          .limit(10),
+        sb.from('snapshot_ga4_devices')
+          .select('*')
+          .eq('snapshot_id', latest.id)
+          .order('sessions', { ascending: false })
+          .limit(10),
+        sb.from('snapshot_ga4_conversion_events')
+          .select('*')
+          .eq('snapshot_id', latest.id)
+          .order('key_events', { ascending: false })
           .limit(10),
       ]);
 
       currentChannels = channels || [];
       currentLandingPages = landingPages || [];
+      currentCountries = countries || [];
+      currentDevices = devices || [];
+      currentConversionEvents = conversionEvents || [];
       currentChannelsTotal = channelsCount || 0;
       currentLandingPagesTotal = landingPagesCount || 0;
+      currentCountriesTotal = countriesCount || 0;
+      currentDevicesTotal = devicesCount || 0;
+      currentConversionEventsTotal = conversionEventsCount || 0;
     }
 
     function renderGa4Data() {
@@ -259,6 +315,12 @@
           ${renderKPI('Conversiones', fmtDecimal(latest.ga4_conversions), 'Revenue ' + fmtCurrency(latest.ga4_revenue))}
         </div>
 
+        <div class="grid-3">
+          ${renderKPI('Engaged sessions', fmtNum(latest.ga4_engaged_sessions), 'Sesiones con engagement')}
+          ${renderKPI('Engagement rate', fmtPercent(latest.ga4_engagement_rate), 'Calidad del trafico')}
+          ${renderKPI('Duracion media', fmtDuration(latest.ga4_avg_session_duration), 'Tiempo medio por sesion')}
+        </div>
+
         <div class="card" style="margin-bottom:16px">
           <div class="card-header">
             <div class="card-title">Series semanales disponibles</div>
@@ -281,6 +343,27 @@
             </div>
             ${renderLandingPagesTable(currentLandingPages)}
           </div>
+          <div class="card">
+            <div class="card-header">
+              <div class="card-title">Top countries GA4</div>
+              <span class="badge">${currentCountries.length} visibles · ${currentCountriesTotal} recogidos</span>
+            </div>
+            ${renderCountriesTable(currentCountries)}
+          </div>
+          <div class="card">
+            <div class="card-header">
+              <div class="card-title">Top devices GA4</div>
+              <span class="badge">${currentDevices.length} visibles · ${currentDevicesTotal} recogidos</span>
+            </div>
+            ${renderDevicesTable(currentDevices)}
+          </div>
+          <div class="card">
+            <div class="card-header">
+              <div class="card-title">Top eventos y conversiones GA4</div>
+              <span class="badge">${currentConversionEvents.length} visibles · ${currentConversionEventsTotal} recogidos</span>
+            </div>
+            ${renderConversionEventsTable(currentConversionEvents)}
+          </div>
         </div>
 
         <div class="grid-2">
@@ -294,6 +377,8 @@
                   <tr>
                     <th>Periodo</th>
                     <th>Sesiones</th>
+                    <th>Engaged</th>
+                    <th>Engagement</th>
                     <th>Usuarios</th>
                     <th>Conversiones</th>
                     <th>Revenue</th>
@@ -317,6 +402,9 @@
               <div class="list-item"><div class="list-label">Resumen semanal GA4</div><div class="pill ok">Disponible</div></div>
               <div class="list-item"><div class="list-label">Channels</div><div class="pill ${currentChannelsTotal ? 'ok' : 'missing'}">${currentChannelsTotal ? currentChannels.length + ' visibles · ' + currentChannelsTotal + ' recogidos' : 'Pendiente'}</div></div>
               <div class="list-item"><div class="list-label">Landing pages</div><div class="pill ${currentLandingPagesTotal ? 'ok' : 'missing'}">${currentLandingPagesTotal ? currentLandingPages.length + ' visibles · ' + currentLandingPagesTotal + ' recogidas' : 'Pendiente'}</div></div>
+              <div class="list-item"><div class="list-label">Countries</div><div class="pill ${currentCountriesTotal ? 'ok' : 'missing'}">${currentCountriesTotal ? currentCountries.length + ' visibles · ' + currentCountriesTotal + ' recogidos' : 'Pendiente'}</div></div>
+              <div class="list-item"><div class="list-label">Devices</div><div class="pill ${currentDevicesTotal ? 'ok' : 'missing'}">${currentDevicesTotal ? currentDevices.length + ' visibles · ' + currentDevicesTotal + ' recogidos' : 'Pendiente'}</div></div>
+              <div class="list-item"><div class="list-label">Eventos clave</div><div class="pill ${currentConversionEventsTotal ? 'ok' : 'missing'}">${currentConversionEventsTotal ? currentConversionEvents.length + ' visibles · ' + currentConversionEventsTotal + ' recogidos' : 'Pendiente'}</div></div>
             </div>
             <div id="page-msg" class="msg"></div>
           </div>
@@ -354,6 +442,8 @@
           <div class="mini-series"><div class="card-title" style="margin-bottom:10px">Usuarios</div>${renderMiniBars(ordered, 'ga4_users', 'green')}</div>
           <div class="mini-series"><div class="card-title" style="margin-bottom:10px">Conversiones</div>${renderMiniBars(ordered, 'ga4_conversions', 'orange')}</div>
           <div class="mini-series"><div class="card-title" style="margin-bottom:10px">Revenue</div>${renderMiniBars(ordered, 'ga4_revenue', 'orange')}</div>
+          <div class="mini-series"><div class="card-title" style="margin-bottom:10px">Engaged sessions</div>${renderMiniBars(ordered, 'ga4_engaged_sessions', 'green')}</div>
+          <div class="mini-series"><div class="card-title" style="margin-bottom:10px">Engagement rate</div>${renderMiniBars(ordered, 'ga4_engagement_rate', '')}</div>
         </div>`;
     }
 
@@ -368,7 +458,7 @@
             var height = Math.max(20, Math.round(Math.max(0.12, value / max) * 130));
             return `
               <div class="mini-bar-wrap">
-                <div class="mini-value">${field === 'ga4_revenue' ? fmtCurrency(value) : fmtNum(value)}</div>
+                <div class="mini-value">${field === 'ga4_revenue' ? fmtCurrency(value) : field === 'ga4_engagement_rate' ? fmtPercent(value) : fmtNum(value)}</div>
                 <div class="mini-bar ${colorClass}" style="height:${height}px"></div>
                 <div class="mini-label">${formatShortWeek(snap.week_start)}</div>
               </div>`;
@@ -381,6 +471,8 @@
         <tr>
           <td>${formatWeek(snap.week_start)}</td>
           <td>${fmtNum(snap.ga4_sessions)}</td>
+          <td>${fmtNum(snap.ga4_engaged_sessions)}</td>
+          <td>${fmtPercent(snap.ga4_engagement_rate)}</td>
           <td>${fmtNum(snap.ga4_users)}</td>
           <td>${fmtDecimal(snap.ga4_conversions)}</td>
           <td>${fmtCurrency(snap.ga4_revenue)}</td>
@@ -400,6 +492,7 @@
                 <th>Usuarios</th>
                 <th>Conversiones</th>
                 <th>Revenue</th>
+                <th>Engagement</th>
               </tr>
             </thead>
             <tbody>
@@ -411,6 +504,7 @@
                     <td>${fmtNum(row.users || 0)}</td>
                     <td>${fmtDecimal(row.conversions || 0)}</td>
                     <td>${fmtCurrency(row.revenue || 0)}</td>
+                    <td>${fmtPercent(row.engagement_rate || 0)}</td>
                   </tr>`;
               }).join('')}
             </tbody>
@@ -430,6 +524,7 @@
                 <th>Usuarios</th>
                 <th>Conversiones</th>
                 <th>Revenue</th>
+                <th>Engagement</th>
               </tr>
             </thead>
             <tbody>
@@ -440,6 +535,99 @@
                     <td>${fmtNum(row.sessions || 0)}</td>
                     <td>${fmtNum(row.users || 0)}</td>
                     <td>${fmtDecimal(row.conversions || 0)}</td>
+                    <td>${fmtCurrency(row.revenue || 0)}</td>
+                    <td>${fmtPercent(row.engagement_rate || 0)}</td>
+                  </tr>`;
+              }).join('')}
+            </tbody>
+          </table>
+        </div>`;
+    }
+
+    function renderCountriesTable(rows) {
+      if (!rows.length) return '<div class="empty">Todavia no hay detalle de countries guardado para este snapshot.</div>';
+      return `
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Country</th>
+                <th>Sesiones</th>
+                <th>Usuarios</th>
+                <th>Conversiones</th>
+                <th>Revenue</th>
+                <th>Engagement</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${rows.map(function(row) {
+                return `
+                  <tr>
+                    <td>${escapeHtml(row.country_name || '')}</td>
+                    <td>${fmtNum(row.sessions || 0)}</td>
+                    <td>${fmtNum(row.users || 0)}</td>
+                    <td>${fmtDecimal(row.conversions || 0)}</td>
+                    <td>${fmtCurrency(row.revenue || 0)}</td>
+                    <td>${fmtPercent(row.engagement_rate || 0)}</td>
+                  </tr>`;
+              }).join('')}
+            </tbody>
+          </table>
+        </div>`;
+    }
+
+    function renderDevicesTable(rows) {
+      if (!rows.length) return '<div class="empty">Todavia no hay detalle de devices guardado para este snapshot.</div>';
+      return `
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Device</th>
+                <th>Sesiones</th>
+                <th>Usuarios</th>
+                <th>Conversiones</th>
+                <th>Revenue</th>
+                <th>Engagement</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${rows.map(function(row) {
+                return `
+                  <tr>
+                    <td>${escapeHtml(row.device_category || '')}</td>
+                    <td>${fmtNum(row.sessions || 0)}</td>
+                    <td>${fmtNum(row.users || 0)}</td>
+                    <td>${fmtDecimal(row.conversions || 0)}</td>
+                    <td>${fmtCurrency(row.revenue || 0)}</td>
+                    <td>${fmtPercent(row.engagement_rate || 0)}</td>
+                  </tr>`;
+              }).join('')}
+            </tbody>
+          </table>
+        </div>`;
+    }
+
+    function renderConversionEventsTable(rows) {
+      if (!rows.length) return '<div class="empty">Todavia no hay detalle de eventos guardado para este snapshot.</div>';
+      return `
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Evento</th>
+                <th>Event count</th>
+                <th>Key events</th>
+                <th>Revenue</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${rows.map(function(row) {
+                return `
+                  <tr>
+                    <td>${escapeHtml(row.event_name || '')}</td>
+                    <td>${fmtDecimal(row.event_count || 0)}</td>
+                    <td>${fmtDecimal(row.key_events || 0)}</td>
                     <td>${fmtCurrency(row.revenue || 0)}</td>
                   </tr>`;
               }).join('')}
@@ -562,6 +750,19 @@
 
     function fmtCurrency(n) {
       return new Intl.NumberFormat('es-ES', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 }).format(Number(n || 0));
+    }
+
+    function fmtPercent(n) {
+      return (Number(n || 0) * 100).toFixed(2) + '%';
+    }
+
+    function fmtDuration(n) {
+      var totalSeconds = Math.round(Number(n || 0));
+      if (!totalSeconds) return '0s';
+      var minutes = Math.floor(totalSeconds / 60);
+      var seconds = totalSeconds % 60;
+      if (!minutes) return seconds + 's';
+      return minutes + 'm ' + String(seconds).padStart(2, '0') + 's';
     }
 
     function formatWeek(dateStr) {
