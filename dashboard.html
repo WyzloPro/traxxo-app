@@ -665,7 +665,7 @@ function renderSystemStatus() {
   return `
     <div class="card" style="margin-bottom:16px">
       <div class="card-header">
-        <div class="card-title">Estado real</div>
+        <div class="card-title">Estado del proyecto</div>
         <span class="card-badge badge-muted">${status.headline || 'Fase 1 completada'}</span>
       </div>
       <div style="font-size:13px;color:var(--muted);margin-bottom:14px;line-height:1.6">
@@ -736,7 +736,7 @@ function renderConnectionStatus() {
   return `
     <div class="card" style="margin-bottom:16px">
       <div class="card-header">
-        <div class="card-title">Conexiones del proyecto</div>
+        <div class="card-title">Conexiones activas</div>
         <span class="card-badge badge-muted">estado actual</span>
       </div>
       ${items.map(renderConnectionItem).join('')}
@@ -803,11 +803,12 @@ function renderPhaseItem(item) {
   var status = item.status || 'pending';
   var badgeClass = status === 'completed' ? 'pill ok' : status === 'in_progress' ? 'pill partial' : 'pill missing';
   var badgeText = status === 'completed' ? 'Completada' : status === 'in_progress' ? 'En curso' : 'Pendiente';
+  var roleLabel = getPhaseRoleLabel(item.code, item.label);
   return `
     <div class="context-item">
       <div class="context-label">${item.label || 'Fase'}</div>
       <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:8px">
-        <div class="context-value">${item.code ? 'Agente ' + item.code : '—'}</div>
+        <div class="context-value">${roleLabel}</div>
         <span class="${badgeClass}">${badgeText}</span>
       </div>
       <div class="context-value muted" style="font-size:13px;line-height:1.5">${item.detail || ''}</div>
@@ -850,6 +851,16 @@ function formatPlatformLabel(value) {
     tiendanube: 'Tienda Nube'
   };
   return labels[value] || value || 'Plataforma';
+}
+
+function getPhaseRoleLabel(code, fallback) {
+  var map = {
+    '0.5.2': 'Recolector',
+    '2': 'Analisis interno',
+    '3': 'Analisis competitivo',
+    '4': 'The Thinker'
+  };
+  return map[String(code || '')] || fallback || 'Fase';
 }
 
 function formatMarket(value) {
