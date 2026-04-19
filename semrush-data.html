@@ -186,11 +186,11 @@
       }
 
       var latest = allSnapshots[0];
-      var [{ count }, { data: keywords }, { data: auditSummary }] = await Promise.all([
+      var [{ count }, { data: auditSummary }] = await Promise.all([
         sb.from('snapshot_semrush_keywords').select('*', { count: 'exact', head: true }).eq('snapshot_id', latest.id),
-        sb.from('snapshot_semrush_keywords').select('*').eq('snapshot_id', latest.id).order('position', { ascending: true }).limit(200),
         sb.from('snapshot_semrush_audit_summary').select('*').eq('snapshot_id', latest.id).maybeSingle(),
       ]);
+      var keywords = await fetchAllSnapshotKeywords(latest.id);
 
       currentKeywordCount = count || 0;
       currentKeywords = keywords || [];
@@ -198,6 +198,34 @@
       currentKeywordPage = 1;
       currentUrlPage = 1;
       currentAuditPages = { errors: 1, warnings: 1, notices: 1 };
+    }
+
+    async function fetchAllSnapshotKeywords(snapshotId) {
+      var pageSize = 1000;
+      var from = 0;
+      var allRows = [];
+
+      while (true) {
+        var to = from + pageSize - 1;
+        var { data: rows, error } = await sb
+          .from('snapshot_semrush_keywords')
+          .select('*')
+          .eq('snapshot_id', snapshotId)
+          .order('position', { ascending: true })
+          .range(from, to);
+
+        if (error) {
+          console.error(error);
+          break;
+        }
+
+        var pageRows = rows || [];
+        allRows = allRows.concat(pageRows);
+        if (pageRows.length < pageSize) break;
+        from += pageSize;
+      }
+
+      return allRows;
     }
 
     function renderSemrushData() {
