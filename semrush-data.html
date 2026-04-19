@@ -347,16 +347,61 @@
       return `
         <div class="grid-4" style="margin-bottom:16px">
           ${renderKPI('Estado', escapeHtml(summary.audit_status || '—'), 'Estado del ultimo crawl')}
+          ${renderKPI('Score', summary.quality_score == null ? '—' : Number(summary.quality_score).toFixed(0), 'Salud tecnica del snapshot')}
           ${renderKPI('Errors', fmtNum(summary.errors || 0), 'Issues criticos detectados')}
           ${renderKPI('Warnings', fmtNum(summary.warnings || 0), 'Issues medios detectados')}
-          ${renderKPI('Notices', fmtNum(summary.notices || 0), 'Señales informativas')}
         </div>
-        <div class="grid-4" style="margin-bottom:0">
+        <div class="grid-4" style="margin-bottom:16px">
+          ${renderKPI('Notices', fmtNum(summary.notices || 0), 'Señales informativas')}
           ${renderKPI('Paginas rastreadas', fmtNum(summary.pages_crawled || 0), 'Cobertura real del crawl')}
           ${renderKPI('Limite de paginas', fmtNum(summary.pages_limit || 0), 'Capacidad actual de auditoria')}
           ${renderKPI('Checks ejecutados', fmtNum(summary.total_checks || 0), 'Chequeos tecnicos realizados')}
+        </div>
+        <div class="grid-4" style="margin-bottom:16px">
           ${renderKPI('Ultima auditoria', formatDateTime(summary.latest_snapshot_finish_at || summary.last_audit_at), 'Fecha del ultimo audit detectado')}
+        </div>
+        ${renderAuditIssueLists(summary)}`;
+    }
+
+    function renderAuditIssueLists(summary) {
+      return `
+        <div class="detail-stack">
+          <div class="card">
+            <div class="card-header">
+              <div class="card-title">Errores de auditoria</div>
+              <span class="badge">${Array.isArray(summary.errors_detail) ? summary.errors_detail.length : 0} visibles</span>
+            </div>
+            ${renderAuditIssueTable(summary.errors_detail, 'No hay errores detallados en este snapshot.')}
+          </div>
+          <div class="card">
+            <div class="card-header">
+              <div class="card-title">Warnings de auditoria</div>
+              <span class="badge">${Array.isArray(summary.warnings_detail) ? summary.warnings_detail.length : 0} visibles</span>
+            </div>
+            ${renderAuditIssueTable(summary.warnings_detail, 'No hay warnings detallados en este snapshot.')}
+          </div>
+          <div class="card">
+            <div class="card-header">
+              <div class="card-title">Notices de auditoria</div>
+              <span class="badge">${Array.isArray(summary.notices_detail) ? summary.notices_detail.length : 0} visibles</span>
+            </div>
+            ${renderAuditIssueTable(summary.notices_detail, 'No hay notices detallados en este snapshot.')}
+          </div>
         </div>`;
+    }
+
+    function renderAuditIssueTable(rows, emptyMessage) {
+      if (!Array.isArray(rows) || !rows.length) return `<div class="empty">${emptyMessage}</div>`;
+      return `<div class="table-wrap"><table><thead><tr><th>Issue</th><th>Count</th><th>Checks</th><th>Delta</th></tr></thead><tbody>
+        ${rows.slice(0, 12).map(function(row) {
+          return `<tr>
+            <td>${escapeHtml(row.title || '')}</td>
+            <td>${fmtNum(row.count || 0)}</td>
+            <td>${fmtNum(row.checks || 0)}</td>
+            <td>${row.delta == null ? '—' : Number(row.delta).toFixed(0)}</td>
+          </tr>`;
+        }).join('')}
+      </tbody></table></div>`;
     }
 
     function renderWeeklySeries(snaps) {
