@@ -680,7 +680,7 @@ function renderSystemStatus() {
 function renderConnectionStatus() {
   var connections = (dashboardBrain && dashboardBrain.connections) ? dashboardBrain.connections : {};
   var context = (dashboardBrain && dashboardBrain.context) ? dashboardBrain.context : {};
-  var platform = normalizePlatform(context.platform || currentProject?.platform || currentProject?.intake_data?.wizard?.platform || '');
+  var platformValue = context.platform || currentProject?.platform || currentProject?.intake_data?.wizard?.platform || '';
   var hasDomain = !!(currentProject?.domain || dashboardBrain?.project?.domain || dashboardBrain?.project?.gsc_site_url);
   var items = [
     {
@@ -720,18 +720,7 @@ function renderConnectionStatus() {
     }
   ];
 
-  if (platform === 'woocommerce') {
-    items.push({ code: 'WP', color: '#21759b', label: 'WordPress', connected: true, detail: 'Base web declarada' });
-    items.push({ code: 'WC', color: '#7f54b3', label: 'WooCommerce', connected: true, detail: 'Store conected' });
-  } else if (platform === 'shopify') {
-    items.push({ code: 'SHP', color: '#95bf47', label: 'Shopify', connected: true, detail: 'Store conected' });
-  } else if (platform === 'wordpress') {
-    items.push({ code: 'WP', color: '#21759b', label: 'WordPress', connected: true, detail: 'Base web declarada' });
-  } else if (platform === 'prestashop' || platform === 'tiendanube' || platform === 'shopware' || platform === 'magento') {
-    items.push({ code: 'ST', color: '#8b5cf6', label: formatPlatformLabel(platform), connected: true, detail: 'Store conected' });
-  } else if (platform) {
-    items.push({ code: 'PLT', color: '#8b5cf6', label: formatPlatformLabel(platform), connected: true, detail: 'Plataforma declarada' });
-  }
+  items = items.concat(buildPlatformConnectionItems(platformValue));
 
   return `
     <div class="card" style="margin-bottom:16px">
@@ -851,6 +840,73 @@ function formatPlatformLabel(value) {
     tiendanube: 'Tienda Nube'
   };
   return labels[value] || value || 'Plataforma';
+}
+
+function buildPlatformConnectionItems(platformValue) {
+  var values = normalizePlatformList(platformValue);
+  if (!values.length) return [];
+
+  var counts = {};
+  values.forEach(function(item) {
+    counts[item] = (counts[item] || 0) + 1;
+  });
+
+  return Object.keys(counts).map(function(key) {
+    var count = counts[key];
+    return {
+      code: getPlatformCode(key),
+      color: getPlatformColor(key),
+      label: formatPlatformLabel(key),
+      connected: true,
+      detail: formatPlatformConnectionDetail(key, count),
+    };
+  });
+}
+
+function normalizePlatformList(value) {
+  if (Array.isArray(value)) {
+    return value.map(normalizePlatform).filter(Boolean);
+  }
+  var raw = String(value || '').trim();
+  if (!raw) return [];
+  return raw
+    .split(',')
+    .map(function(item) { return normalizePlatform(item); })
+    .filter(Boolean);
+}
+
+function getPlatformCode(value) {
+  var map = {
+    woocommerce: 'WC',
+    wordpress: 'WP',
+    shopify: 'SHP',
+    prestashop: 'PS',
+    shopware: 'SWR',
+    magento: 'MAG',
+    tiendanube: 'TN'
+  };
+  return map[value] || 'PLT';
+}
+
+function getPlatformColor(value) {
+  var map = {
+    woocommerce: '#7f54b3',
+    wordpress: '#21759b',
+    shopify: '#95bf47',
+    prestashop: '#df0067',
+    shopware: '#189eff',
+    magento: '#f26322',
+    tiendanube: '#00a8ff'
+  };
+  return map[value] || '#8b5cf6';
+}
+
+function formatPlatformConnectionDetail(value, count) {
+  if (count > 1) {
+    return count + ' conexiones activas';
+  }
+  if (value === 'wordpress') return 'Base web conectada';
+  return 'Store conected';
 }
 
 function getPhaseRoleLabel(code, fallback) {
