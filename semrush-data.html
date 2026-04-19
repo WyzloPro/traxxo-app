@@ -127,6 +127,7 @@
     let allSnapshots = [];
     let currentKeywords = [];
     let currentKeywordCount = 0;
+    let currentAuditSummary = null;
 
     sb.auth.getSession().then(async function({ data: { session } }) {
       if (!session) { window.location.href = '/'; return; }
@@ -173,17 +174,20 @@
       if (!allSnapshots.length) {
         currentKeywords = [];
         currentKeywordCount = 0;
+        currentAuditSummary = null;
         return;
       }
 
       var latest = allSnapshots[0];
-      var [{ count }, { data: keywords }] = await Promise.all([
+      var [{ count }, { data: keywords }, { data: auditSummary }] = await Promise.all([
         sb.from('snapshot_semrush_keywords').select('*', { count: 'exact', head: true }).eq('snapshot_id', latest.id),
         sb.from('snapshot_semrush_keywords').select('*').eq('snapshot_id', latest.id).order('position', { ascending: true }).limit(10),
+        sb.from('snapshot_semrush_audit_summary').select('*').eq('snapshot_id', latest.id).maybeSingle(),
       ]);
 
       currentKeywordCount = count || 0;
       currentKeywords = keywords || [];
+      currentAuditSummary = auditSummary || null;
     }
 
     function renderSemrushData() {
@@ -225,7 +229,7 @@
         <div class="hero">
           <div>
             <h1>Datos Semrush</h1>
-            <p>Esta vista separa la capa de fuente de la capa de analisis. Aqui ves las keywords organicas y las URLs que Traxxo ya ha descargado de Semrush para <strong>${escapeHtml(currentProject.domain || 'este proyecto')}</strong>.</p>
+            <p>Esta vista separa la capa de fuente de la capa de analisis. Aqui ves la auditoria tecnica y las posiciones organicas que Traxxo ya ha descargado de Semrush para <strong>${escapeHtml(currentProject.domain || 'este proyecto')}</strong>.</p>
           </div>
           <span class="badge">${allSnapshots.length} snapshots cargados</span>
         </div>
@@ -235,6 +239,14 @@
           ${renderKPI('Keywords', fmtNum(latest.semrush_keywords), 'Dato descargado de Semrush')}
           ${renderKPI('Top 3', fmtNum(latest.semrush_top3), 'Keywords mejor posicionadas')}
           ${renderKPI('Top 10', fmtNum(latest.semrush_top10), 'Cobertura organica visible')}
+        </div>
+
+        <div class="card" style="margin-bottom:16px">
+          <div class="card-header">
+            <div class="card-title">Auditoria tecnica Semrush</div>
+            <span class="badge">${currentAuditSummary ? 'Resumen disponible' : (currentProject.semrush_project_id ? 'Project ID conectado' : 'Falta project ID')}</span>
+          </div>
+          ${renderAuditSummary(currentAuditSummary, currentProject.semrush_project_id)}
         </div>
 
         <div class="card" style="margin-bottom:16px">
@@ -290,8 +302,10 @@
           </div>
           <div class="grid-3" style="margin-bottom:0">
             <div class="list-item"><div class="list-label">API key Semrush</div><div class="pill ok">Conectada</div></div>
+            <div class="list-item"><div class="list-label">Project ID para auditoria</div><div class="pill ${currentProject.semrush_project_id ? 'ok' : 'missing'}">${currentProject.semrush_project_id ? 'Conectado' : 'Pendiente'}</div></div>
             <div class="list-item"><div class="list-label">Historico semanal guardado</div><div class="pill ok">${allSnapshots.length} snapshots</div></div>
             <div class="list-item"><div class="list-label">Backfill de 4 meses</div><div class="pill ok">Historico inicial cargado</div></div>
+            <div class="list-item"><div class="list-label">Auditoria tecnica</div><div class="pill ${currentAuditSummary ? 'ok' : (currentProject.semrush_project_id ? 'partial' : 'missing')}">${currentAuditSummary ? 'Disponible' : (currentProject.semrush_project_id ? 'Sin resumen aun' : 'Falta project ID')}</div></div>
             <div class="list-item"><div class="list-label">Resumen semanal Semrush</div><div class="pill ok">Disponible</div></div>
             <div class="list-item"><div class="list-label">Keywords</div><div class="pill ${currentKeywordCount ? 'ok' : 'missing'}">${currentKeywordCount ? currentKeywords.length + ' visibles · ' + currentKeywordCount + ' recogidas' : 'Pendiente'}</div></div>
             <div class="list-item"><div class="list-label">Top URLs derivadas</div><div class="pill ${topUrls.length ? 'ok' : 'partial'}">${topUrls.length ? topUrls.length + ' visibles' : 'Sin datos aun'}</div></div>
@@ -320,6 +334,29 @@
 
     function renderKPI(label, value, sub) {
       return `<div class="card"><div class="card-title">${label}</div><div class="kpi-value">${value}</div><div class="kpi-sub">${sub}</div></div>`;
+    }
+
+    function renderAuditSummary(summary, semrushProjectId) {
+      if (!semrushProjectId) {
+        return '<div class="empty">Falta guardar el <strong>Project ID</strong> de Semrush en <strong>Mi cuenta</strong> para leer la auditoria tecnica del sitio.</div>';
+      }
+      if (!summary) {
+        return '<div class="empty">Todavia no hay resumen de auditoria guardado para este snapshot. Si el Project ID ya esta bien conectado, pulsa <strong>Actualizar</strong>.</div>';
+      }
+
+      return `
+        <div class="grid-4" style="margin-bottom:16px">
+          ${renderKPI('Estado', escapeHtml(summary.audit_status || '—'), 'Estado del ultimo crawl')}
+          ${renderKPI('Errors', fmtNum(summary.errors || 0), 'Issues criticos detectados')}
+          ${renderKPI('Warnings', fmtNum(summary.warnings || 0), 'Issues medios detectados')}
+          ${renderKPI('Notices', fmtNum(summary.notices || 0), 'Señales informativas')}
+        </div>
+        <div class="grid-4" style="margin-bottom:0">
+          ${renderKPI('Paginas rastreadas', fmtNum(summary.pages_crawled || 0), 'Cobertura real del crawl')}
+          ${renderKPI('Limite de paginas', fmtNum(summary.pages_limit || 0), 'Capacidad actual de auditoria')}
+          ${renderKPI('Checks ejecutados', fmtNum(summary.total_checks || 0), 'Chequeos tecnicos realizados')}
+          ${renderKPI('Ultima auditoria', formatDateTime(summary.latest_snapshot_finish_at || summary.last_audit_at), 'Fecha del ultimo audit detectado')}
+        </div>`;
     }
 
     function renderWeeklySeries(snaps) {

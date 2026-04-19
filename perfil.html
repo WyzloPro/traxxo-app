@@ -225,10 +225,14 @@
   <!-- SEMRUSH -->
   <div class="section">
     <div class="section-title">Semrush</div>
-    <p style="font-size:13px;color:var(--muted);margin-bottom:4px">API key para ver posiciones orgánicas.</p>
-    <a href="https://www.semrush.com/user/profile/api/" target="_blank" style="font-size:12px;color:var(--accent);display:block;margin-bottom:12px">¿Dónde encuentro mi API key? →</a>
+    <p style="font-size:13px;color:var(--muted);margin-bottom:4px">API key para ver posiciones orgánicas y Project ID para la auditoría técnica.</p>
+    <a href="https://www.semrush.com/user/profile/api/" target="_blank" style="font-size:12px;color:var(--accent);display:block;margin-bottom:8px">¿Dónde encuentro mi API key? →</a>
+    <a href="https://developer.semrush.com/api/v3/projects/basic-docs/" target="_blank" style="font-size:12px;color:var(--accent);display:block;margin-bottom:12px">¿Dónde encuentro mi Project ID de Semrush? →</a>
     <div style="display:flex;gap:8px">
       <input type="password" id="semrush-key" placeholder="Tu API key de Semrush..." style="flex:1" />
+    </div>
+    <div style="display:flex;gap:8px;margin-top:8px">
+      <input type="text" id="semrush-project-id" placeholder="Project ID para Site Audit..." style="flex:1" />
       <button class="btn btn-accent" onclick="saveSemrush()">Guardar</button>
     </div>
     <div class="msg" id="semrush-msg"></div>
@@ -413,6 +417,9 @@
     if (project?.semrush_api_key) {
       document.getElementById('semrush-key').value = project.semrush_api_key;
     }
+    if (project?.semrush_project_id) {
+      document.getElementById('semrush-project-id').value = project.semrush_project_id;
+    }
 
     // Google
     if (client?.google_access_token || syncedGoogleTools) {
@@ -587,6 +594,7 @@
 
   async function saveSemrush() {
     const key = document.getElementById('semrush-key').value.trim();
+    const semrushProjectId = document.getElementById('semrush-project-id').value.trim();
     if (!key) return;
     if (!_projectId) return showMsg('semrush-msg', 'No hay proyecto activo para guardar la API key.', 'error');
 
@@ -614,9 +622,14 @@
       return showMsg('semrush-msg', '✗ Error de conexión con Semrush', 'error');
     }
 
-    const { error } = await sb.from('projects').update({ semrush_api_key: key }).eq('id', _projectId);
+    const { error } = await sb.from('projects').update({
+      semrush_api_key: key,
+      semrush_project_id: semrushProjectId || null
+    }).eq('id', _projectId);
     if (error) return showMsg('semrush-msg', 'Error al guardar', 'error');
-    showMsg('semrush-msg', '✓ API key guardada correctamente', 'success');
+    showMsg('semrush-msg', semrushProjectId
+      ? '✓ API key y Project ID guardados correctamente'
+      : '✓ API key guardada correctamente', 'success');
   }
 
   async function saveNotifications() {
