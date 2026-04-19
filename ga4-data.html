@@ -131,11 +131,17 @@
     let currentCountries = [];
     let currentDevices = [];
     let currentConversionEvents = [];
+    let currentSourceMediums = [];
+    let currentCampaigns = [];
+    let currentItems = [];
     let currentChannelsTotal = 0;
     let currentLandingPagesTotal = 0;
     let currentCountriesTotal = 0;
     let currentDevicesTotal = 0;
     let currentConversionEventsTotal = 0;
+    let currentSourceMediumsTotal = 0;
+    let currentCampaignsTotal = 0;
+    let currentItemsTotal = 0;
 
     sb.auth.getSession().then(async function({ data: { session } }) {
       if (!session) { window.location.href = '/'; return; }
@@ -189,11 +195,17 @@
         currentCountries = [];
         currentDevices = [];
         currentConversionEvents = [];
+        currentSourceMediums = [];
+        currentCampaigns = [];
+        currentItems = [];
         currentChannelsTotal = 0;
         currentLandingPagesTotal = 0;
         currentCountriesTotal = 0;
         currentDevicesTotal = 0;
         currentConversionEventsTotal = 0;
+        currentSourceMediumsTotal = 0;
+        currentCampaignsTotal = 0;
+        currentItemsTotal = 0;
         return;
       }
 
@@ -204,11 +216,17 @@
         { count: countriesCount },
         { count: devicesCount },
         { count: conversionEventsCount },
+        { count: sourceMediumsCount },
+        { count: campaignsCount },
+        { count: itemsCount },
         { data: channels },
         { data: landingPages },
         { data: countries },
         { data: devices },
-        { data: conversionEvents }
+        { data: conversionEvents },
+        { data: sourceMediums },
+        { data: campaigns },
+        { data: items }
       ] = await Promise.all([
         sb.from('snapshot_ga4_channels')
           .select('*', { count: 'exact', head: true })
@@ -223,6 +241,15 @@
           .select('*', { count: 'exact', head: true })
           .eq('snapshot_id', latest.id),
         sb.from('snapshot_ga4_conversion_events')
+          .select('*', { count: 'exact', head: true })
+          .eq('snapshot_id', latest.id),
+        sb.from('snapshot_ga4_source_mediums')
+          .select('*', { count: 'exact', head: true })
+          .eq('snapshot_id', latest.id),
+        sb.from('snapshot_ga4_campaigns')
+          .select('*', { count: 'exact', head: true })
+          .eq('snapshot_id', latest.id),
+        sb.from('snapshot_ga4_items')
           .select('*', { count: 'exact', head: true })
           .eq('snapshot_id', latest.id),
         sb.from('snapshot_ga4_channels')
@@ -250,6 +277,21 @@
           .eq('snapshot_id', latest.id)
           .order('key_events', { ascending: false })
           .limit(10),
+        sb.from('snapshot_ga4_source_mediums')
+          .select('*')
+          .eq('snapshot_id', latest.id)
+          .order('sessions', { ascending: false })
+          .limit(25),
+        sb.from('snapshot_ga4_campaigns')
+          .select('*')
+          .eq('snapshot_id', latest.id)
+          .order('sessions', { ascending: false })
+          .limit(25),
+        sb.from('snapshot_ga4_items')
+          .select('*')
+          .eq('snapshot_id', latest.id)
+          .order('item_revenue', { ascending: false })
+          .limit(25),
       ]);
 
       currentChannels = channels || [];
@@ -257,11 +299,17 @@
       currentCountries = countries || [];
       currentDevices = devices || [];
       currentConversionEvents = conversionEvents || [];
+      currentSourceMediums = sourceMediums || [];
+      currentCampaigns = campaigns || [];
+      currentItems = items || [];
       currentChannelsTotal = channelsCount || 0;
       currentLandingPagesTotal = landingPagesCount || 0;
       currentCountriesTotal = countriesCount || 0;
       currentDevicesTotal = devicesCount || 0;
       currentConversionEventsTotal = conversionEventsCount || 0;
+      currentSourceMediumsTotal = sourceMediumsCount || 0;
+      currentCampaignsTotal = campaignsCount || 0;
+      currentItemsTotal = itemsCount || 0;
     }
 
     function renderGa4Data() {
@@ -303,7 +351,7 @@
         <div class="hero">
           <div>
             <h1>Datos Google Analytics 4</h1>
-            <p>Esta vista deja GA4 como fuente separada. Aqui ves sesiones, usuarios, conversiones, revenue, canales y landings que Traxxo ya ha descargado para <strong>${escapeHtml(currentProject.domain || 'este proyecto')}</strong>.</p>
+            <p>Esta vista deja GA4 como fuente separada. Aqui ves adquisicion, comportamiento y e-commerce que Traxxo ya ha descargado para <strong>${escapeHtml(currentProject.domain || 'este proyecto')}</strong>.</p>
           </div>
           <span class="badge">${allSnapshots.length} snapshots cargados</span>
         </div>
@@ -329,6 +377,20 @@
         </div>
 
         <div class="detail-stack">
+          <div class="card">
+            <div class="card-header">
+              <div class="card-title">Top source / medium GA4</div>
+              <span class="badge">${currentSourceMediums.length} visibles · ${currentSourceMediumsTotal} recogidos</span>
+            </div>
+            ${renderSourceMediumsTable(currentSourceMediums)}
+          </div>
+          <div class="card">
+            <div class="card-header">
+              <div class="card-title">Top campaigns GA4</div>
+              <span class="badge">${currentCampaigns.length} visibles · ${currentCampaignsTotal} recogidas</span>
+            </div>
+            ${renderCampaignsTable(currentCampaigns)}
+          </div>
           <div class="card">
             <div class="card-header">
               <div class="card-title">Top channels GA4</div>
@@ -363,6 +425,13 @@
               <span class="badge">${currentConversionEvents.length} visibles · ${currentConversionEventsTotal} recogidos</span>
             </div>
             ${renderConversionEventsTable(currentConversionEvents)}
+          </div>
+          <div class="card">
+            <div class="card-header">
+              <div class="card-title">Top items e-commerce GA4</div>
+              <span class="badge">${currentItems.length} visibles · ${currentItemsTotal} recogidos</span>
+            </div>
+            ${renderItemsTable(currentItems)}
           </div>
         </div>
 
@@ -400,11 +469,14 @@
               <div class="list-item"><div class="list-label">Historico semanal guardado</div><div class="pill ok">${allSnapshots.length} snapshots</div></div>
               <div class="list-item"><div class="list-label">Backfill de 4 meses</div><div class="pill ok">Historico inicial cargado</div></div>
               <div class="list-item"><div class="list-label">Resumen semanal GA4</div><div class="pill ok">Disponible</div></div>
+              <div class="list-item"><div class="list-label">Source / medium</div><div class="pill ${currentSourceMediumsTotal ? 'ok' : 'missing'}">${currentSourceMediumsTotal ? currentSourceMediums.length + ' visibles · ' + currentSourceMediumsTotal + ' recogidos' : 'Pendiente'}</div></div>
+              <div class="list-item"><div class="list-label">Campaigns</div><div class="pill ${currentCampaignsTotal ? 'ok' : 'missing'}">${currentCampaignsTotal ? currentCampaigns.length + ' visibles · ' + currentCampaignsTotal + ' recogidas' : 'Pendiente'}</div></div>
               <div class="list-item"><div class="list-label">Channels</div><div class="pill ${currentChannelsTotal ? 'ok' : 'missing'}">${currentChannelsTotal ? currentChannels.length + ' visibles · ' + currentChannelsTotal + ' recogidos' : 'Pendiente'}</div></div>
               <div class="list-item"><div class="list-label">Landing pages</div><div class="pill ${currentLandingPagesTotal ? 'ok' : 'missing'}">${currentLandingPagesTotal ? currentLandingPages.length + ' visibles · ' + currentLandingPagesTotal + ' recogidas' : 'Pendiente'}</div></div>
               <div class="list-item"><div class="list-label">Countries</div><div class="pill ${currentCountriesTotal ? 'ok' : 'missing'}">${currentCountriesTotal ? currentCountries.length + ' visibles · ' + currentCountriesTotal + ' recogidos' : 'Pendiente'}</div></div>
               <div class="list-item"><div class="list-label">Devices</div><div class="pill ${currentDevicesTotal ? 'ok' : 'missing'}">${currentDevicesTotal ? currentDevices.length + ' visibles · ' + currentDevicesTotal + ' recogidos' : 'Pendiente'}</div></div>
               <div class="list-item"><div class="list-label">Eventos clave</div><div class="pill ${currentConversionEventsTotal ? 'ok' : 'missing'}">${currentConversionEventsTotal ? currentConversionEvents.length + ' visibles · ' + currentConversionEventsTotal + ' recogidos' : 'Pendiente'}</div></div>
+              <div class="list-item"><div class="list-label">Items e-commerce</div><div class="pill ${currentItemsTotal ? 'ok' : 'missing'}">${currentItemsTotal ? currentItems.length + ' visibles · ' + currentItemsTotal + ' recogidos' : 'Pendiente'}</div></div>
             </div>
             <div id="page-msg" class="msg"></div>
           </div>
@@ -500,6 +572,70 @@
                 return `
                   <tr>
                     <td>${escapeHtml(row.channel_name || '')}</td>
+                    <td>${fmtNum(row.sessions || 0)}</td>
+                    <td>${fmtNum(row.users || 0)}</td>
+                    <td>${fmtDecimal(row.conversions || 0)}</td>
+                    <td>${fmtCurrency(row.revenue || 0)}</td>
+                    <td>${fmtPercent(row.engagement_rate || 0)}</td>
+                  </tr>`;
+              }).join('')}
+            </tbody>
+          </table>
+        </div>`;
+    }
+
+    function renderSourceMediumsTable(rows) {
+      if (!rows.length) return '<div class="empty">Todavia no hay detalle de source / medium guardado para este snapshot.</div>';
+      return `
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Source / medium</th>
+                <th>Sesiones</th>
+                <th>Usuarios</th>
+                <th>Conversiones</th>
+                <th>Revenue</th>
+                <th>Engagement</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${rows.map(function(row) {
+                return `
+                  <tr>
+                    <td>${escapeHtml(row.source_medium || '')}</td>
+                    <td>${fmtNum(row.sessions || 0)}</td>
+                    <td>${fmtNum(row.users || 0)}</td>
+                    <td>${fmtDecimal(row.conversions || 0)}</td>
+                    <td>${fmtCurrency(row.revenue || 0)}</td>
+                    <td>${fmtPercent(row.engagement_rate || 0)}</td>
+                  </tr>`;
+              }).join('')}
+            </tbody>
+          </table>
+        </div>`;
+    }
+
+    function renderCampaignsTable(rows) {
+      if (!rows.length) return '<div class="empty">Todavia no hay detalle de campañas guardado para este snapshot.</div>';
+      return `
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Campaign</th>
+                <th>Sesiones</th>
+                <th>Usuarios</th>
+                <th>Conversiones</th>
+                <th>Revenue</th>
+                <th>Engagement</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${rows.map(function(row) {
+                return `
+                  <tr>
+                    <td>${escapeHtml(row.campaign_name || '')}</td>
                     <td>${fmtNum(row.sessions || 0)}</td>
                     <td>${fmtNum(row.users || 0)}</td>
                     <td>${fmtDecimal(row.conversions || 0)}</td>
@@ -629,6 +765,38 @@
                     <td>${fmtDecimal(row.event_count || 0)}</td>
                     <td>${fmtDecimal(row.key_events || 0)}</td>
                     <td>${fmtCurrency(row.revenue || 0)}</td>
+                  </tr>`;
+              }).join('')}
+            </tbody>
+          </table>
+        </div>`;
+    }
+
+    function renderItemsTable(rows) {
+      if (!rows.length) return '<div class="empty">Todavia no hay detalle de items e-commerce guardado para este snapshot.</div>';
+      return `
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Item</th>
+                <th>Vistos</th>
+                <th>Add to cart</th>
+                <th>Checkout</th>
+                <th>Comprados</th>
+                <th>Revenue</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${rows.map(function(row) {
+                return `
+                  <tr>
+                    <td>${escapeHtml(row.item_name || '')}</td>
+                    <td>${fmtDecimal(row.items_viewed || 0)}</td>
+                    <td>${fmtDecimal(row.items_added_to_cart || 0)}</td>
+                    <td>${fmtDecimal(row.items_checked_out || 0)}</td>
+                    <td>${fmtDecimal(row.items_purchased || 0)}</td>
+                    <td>${fmtCurrency(row.item_revenue || 0)}</td>
                   </tr>`;
               }).join('')}
             </tbody>
