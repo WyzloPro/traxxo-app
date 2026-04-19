@@ -202,6 +202,31 @@
     .conn-badge { font-size:11px; font-weight:700; padding:3px 10px; border-radius:20px; white-space:nowrap; }
     .conn-badge.connected { background:rgba(16,185,129,.1); color:var(--green); border:1px solid rgba(16,185,129,.2); }
     .conn-badge.disconnected { background:var(--bg); color:var(--muted); border:1px solid var(--border); }
+    .status-shell { background:
+      radial-gradient(circle at top right, rgba(34,211,238,.08), transparent 28%),
+      linear-gradient(180deg, rgba(255,255,255,.015), rgba(255,255,255,0));
+    }
+    .section-kicker { display:flex; align-items:center; gap:8px; font-size:11px; font-weight:700; letter-spacing:.08em; text-transform:uppercase; color:var(--muted); }
+    .section-kicker-dot { width:8px; height:8px; border-radius:50%; background:var(--accent); box-shadow:0 0 0 4px rgba(34,211,238,.08); }
+    .section-kicker-dot.green { background:var(--green); box-shadow:0 0 0 4px rgba(16,185,129,.08); }
+    .status-topline { display:flex; align-items:flex-start; justify-content:space-between; gap:16px; margin-bottom:16px; }
+    .status-headline { font-size:24px; font-weight:700; line-height:1.1; margin:8px 0 10px; }
+    .status-summary { font-size:13px; color:var(--muted); line-height:1.7; max-width:760px; }
+    .status-meta { display:flex; flex-wrap:wrap; gap:8px; margin-top:14px; }
+    .meta-pill { display:inline-flex; align-items:center; gap:6px; padding:6px 10px; border-radius:999px; background:var(--bg); border:1px solid var(--border); font-size:11px; color:var(--muted); }
+    .meta-pill strong { color:var(--text); font-weight:700; }
+    .phase-grid { display:grid; grid-template-columns:repeat(4, 1fr); gap:12px; }
+    @media(max-width:900px) { .phase-grid { grid-template-columns:1fr 1fr; } }
+    @media(max-width:768px) { .phase-grid { grid-template-columns:1fr; } }
+    .phase-card { background:var(--bg); border:1px solid var(--border); border-radius:12px; padding:14px; min-height:122px; }
+    .phase-header { display:flex; align-items:center; justify-content:space-between; gap:10px; margin-bottom:10px; }
+    .phase-name { font-size:10px; font-weight:700; letter-spacing:.08em; text-transform:uppercase; color:var(--muted); }
+    .phase-status { font-size:10px; font-weight:700; padding:3px 8px; border-radius:999px; }
+    .phase-status.completed { background:rgba(16,185,129,.1); color:var(--green); border:1px solid rgba(16,185,129,.2); }
+    .phase-status.in_progress { background:rgba(34,211,238,.1); color:var(--accent); border:1px solid rgba(34,211,238,.2); }
+    .phase-status.pending { background:var(--surface); color:var(--muted); border:1px solid var(--border); }
+    .phase-role { font-size:19px; font-weight:700; line-height:1.1; margin-bottom:8px; }
+    .phase-detail { font-size:13px; color:var(--muted); line-height:1.55; }
 
     /* SKELETON */
     @keyframes shimmer { 0%{background-position:-200% 0} 100%{background-position:200% 0} }
@@ -661,17 +686,25 @@ function renderSystemStatus() {
     ],
   };
   var phases = Array.isArray(status.phases) ? status.phases : [];
+  var completedCount = phases.filter(function(item) { return item && item.status === 'completed'; }).length;
 
   return `
-    <div class="card" style="margin-bottom:16px">
-      <div class="card-header">
-        <div class="card-title">Estado del proyecto</div>
+    <div class="card status-shell" style="margin-bottom:16px">
+      <div class="status-topline">
+        <div>
+          <div class="section-kicker"><span class="section-kicker-dot"></span>Estado del proyecto</div>
+          <div class="status-headline">${status.headline || 'Fase 1 completada'}</div>
+          <div class="status-summary">
+            ${status.summary || 'La fase de recoleccion ya esta cerrada y el resto de capas siguen pendientes.'}
+          </div>
+          <div class="status-meta">
+            <span class="meta-pill"><strong>${completedCount}/${phases.length || 4}</strong> fases cerradas</span>
+            <span class="meta-pill"><strong>Ahora</strong> preparada para la siguiente etapa</span>
+          </div>
+        </div>
         <span class="card-badge badge-muted">${status.headline || 'Fase 1 completada'}</span>
       </div>
-      <div style="font-size:13px;color:var(--muted);margin-bottom:14px;line-height:1.6">
-        ${status.summary || 'La fase de recoleccion ya esta cerrada y el resto de capas siguen pendientes.'}
-      </div>
-      <div class="context-grid">
+      <div class="phase-grid">
         ${phases.map(renderPhaseItem).join('')}
       </div>
     </div>`;
@@ -722,12 +755,18 @@ function renderConnectionStatus() {
   ];
 
   items = items.concat(buildPlatformConnectionItems(platformValue, webIntegrations));
+  var connectedCount = items.filter(function(item) { return item.connected; }).length;
 
   return `
     <div class="card" style="margin-bottom:16px">
-      <div class="card-header">
-        <div class="card-title">Conexiones activas</div>
-        <span class="card-badge badge-muted">estado actual</span>
+      <div class="status-topline" style="margin-bottom:8px">
+        <div>
+          <div class="section-kicker"><span class="section-kicker-dot green"></span>Conexiones activas</div>
+          <div class="status-summary" style="max-width:none;margin-top:8px">
+            Estas conexiones y credenciales son la base que usa Traxxo para saber de dónde bajar la información del proyecto.
+          </div>
+        </div>
+        <span class="meta-pill"><strong>${connectedCount}/${items.length}</strong> listas</span>
       </div>
       ${items.map(renderConnectionItem).join('')}
     </div>`;
@@ -791,17 +830,16 @@ function renderCompetitorsItem(competitors) {
 
 function renderPhaseItem(item) {
   var status = item.status || 'pending';
-  var badgeClass = status === 'completed' ? 'pill ok' : status === 'in_progress' ? 'pill partial' : 'pill missing';
   var badgeText = status === 'completed' ? 'Completada' : status === 'in_progress' ? 'En curso' : 'Pendiente';
   var roleLabel = getPhaseRoleLabel(item.code, item.label);
   return `
-    <div class="context-item">
-      <div class="context-label">${item.label || 'Fase'}</div>
-      <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:8px">
-        <div class="context-value">${roleLabel}</div>
-        <span class="${badgeClass}">${badgeText}</span>
+    <div class="phase-card">
+      <div class="phase-header">
+        <div class="phase-name">${item.label || 'Fase'}</div>
+        <span class="phase-status ${status}">${badgeText}</span>
       </div>
-      <div class="context-value muted" style="font-size:13px;line-height:1.5">${item.detail || ''}</div>
+      <div class="phase-role">${roleLabel}</div>
+      <div class="phase-detail">${item.detail || ''}</div>
     </div>`;
 }
 
