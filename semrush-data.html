@@ -128,6 +128,10 @@
     let currentKeywords = [];
     let currentKeywordCount = 0;
     let currentAuditSummary = null;
+    let currentKeywordPage = 1;
+    let currentUrlPage = 1;
+    let currentAuditPages = { errors: 1, warnings: 1, notices: 1 };
+    const PAGE_SIZE = 25;
 
     sb.auth.getSession().then(async function({ data: { session } }) {
       if (!session) { window.location.href = '/'; return; }
@@ -175,19 +179,25 @@
         currentKeywords = [];
         currentKeywordCount = 0;
         currentAuditSummary = null;
+        currentKeywordPage = 1;
+        currentUrlPage = 1;
+        currentAuditPages = { errors: 1, warnings: 1, notices: 1 };
         return;
       }
 
       var latest = allSnapshots[0];
       var [{ count }, { data: keywords }, { data: auditSummary }] = await Promise.all([
         sb.from('snapshot_semrush_keywords').select('*', { count: 'exact', head: true }).eq('snapshot_id', latest.id),
-        sb.from('snapshot_semrush_keywords').select('*').eq('snapshot_id', latest.id).order('position', { ascending: true }).limit(10),
+        sb.from('snapshot_semrush_keywords').select('*').eq('snapshot_id', latest.id).order('position', { ascending: true }).limit(200),
         sb.from('snapshot_semrush_audit_summary').select('*').eq('snapshot_id', latest.id).maybeSingle(),
       ]);
 
       currentKeywordCount = count || 0;
       currentKeywords = keywords || [];
       currentAuditSummary = auditSummary || null;
+      currentKeywordPage = 1;
+      currentUrlPage = 1;
+      currentAuditPages = { errors: 1, warnings: 1, notices: 1 };
     }
 
     function renderSemrushData() {
@@ -260,16 +270,16 @@
           <div class="card">
             <div class="card-header">
               <div class="card-title">Top keywords Semrush</div>
-              <span class="badge">${currentKeywords.length} visibles · ${currentKeywordCount} recogidas</span>
+              <span class="badge">${Math.min(currentKeywords.length, PAGE_SIZE)} por pagina · ${currentKeywordCount} recogidas</span>
             </div>
-            ${renderKeywordsTable(currentKeywords)}
+            ${renderKeywordsTable(currentKeywords, currentKeywordPage)}
           </div>
           <div class="card">
             <div class="card-header">
               <div class="card-title">Top URLs derivadas de keywords</div>
-              <span class="badge">${topUrls.length} visibles</span>
+              <span class="badge">${Math.min(topUrls.length, PAGE_SIZE)} por pagina · ${topUrls.length} recogidas</span>
             </div>
-            ${renderUrlsTable(topUrls)}
+            ${renderUrlsTable(topUrls, currentUrlPage)}
           </div>
         </div>
 
@@ -307,8 +317,8 @@
             <div class="list-item"><div class="list-label">Backfill de 4 meses</div><div class="pill ok">Historico inicial cargado</div></div>
             <div class="list-item"><div class="list-label">Auditoria tecnica</div><div class="pill ${currentAuditSummary ? 'ok' : (currentProject.semrush_project_id ? 'partial' : 'missing')}">${currentAuditSummary ? 'Disponible' : (currentProject.semrush_project_id ? 'Sin resumen aun' : 'Falta project ID')}</div></div>
             <div class="list-item"><div class="list-label">Resumen semanal Semrush</div><div class="pill ok">Disponible</div></div>
-            <div class="list-item"><div class="list-label">Keywords</div><div class="pill ${currentKeywordCount ? 'ok' : 'missing'}">${currentKeywordCount ? currentKeywords.length + ' visibles · ' + currentKeywordCount + ' recogidas' : 'Pendiente'}</div></div>
-            <div class="list-item"><div class="list-label">Top URLs derivadas</div><div class="pill ${topUrls.length ? 'ok' : 'partial'}">${topUrls.length ? topUrls.length + ' visibles' : 'Sin datos aun'}</div></div>
+            <div class="list-item"><div class="list-label">Keywords</div><div class="pill ${currentKeywordCount ? 'ok' : 'missing'}">${currentKeywordCount ? currentKeywordCount + ' recogidas' : 'Pendiente'}</div></div>
+            <div class="list-item"><div class="list-label">Top URLs derivadas</div><div class="pill ${topUrls.length ? 'ok' : 'partial'}">${topUrls.length ? topUrls.length + ' recogidas' : 'Sin datos aun'}</div></div>
           </div>
           <div id="page-msg" class="msg"></div>
         </div>
@@ -369,31 +379,35 @@
           <div class="card">
             <div class="card-header">
               <div class="card-title">Errores de auditoria</div>
-              <span class="badge">${Array.isArray(summary.errors_detail) ? summary.errors_detail.length : 0} visibles</span>
+              <span class="badge">${Array.isArray(summary.errors_detail) ? summary.errors_detail.length : 0} recogidos</span>
             </div>
-            ${renderAuditIssueTable(summary.errors_detail, 'No hay errores detallados en este snapshot.')}
+            ${renderAuditIssueTable(summary.errors_detail, 'errors', 'No hay errores detallados en este snapshot.')}
           </div>
           <div class="card">
             <div class="card-header">
               <div class="card-title">Warnings de auditoria</div>
-              <span class="badge">${Array.isArray(summary.warnings_detail) ? summary.warnings_detail.length : 0} visibles</span>
+              <span class="badge">${Array.isArray(summary.warnings_detail) ? summary.warnings_detail.length : 0} recogidos</span>
             </div>
-            ${renderAuditIssueTable(summary.warnings_detail, 'No hay warnings detallados en este snapshot.')}
+            ${renderAuditIssueTable(summary.warnings_detail, 'warnings', 'No hay warnings detallados en este snapshot.')}
           </div>
           <div class="card">
             <div class="card-header">
               <div class="card-title">Notices de auditoria</div>
-              <span class="badge">${Array.isArray(summary.notices_detail) ? summary.notices_detail.length : 0} visibles</span>
+              <span class="badge">${Array.isArray(summary.notices_detail) ? summary.notices_detail.length : 0} recogidos</span>
             </div>
-            ${renderAuditIssueTable(summary.notices_detail, 'No hay notices detallados en este snapshot.')}
+            ${renderAuditIssueTable(summary.notices_detail, 'notices', 'No hay notices detallados en este snapshot.')}
           </div>
         </div>`;
     }
 
-    function renderAuditIssueTable(rows, emptyMessage) {
+    function renderAuditIssueTable(rows, kind, emptyMessage) {
       if (!Array.isArray(rows) || !rows.length) return `<div class="empty">${emptyMessage}</div>`;
+      var totalPages = Math.max(1, Math.ceil(rows.length / PAGE_SIZE));
+      var currentPage = Math.min(Math.max(1, currentAuditPages[kind] || 1), totalPages);
+      var start = (currentPage - 1) * PAGE_SIZE;
+      var pageRows = rows.slice(start, start + PAGE_SIZE);
       return `<div class="table-wrap"><table><thead><tr><th>Issue</th><th>Count</th><th>Checks</th><th>Delta</th></tr></thead><tbody>
-        ${rows.slice(0, 12).map(function(row) {
+        ${pageRows.map(function(row) {
           return `<tr>
             <td>${escapeHtml(row.title || '')}</td>
             <td>${fmtNum(row.count || 0)}</td>
@@ -401,7 +415,7 @@
             <td>${row.delta == null ? '—' : Number(row.delta).toFixed(0)}</td>
           </tr>`;
         }).join('')}
-      </tbody></table></div>`;
+      </tbody></table></div>${renderPager(kind, currentPage, totalPages, rows.length, 'audit')}`;
     }
 
     function renderWeeklySeries(snaps) {
@@ -432,10 +446,14 @@
       </div>`;
     }
 
-    function renderKeywordsTable(rows) {
+    function renderKeywordsTable(rows, page) {
       if (!rows.length) return '<div class="empty">Todavia no hay detalle de keywords guardado para este snapshot.</div>';
+      var totalPages = Math.max(1, Math.ceil(rows.length / PAGE_SIZE));
+      var currentPage = Math.min(Math.max(1, page || 1), totalPages);
+      var start = (currentPage - 1) * PAGE_SIZE;
+      var pageRows = rows.slice(start, start + PAGE_SIZE);
       return `<div class="table-wrap"><table><thead><tr><th>Keyword</th><th>Posicion</th><th>Volumen</th><th>Traffic %</th><th>URL</th></tr></thead><tbody>
-        ${rows.map(function(row) {
+        ${pageRows.map(function(row) {
           return `<tr>
             <td>${escapeHtml(row.keyword || '')}</td>
             <td>${row.position == null ? '—' : Number(row.position).toFixed(1)}</td>
@@ -444,13 +462,17 @@
             <td class="mono">${escapeHtml(shortUrl(row.url || ''))}</td>
           </tr>`;
         }).join('')}
-      </tbody></table></div>`;
+      </tbody></table></div>${renderPager('keywords', currentPage, totalPages, rows.length)}`;
     }
 
-    function renderUrlsTable(rows) {
+    function renderUrlsTable(rows, page) {
       if (!rows.length) return '<div class="empty">Todavia no hay URLs derivadas de las keywords de este snapshot.</div>';
+      var totalPages = Math.max(1, Math.ceil(rows.length / PAGE_SIZE));
+      var currentPage = Math.min(Math.max(1, page || 1), totalPages);
+      var start = (currentPage - 1) * PAGE_SIZE;
+      var pageRows = rows.slice(start, start + PAGE_SIZE);
       return `<div class="table-wrap"><table><thead><tr><th>URL</th><th>Keywords</th><th>Top 3</th><th>Top 10</th><th>Posicion media</th></tr></thead><tbody>
-        ${rows.map(function(row) {
+        ${pageRows.map(function(row) {
           return `<tr>
             <td class="mono">${escapeHtml(shortUrl(row.url || ''))}</td>
             <td>${fmtNum(row.keywords || 0)}</td>
@@ -459,7 +481,29 @@
             <td>${row.avgPosition == null ? '—' : Number(row.avgPosition).toFixed(1)}</td>
           </tr>`;
         }).join('')}
-      </tbody></table></div>`;
+      </tbody></table></div>${renderPager('urls', currentPage, totalPages, rows.length)}`;
+    }
+
+    function renderPager(kind, currentPage, totalPages, totalRows, group) {
+      if (totalPages <= 1) return `<div class="empty" style="margin-top:12px">Mostrando todos los ${totalRows} resultados recogidos.</div>`;
+      return `<div style="display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:12px">
+        <div class="empty">Pagina ${currentPage} de ${totalPages} · ${totalRows} resultados recogidos</div>
+        <div style="display:flex;gap:8px">
+          <button class="btn btn-ghost" ${currentPage <= 1 ? 'disabled' : ''} onclick="changePage('${kind}', -1, '${group || 'main'}')">←</button>
+          <button class="btn btn-ghost" ${currentPage >= totalPages ? 'disabled' : ''} onclick="changePage('${kind}', 1, '${group || 'main'}')">→</button>
+        </div>
+      </div>`;
+    }
+
+    function changePage(kind, delta, group) {
+      if ((group || 'main') === 'audit') {
+        currentAuditPages[kind] = Math.max(1, (currentAuditPages[kind] || 1) + delta);
+      } else if (kind === 'keywords') {
+        currentKeywordPage = Math.max(1, currentKeywordPage + delta);
+      } else if (kind === 'urls') {
+        currentUrlPage = Math.max(1, currentUrlPage + delta);
+      }
+      renderSemrushData();
     }
 
     function renderSnapshotRow(snap) {
@@ -491,7 +535,7 @@
           ? item.positions.reduce(function(sum, value) { return sum + value; }, 0) / item.positions.length
           : null;
         return item;
-      }).sort(function(a, b) { return (b.keywords || 0) - (a.keywords || 0); }).slice(0, 10);
+      }).sort(function(a, b) { return (b.keywords || 0) - (a.keywords || 0); });
     }
 
     async function refreshSemrushData() {
