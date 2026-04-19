@@ -435,51 +435,50 @@
           </div>
         </div>
 
-        <div class="grid-2">
-          <div class="card">
-            <div class="card-header">
-              <div class="card-title">Historico de snapshots GA4</div>
-            </div>
-            <div class="table-wrap">
-              <table>
-                <thead>
-                  <tr>
-                    <th>Periodo</th>
-                    <th>Sesiones</th>
-                    <th>Engaged</th>
-                    <th>Engagement</th>
-                    <th>Usuarios</th>
-                    <th>Conversiones</th>
-                    <th>Revenue</th>
-                    <th>Actualizado</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  ${allSnapshots.map(renderSnapshotRow).join('')}
-                </tbody>
-              </table>
-            </div>
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title">Historico de snapshots GA4</div>
           </div>
-          <div class="card">
-            <div class="card-header">
-              <div class="card-title">Cobertura actual de datos GA4</div>
-            </div>
-            <div class="grid-3" style="margin-bottom:0">
-              <div class="list-item"><div class="list-label">Propiedad GA4</div><div class="pill ok">Conectada</div></div>
-              <div class="list-item"><div class="list-label">Historico semanal guardado</div><div class="pill ok">${allSnapshots.length} snapshots</div></div>
-              <div class="list-item"><div class="list-label">Backfill de 4 meses</div><div class="pill ok">Historico inicial cargado</div></div>
-              <div class="list-item"><div class="list-label">Resumen semanal GA4</div><div class="pill ok">Disponible</div></div>
-              <div class="list-item"><div class="list-label">Source / medium</div><div class="pill ${currentSourceMediumsTotal ? 'ok' : 'missing'}">${currentSourceMediumsTotal ? currentSourceMediums.length + ' visibles · ' + currentSourceMediumsTotal + ' recogidos' : 'Pendiente'}</div></div>
-              <div class="list-item"><div class="list-label">Campaigns</div><div class="pill ${currentCampaignsTotal ? 'ok' : 'missing'}">${currentCampaignsTotal ? currentCampaigns.length + ' visibles · ' + currentCampaignsTotal + ' recogidas' : 'Pendiente'}</div></div>
-              <div class="list-item"><div class="list-label">Channels</div><div class="pill ${currentChannelsTotal ? 'ok' : 'missing'}">${currentChannelsTotal ? currentChannels.length + ' visibles · ' + currentChannelsTotal + ' recogidos' : 'Pendiente'}</div></div>
-              <div class="list-item"><div class="list-label">Landing pages</div><div class="pill ${currentLandingPagesTotal ? 'ok' : 'missing'}">${currentLandingPagesTotal ? currentLandingPages.length + ' visibles · ' + currentLandingPagesTotal + ' recogidas' : 'Pendiente'}</div></div>
-              <div class="list-item"><div class="list-label">Countries</div><div class="pill ${currentCountriesTotal ? 'ok' : 'missing'}">${currentCountriesTotal ? currentCountries.length + ' visibles · ' + currentCountriesTotal + ' recogidos' : 'Pendiente'}</div></div>
-              <div class="list-item"><div class="list-label">Devices</div><div class="pill ${currentDevicesTotal ? 'ok' : 'missing'}">${currentDevicesTotal ? currentDevices.length + ' visibles · ' + currentDevicesTotal + ' recogidos' : 'Pendiente'}</div></div>
-              <div class="list-item"><div class="list-label">Eventos clave</div><div class="pill ${currentConversionEventsTotal ? 'ok' : 'missing'}">${currentConversionEventsTotal ? currentConversionEvents.length + ' visibles · ' + currentConversionEventsTotal + ' recogidos' : 'Pendiente'}</div></div>
-              <div class="list-item"><div class="list-label">Items e-commerce</div><div class="pill ${currentItemsTotal ? 'ok' : 'missing'}">${currentItemsTotal ? currentItems.length + ' visibles · ' + currentItemsTotal + ' recogidos' : 'Pendiente'}</div></div>
-            </div>
-            <div id="page-msg" class="msg"></div>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Periodo</th>
+                  <th>Sesiones</th>
+                  <th>Engaged</th>
+                  <th>Engagement</th>
+                  <th>Usuarios</th>
+                  <th>Conversiones</th>
+                  <th>Revenue</th>
+                  <th>Actualizado</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${allSnapshots.map(renderSnapshotRow).join('')}
+              </tbody>
+            </table>
           </div>
+        </div>
+
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title">Cobertura actual de datos GA4</div>
+          </div>
+          <div class="grid-3" style="margin-bottom:0">
+            <div class="list-item"><div class="list-label">Propiedad GA4</div><div class="pill ok">Conectada</div></div>
+            <div class="list-item"><div class="list-label">Historico semanal guardado</div><div class="pill ok">${allSnapshots.length} snapshots</div></div>
+            <div class="list-item"><div class="list-label">Backfill de 4 meses</div><div class="pill ok">Historico inicial cargado</div></div>
+            <div class="list-item"><div class="list-label">Resumen semanal GA4</div><div class="pill ok">Disponible</div></div>
+            <div class="list-item"><div class="list-label">Source / medium</div><div class="pill ${currentSourceMediumsTotal ? 'ok' : 'missing'}">${currentSourceMediumsTotal ? currentSourceMediums.length + ' visibles · ' + currentSourceMediumsTotal + ' recogidos' : 'Pendiente'}</div></div>
+            <div class="list-item"><div class="list-label">Campaigns</div><div class="pill ${currentCampaignsTotal ? 'ok' : 'missing'}">${currentCampaignsTotal ? currentCampaigns.length + ' visibles · ' + currentCampaignsTotal + ' recogidas' : 'Pendiente'}</div></div>
+            <div class="list-item"><div class="list-label">Channels</div><div class="pill ${currentChannelsTotal ? 'ok' : 'missing'}">${currentChannelsTotal ? currentChannels.length + ' visibles · ' + currentChannelsTotal + ' recogidos' : 'Pendiente'}</div></div>
+            <div class="list-item"><div class="list-label">Landing pages</div><div class="pill ${currentLandingPagesTotal ? 'ok' : 'missing'}">${currentLandingPagesTotal ? currentLandingPages.length + ' visibles · ' + currentLandingPagesTotal + ' recogidas' : 'Pendiente'}</div></div>
+            <div class="list-item"><div class="list-label">Countries</div><div class="pill ${currentCountriesTotal ? 'ok' : 'missing'}">${currentCountriesTotal ? currentCountries.length + ' visibles · ' + currentCountriesTotal + ' recogidos' : 'Pendiente'}</div></div>
+            <div class="list-item"><div class="list-label">Devices</div><div class="pill ${currentDevicesTotal ? 'ok' : 'missing'}">${currentDevicesTotal ? currentDevices.length + ' visibles · ' + currentDevicesTotal + ' recogidos' : 'Pendiente'}</div></div>
+            <div class="list-item"><div class="list-label">Eventos clave</div><div class="pill ${currentConversionEventsTotal ? 'ok' : 'missing'}">${currentConversionEventsTotal ? currentConversionEvents.length + ' visibles · ' + currentConversionEventsTotal + ' recogidos' : 'Pendiente'}</div></div>
+            <div class="list-item"><div class="list-label">Items e-commerce</div><div class="pill ${currentItemsTotal ? 'ok' : 'missing'}">${currentItemsTotal ? currentItems.length + ' visibles · ' + currentItemsTotal + ' recogidos' : 'Pendiente'}</div></div>
+          </div>
+          <div id="page-msg" class="msg"></div>
         </div>
 
         <details class="fold">
