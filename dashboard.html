@@ -367,6 +367,7 @@ function renderAuditState() {
 function renderDashboard(plan) {
   var snap = allSnapshots[currentWeekIdx];
   var prevSnap = allSnapshots[currentWeekIdx + 1] || null;
+  var analysisStarted = hasAnalysisStarted();
 
   var weekLabel = formatWeek(snap.week_start);
   var lastUpdateStr = snap.created_at ? new Date(snap.created_at).toLocaleDateString('es-ES', {day:'numeric',month:'long'}) : '';
@@ -376,7 +377,10 @@ function renderDashboard(plan) {
 
   document.getElementById('main-container').innerHTML = `
 
+    ${renderSystemStatus()}
+
     <!-- SEMANA NAV -->
+    ${analysisStarted ? `
     <div class="week-nav">
       <div>
         <div class="week-label">Semana del ${weekLabel}</div>
@@ -387,16 +391,20 @@ function renderDashboard(plan) {
         <button class="arrow-btn" onclick="changeWeek(-1)" ${currentWeekIdx <= 0 ? 'disabled' : ''}>→</button>
       </div>
     </div>
+    ` : ''}
 
     <!-- KPIs GSC -->
+    ${analysisStarted ? `
     <div class="grid-4">
       ${renderKPI('Clics orgánicos', fmtNum(snap.gsc_clicks), delta(snap.gsc_clicks, prevSnap?.gsc_clicks), '#22d3ee')}
       ${renderKPI('Impresiones', fmtNum(snap.gsc_impressions), delta(snap.gsc_impressions, prevSnap?.gsc_impressions), '#8b5cf6')}
       ${renderKPI('CTR', (snap.gsc_ctr||0).toFixed(2)+'%', deltaInv(snap.gsc_ctr, prevSnap?.gsc_ctr), '#10b981')}
       ${renderKPI('Posición media', (snap.gsc_position||0).toFixed(1), deltaPos(snap.gsc_position, prevSnap?.gsc_position), '#f59e0b')}
     </div>
+    ` : ''}
 
     <!-- EVOLUCIÓN TRÁFICO + TEMAS GSC -->
+    ${analysisStarted ? `
     <div class="grid-2">
       <div class="card">
         <div class="card-header">
@@ -412,9 +420,10 @@ function renderDashboard(plan) {
         ${renderTopicBars(snap.gsc_by_topic || [], 'clicks')}
       </div>
     </div>
+    ` : ''}
 
     <!-- SEMRUSH -->
-    ${hasSemrush ? `
+    ${analysisStarted ? (hasSemrush ? `
     <div class="card" style="margin-bottom:16px">
       <div class="card-header">
         <div class="card-title">Posicionamiento orgánico</div>
@@ -433,14 +442,14 @@ function renderDashboard(plan) {
       <p style="font-size:13px;color:var(--muted);margin-bottom:16px">Conecta tu API key de Semrush para ver tus posiciones orgánicas por tema.</p>
       <button class="btn btn-accent" onclick="window.location.href='/'">Añadir Semrush</button>
     </div>
-    `}
+    `) : ''}
 
     <!-- ADS -->
-    ${hasAds ? renderAdsSection(snap) : renderAdsUpsell()}
+    ${analysisStarted ? (hasAds ? renderAdsSection(snap) : renderAdsUpsell()) : ''}
 
     ${renderOperationalContext()}
 
-    ${renderBrainSection()}
+    ${analysisStarted ? renderBrainSection() : renderAwaitingAnalysisState()}
 
     <!-- FEEDBACK -->
     ${renderFeedbackSection()}
@@ -587,10 +596,58 @@ function renderBrainSection() {
     </div>`;
 }
 
-function renderSystemStatus() {
-  if (!dashboardBrain || !dashboardBrain.system_status) return '';
+function hasAnalysisStarted() {
+  if (!dashboardBrain || !dashboardBrain.system_status) return false;
+  var phases = Array.isArray(dashboardBrain.system_status.phases) ? dashboardBrain.system_status.phases : [];
+  return phases.some(function(item) {
+    return item && item.code !== '0.5.2' && (item.status === 'in_progress' || item.status === 'completed');
+  });
+}
 
-  var status = dashboardBrain.system_status || {};
+function renderAwaitingAnalysisState() {
+  return `
+    <div class="card" style="margin-bottom:16px">
+      <div class="card-header">
+        <div class="card-title">Siguiente etapa</div>
+        <span class="card-badge badge-muted">Traxxo aún no ha empezado</span>
+      </div>
+      <div style="font-size:14px;line-height:1.7;color:var(--muted)">
+        La fase de recolección ya está completada y la información base del proyecto ya está guardada. Traxxo todavía no ha empezado el análisis interno; cuando arranque la Fase 2, aquí aparecerán la lectura operativa, los focos detectados y los siguientes pasos.
+      </div>
+    </div>`;
+}
+
+function renderSystemStatus() {
+  var status = (dashboardBrain && dashboardBrain.system_status) ? dashboardBrain.system_status : {
+    headline: 'Fase 1 completada',
+    summary: 'La recolección de datos ya está lista. Traxxo pasa ahora a la siguiente etapa del sistema y todavía no ha empezado el trabajo de análisis sobre este proyecto.',
+    phases: [
+      {
+        code: '0.5.2',
+        label: 'Fase 1 · Recolección',
+        status: 'completed',
+        detail: 'Capturar y guardar las fuentes necesarias',
+      },
+      {
+        code: '2',
+        label: 'Fase 2 · Análisis interno',
+        status: 'pending',
+        detail: 'Leer el estado real del proyecto y detectar focos',
+      },
+      {
+        code: '3',
+        label: 'Fase 3 · Análisis competitivo',
+        status: 'pending',
+        detail: 'Cruzar oportunidades y gaps frente al mercado',
+      },
+      {
+        code: '4',
+        label: 'Fase 4 · The Thinker',
+        status: 'pending',
+        detail: 'Convertir el análisis en dirección estratégica',
+      }
+    ],
+  };
   var phases = Array.isArray(status.phases) ? status.phases : [];
 
   return `
