@@ -379,6 +379,8 @@ function renderDashboard(plan) {
 
     ${renderSystemStatus()}
 
+    ${renderConnectionStatus()}
+
     <!-- SEMANA NAV -->
     ${analysisStarted ? `
     <div class="week-nav">
@@ -665,6 +667,59 @@ function renderSystemStatus() {
     </div>`;
 }
 
+function renderConnectionStatus() {
+  var connections = (dashboardBrain && dashboardBrain.connections) ? dashboardBrain.connections : {};
+  var context = (dashboardBrain && dashboardBrain.context) ? dashboardBrain.context : {};
+  var platform = normalizePlatform(context.platform || currentProject?.platform || currentProject?.intake_data?.wizard?.platform || '');
+  var hasDomain = !!(currentProject?.domain || dashboardBrain?.project?.domain || dashboardBrain?.project?.gsc_site_url);
+  var items = [
+    {
+      label: 'GSC',
+      connected: !!connections?.gsc?.connected,
+      detail: connections?.gsc?.label || 'No conectado',
+    },
+    {
+      label: 'Analytics',
+      connected: !!connections?.ga4?.connected,
+      detail: connections?.ga4?.label || 'No conectado',
+    },
+    {
+      label: 'Semrush',
+      connected: !!connections?.semrush?.connected,
+      detail: connections?.semrush?.connected ? 'Fuente activa' : 'No conectado',
+    },
+    {
+      label: 'Web',
+      connected: hasDomain,
+      detail: currentProject?.domain || dashboardBrain?.project?.domain || dashboardBrain?.project?.gsc_site_url || 'Sin dominio',
+    }
+  ];
+
+  if (platform === 'woocommerce') {
+    items.push({ label: 'WordPress', connected: true, detail: 'Base web declarada' });
+    items.push({ label: 'WooCommerce', connected: true, detail: 'Store conected' });
+  } else if (platform === 'shopify') {
+    items.push({ label: 'Shopify', connected: true, detail: 'Store conected' });
+  } else if (platform === 'wordpress') {
+    items.push({ label: 'WordPress', connected: true, detail: 'Base web declarada' });
+  } else if (platform === 'prestashop' || platform === 'tiendanube' || platform === 'shopware' || platform === 'magento') {
+    items.push({ label: formatPlatformLabel(platform), connected: true, detail: 'Store conected' });
+  } else if (platform) {
+    items.push({ label: formatPlatformLabel(platform), connected: true, detail: 'Plataforma declarada' });
+  }
+
+  return `
+    <div class="card" style="margin-bottom:16px">
+      <div class="card-header">
+        <div class="card-title">Conexiones del proyecto</div>
+        <span class="card-badge badge-muted">estado actual</span>
+      </div>
+      <div class="context-grid">
+        ${items.map(renderConnectionItem).join('')}
+      </div>
+    </div>`;
+}
+
 function renderOperationalContext() {
   if (!dashboardBrain || !dashboardBrain.context) return '';
 
@@ -736,9 +791,40 @@ function renderPhaseItem(item) {
     </div>`;
 }
 
+function renderConnectionItem(item) {
+  var badgeClass = item.connected ? 'pill ok' : 'pill missing';
+  var badgeText = item.connected ? 'Conectado' : 'Pendiente';
+  return `
+    <div class="context-item">
+      <div class="context-label">${item.label}</div>
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:8px">
+        <div class="context-value">${item.connected ? 'Indicador en verde' : 'Falta conectar'}</div>
+        <span class="${badgeClass}">${badgeText}</span>
+      </div>
+      <div class="context-value muted" style="font-size:13px;line-height:1.5">${escapeHtml(item.detail || '')}</div>
+    </div>`;
+}
+
 function formatContextValue(value, labels) {
   if (!value) return 'Sin definir';
   return labels[value] || value;
+}
+
+function normalizePlatform(value) {
+  return String(value || '').trim().toLowerCase();
+}
+
+function formatPlatformLabel(value) {
+  var labels = {
+    woocommerce: 'WooCommerce',
+    wordpress: 'WordPress',
+    shopify: 'Shopify',
+    prestashop: 'PrestaShop',
+    shopware: 'Shopware',
+    magento: 'Magento',
+    tiendanube: 'Tienda Nube'
+  };
+  return labels[value] || value || 'Plataforma';
 }
 
 function formatMarket(value) {
