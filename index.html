@@ -1343,14 +1343,67 @@
 
     if (domain) projectPayload.domain = domain;
 
+    var projectId = existingProject?.id || null;
+
     if (existingProject?.id) {
       await sb.from('projects').update(projectPayload).eq('id', existingProject.id);
     } else {
-      await sb.from('projects').insert(Object.assign({ client_id: userId }, projectPayload));
+      var { data: insertedProject } = await sb.from('projects')
+        .insert(Object.assign({ client_id: userId }, projectPayload))
+        .select('id')
+        .single();
+      projectId = insertedProject?.id || null;
+    }
+
+    if (projectId) {
+      kickoffInitialCollection(projectId).catch(function(err) {
+        console.warn('No se pudo iniciar la recolección inicial', err);
+      });
     }
 
     document.getElementById('onboarding').style.display = 'none';
     document.getElementById('dash-main').style.display = '';
+  }
+
+  async function kickoffInitialCollection(projectId) {
+    var session = (await sb.auth.getSession()).data.session;
+    if (!session?.access_token) return;
+
+    var { data: project } = await sb.from('projects')
+      .select('id, gsc_site_url, semrush_api_key, intake_data')
+      .eq('id', projectId)
+      .single();
+
+    if (!project) return;
+
+    var ga4Config = project?.intake_data?.ga4 || null;
+    var jobs = [];
+
+    if (project.gsc_site_url) {
+      jobs.push(triggerCollector('collect-gsc', projectId, session.access_token));
+    }
+    if (ga4Config?.propertyId || ga4Config?.measurementId) {
+      jobs.push(triggerCollector('collect-ga4', projectId, session.access_token));
+    }
+    if (project.semrush_api_key) {
+      jobs.push(triggerCollector('collect-semrush', projectId, session.access_token));
+    }
+
+    if (jobs.length) {
+      await Promise.allSettled(jobs);
+    }
+  }
+
+  async function triggerCollector(functionName, projectId, accessToken) {
+    return fetch(`${SUPABASE_URL}/functions/v1/${functionName}`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        apikey: SUPABASE_ANON_KEY,
+        Authorization: 'Bearer ' + accessToken
+      },
+      body: JSON.stringify({ project_id: projectId })
+    });
   }
 
   function getVal(id) {
