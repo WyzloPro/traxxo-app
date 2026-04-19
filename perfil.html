@@ -588,19 +588,33 @@
   async function saveSemrush() {
     const key = document.getElementById('semrush-key').value.trim();
     if (!key) return;
+    if (!_projectId) return showMsg('semrush-msg', 'No hay proyecto activo para guardar la API key.', 'error');
 
     showMsg('semrush-msg', 'Validando...', '');
-    try {
-      const res = await fetch(`https://api.semrush.com/?type=domain_organic&key=${key}&domain=google.com&database=es`);
-      const text = await res.text();
-      if (text.startsWith('ERROR')) {
-        return showMsg('semrush-msg', '✗ API key inválida', 'error');
-      }
-    } catch(e) {
-      return showMsg('semrush-msg', '✗ Error de conexión', 'error');
+    const { data: { session } } = await sb.auth.getSession();
+    if (!session?.access_token) {
+      return showMsg('semrush-msg', 'No hay sesión activa para validar Semrush.', 'error');
     }
 
-    const { error } = await sb.from('projects').update({ semrush_api_key: key }).eq('client_id', _userId);
+    try {
+      const domain = document.getElementById('current-domain')?.value?.trim() || 'google.com';
+      const res = await fetch(`${SUPABASE_URL}/functions/v1/validate-semrush-key`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${session.access_token}`
+        },
+        body: JSON.stringify({ key, domain })
+      });
+      const data = await res.json();
+      if (!res.ok || data.error) {
+        return showMsg('semrush-msg', data.error || '✗ API key inválida', 'error');
+      }
+    } catch(e) {
+      return showMsg('semrush-msg', '✗ Error de conexión con Semrush', 'error');
+    }
+
+    const { error } = await sb.from('projects').update({ semrush_api_key: key }).eq('id', _projectId);
     if (error) return showMsg('semrush-msg', 'Error al guardar', 'error');
     showMsg('semrush-msg', '✓ API key guardada correctamente', 'success');
   }
