@@ -1270,11 +1270,85 @@
     if (next) next.style.display = '';
   }
 
+  function getCheckedValue(name) {
+    var checked = document.querySelector('input[name="' + name + '"]:checked');
+    return checked ? checked.value : '';
+  }
+
+  function getSelectedWizardTools() {
+    return ['semrush', 'trends', 'store'].filter(function(key) {
+      var el = document.getElementById('tool-' + key);
+      return !!el && el.checked;
+    });
+  }
+
   async function obFinish() {
     var userId = (await sb.auth.getUser()).data.user?.id;
-    if (userId && _selectedPlan) {
+    if (!userId) {
+      document.getElementById('onboarding').style.display = 'none';
+      document.getElementById('dash-main').style.display = '';
+      return;
+    }
+
+    var domain = getVal('ob-domain').replace(/^https?:\/\//, '').replace(/\/$/, '').split('/')[0];
+    var siteType = getVal('ob-type');
+    var businessModel = getCheckedValue('b2b2c');
+    var mainMarket = getVal('ob-country');
+    var platform = getVal('ob-platform');
+    var priorityFocus = getVal('ob-priority');
+    var seasonalPeaks = getVal('ob-peaks');
+    var monthlySeoBudget = getVal('ob-budget');
+    var knownCompetitors = getVal('ob-competitors')
+      .split(',')
+      .map(function(item) { return item.trim().toLowerCase(); })
+      .filter(Boolean);
+    var selectedTools = getSelectedWizardTools();
+
+    if (_selectedPlan) {
       await sb.from('clients').update({ plan: _selectedPlan }).eq('id', userId);
     }
+
+    var { data: existingProject } = await sb.from('projects')
+      .select('id, intake_data')
+      .eq('client_id', userId)
+      .limit(1)
+      .maybeSingle();
+
+    var nextIntakeData = Object.assign({}, existingProject?.intake_data || {}, {
+      wizard: {
+        site_type: siteType || null,
+        business_model: businessModel || null,
+        main_market: mainMarket || null,
+        platform: platform || null,
+        priority_focus: priorityFocus || null,
+        seasonal_peaks: seasonalPeaks || null,
+        monthly_seo_budget: monthlySeoBudget || null,
+        known_competitors: knownCompetitors,
+        selected_tools: selectedTools,
+      }
+    });
+
+    var projectPayload = {
+      intake_data: nextIntakeData,
+      site_type: siteType || null,
+      business_model: businessModel || null,
+      main_market: mainMarket || null,
+      platform: platform || null,
+      priority_focus: priorityFocus || null,
+      seasonal_peaks: seasonalPeaks || null,
+      monthly_seo_budget: monthlySeoBudget || null,
+      known_competitors: knownCompetitors,
+      active: true,
+    };
+
+    if (domain) projectPayload.domain = domain;
+
+    if (existingProject?.id) {
+      await sb.from('projects').update(projectPayload).eq('id', existingProject.id);
+    } else {
+      await sb.from('projects').insert(Object.assign({ client_id: userId }, projectPayload));
+    }
+
     document.getElementById('onboarding').style.display = 'none';
     document.getElementById('dash-main').style.display = '';
   }
