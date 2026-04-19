@@ -261,43 +261,42 @@
           </div>
         </div>
 
-        <div class="grid-2">
-          <div class="card">
-            <div class="card-header">
-              <div class="card-title">Historico de snapshots Semrush</div>
-            </div>
-            <div class="table-wrap">
-              <table>
-                <thead>
-                  <tr>
-                    <th>Periodo</th>
-                    <th>Keywords</th>
-                    <th>Top 3</th>
-                    <th>Top 10</th>
-                    <th>Posicion media</th>
-                    <th>Actualizado</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  ${allSnapshots.map(renderSnapshotRow).join('')}
-                </tbody>
-              </table>
-            </div>
+        <div class="card" style="margin-bottom:16px">
+          <div class="card-header">
+            <div class="card-title">Historico de snapshots Semrush</div>
           </div>
-          <div class="card">
-            <div class="card-header">
-              <div class="card-title">Cobertura actual de datos Semrush</div>
-            </div>
-            <div class="grid-3" style="margin-bottom:0">
-              <div class="list-item"><div class="list-label">API key Semrush</div><div class="pill ok">Conectada</div></div>
-              <div class="list-item"><div class="list-label">Historico semanal guardado</div><div class="pill ok">${allSnapshots.length} snapshots</div></div>
-              <div class="list-item"><div class="list-label">Backfill de 4 meses</div><div class="pill ok">Historico inicial cargado</div></div>
-              <div class="list-item"><div class="list-label">Resumen semanal Semrush</div><div class="pill ok">Disponible</div></div>
-              <div class="list-item"><div class="list-label">Keywords</div><div class="pill ${currentKeywordCount ? 'ok' : 'missing'}">${currentKeywordCount ? currentKeywords.length + ' visibles · ' + currentKeywordCount + ' recogidas' : 'Pendiente'}</div></div>
-              <div class="list-item"><div class="list-label">Top URLs derivadas</div><div class="pill ${topUrls.length ? 'ok' : 'partial'}">${topUrls.length ? topUrls.length + ' visibles' : 'Sin datos aun'}</div></div>
-            </div>
-            <div id="page-msg" class="msg"></div>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Periodo</th>
+                  <th>Keywords</th>
+                  <th>Top 3</th>
+                  <th>Top 10</th>
+                  <th>Posicion media</th>
+                  <th>Actualizado</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${allSnapshots.map(renderSnapshotRow).join('')}
+              </tbody>
+            </table>
           </div>
+        </div>
+
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title">Cobertura actual de datos Semrush</div>
+          </div>
+          <div class="grid-3" style="margin-bottom:0">
+            <div class="list-item"><div class="list-label">API key Semrush</div><div class="pill ok">Conectada</div></div>
+            <div class="list-item"><div class="list-label">Historico semanal guardado</div><div class="pill ok">${allSnapshots.length} snapshots</div></div>
+            <div class="list-item"><div class="list-label">Backfill de 4 meses</div><div class="pill ok">Historico inicial cargado</div></div>
+            <div class="list-item"><div class="list-label">Resumen semanal Semrush</div><div class="pill ok">Disponible</div></div>
+            <div class="list-item"><div class="list-label">Keywords</div><div class="pill ${currentKeywordCount ? 'ok' : 'missing'}">${currentKeywordCount ? currentKeywords.length + ' visibles · ' + currentKeywordCount + ' recogidas' : 'Pendiente'}</div></div>
+            <div class="list-item"><div class="list-label">Top URLs derivadas</div><div class="pill ${topUrls.length ? 'ok' : 'partial'}">${topUrls.length ? topUrls.length + ' visibles' : 'Sin datos aun'}</div></div>
+          </div>
+          <div id="page-msg" class="msg"></div>
         </div>
 
         <details class="fold">
