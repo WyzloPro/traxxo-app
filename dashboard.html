@@ -183,6 +183,15 @@
     .brain-action-priority.medium { color:#f59e0b; }
     .brain-action-priority.low { color:var(--muted); }
     .brain-action-title { font-size:13px; color:var(--text); line-height:1.4; }
+    .context-grid { display:grid; grid-template-columns:repeat(4, 1fr); gap:12px; }
+    @media(max-width:900px) { .context-grid { grid-template-columns:1fr 1fr; } }
+    @media(max-width:768px) { .context-grid { grid-template-columns:1fr; } }
+    .context-item { background:var(--bg); border:1px solid var(--border); border-radius:10px; padding:12px; }
+    .context-label { font-size:10px; font-weight:700; letter-spacing:.05em; text-transform:uppercase; color:var(--muted); margin-bottom:6px; }
+    .context-value { font-size:13px; color:var(--text); line-height:1.45; }
+    .context-value.muted { color:var(--muted); }
+    .context-chips { display:flex; flex-wrap:wrap; gap:6px; }
+    .context-chip { display:inline-flex; align-items:center; padding:5px 9px; border-radius:999px; font-size:11px; font-weight:600; background:rgba(34,211,238,.08); color:var(--accent); border:1px solid rgba(34,211,238,.18); }
 
     /* SKELETON */
     @keyframes shimmer { 0%{background-position:-200% 0} 100%{background-position:200% 0} }
@@ -429,6 +438,8 @@ function renderDashboard(plan) {
     <!-- ADS -->
     ${hasAds ? renderAdsSection(snap) : renderAdsUpsell()}
 
+    ${renderOperationalContext()}
+
     ${renderBrainSection()}
 
     <!-- FEEDBACK -->
@@ -574,6 +585,89 @@ function renderBrainSection() {
         </div>
       </div>
     </div>`;
+}
+
+function renderOperationalContext() {
+  if (!dashboardBrain || !dashboardBrain.context) return '';
+
+  var context = dashboardBrain.context || {};
+  var competitors = Array.isArray(context.known_competitors) ? context.known_competitors : [];
+
+  return `
+    <div class="card" style="margin-bottom:16px">
+      <div class="card-header">
+        <div class="card-title">Contexto operativo del proyecto</div>
+        <span class="card-badge badge-muted">base declarada</span>
+      </div>
+      <div class="context-grid">
+        ${renderContextItem('Tipo de web', formatContextValue(context.site_type, {
+          ecommerce: 'E-commerce',
+          services: 'Servicios',
+          blog: 'Blog',
+          saas: 'SaaS / App'
+        }))}
+        ${renderContextItem('Modelo', formatContextValue(context.business_model, {
+          b2b: 'B2B',
+          b2c: 'B2C',
+          b2b2c: 'Ambos'
+        }))}
+        ${renderContextItem('Mercado principal', formatMarket(context.main_market))}
+        ${renderContextItem('Plataforma', context.platform || 'Sin definir')}
+        ${renderContextItem('Foco prioritario', context.priority_focus || 'Sin foco declarado')}
+        ${renderContextItem('Picos estacionales', context.seasonal_peaks || 'No indicados')}
+        ${renderContextItem('Inversion SEO', formatBudget(context.monthly_seo_budget))}
+        ${renderCompetitorsItem(competitors)}
+      </div>
+    </div>`;
+}
+
+function renderContextItem(label, value) {
+  var isMuted = !value || value === 'Sin definir' || value === 'No indicados' || value === 'Sin foco declarado' || value === 'Sin competidores declarados';
+  return `
+    <div class="context-item">
+      <div class="context-label">${label}</div>
+      <div class="context-value ${isMuted ? 'muted' : ''}">${value || '—'}</div>
+    </div>`;
+}
+
+function renderCompetitorsItem(competitors) {
+  if (!competitors.length) {
+    return renderContextItem('Competidores conocidos', 'Sin competidores declarados');
+  }
+  return `
+    <div class="context-item">
+      <div class="context-label">Competidores conocidos</div>
+      <div class="context-chips">
+        ${competitors.map(function(item) { return `<span class="context-chip">${escapeHtml(item)}</span>`; }).join('')}
+      </div>
+    </div>`;
+}
+
+function formatContextValue(value, labels) {
+  if (!value) return 'Sin definir';
+  return labels[value] || value;
+}
+
+function formatMarket(value) {
+  if (!value) return 'Sin definir';
+  try {
+    var label = new Intl.DisplayNames(['es'], { type: 'region' }).of(String(value).toUpperCase());
+    return label ? label + ' (' + String(value).toUpperCase() + ')' : String(value).toUpperCase();
+  } catch (e) {
+    return String(value).toUpperCase();
+  }
+}
+
+function formatBudget(value) {
+  if (!value) return 'Sin definir';
+  var map = {
+    '0': 'No invierte todavia',
+    '500': 'Menos de 500€',
+    '1000': '500€ - 1.000€',
+    '3000': '1.000€ - 3.000€',
+    '3000+': 'Mas de 3.000€'
+  };
+  return map[value] || value;
 }
 
 function renderInsightCard(item) {
@@ -744,6 +838,15 @@ function getGa4DataPath(project) {
 
 function getSemrushDataPath(project) {
   return getProjectPath(project) + '/semrush';
+}
+
+function escapeHtml(value) {
+  return String(value == null ? '' : value)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
 }
 
 function getRequestedProjectSlug() {
