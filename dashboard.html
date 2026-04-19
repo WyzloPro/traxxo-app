@@ -192,6 +192,16 @@
     .context-value.muted { color:var(--muted); }
     .context-chips { display:flex; flex-wrap:wrap; gap:6px; }
     .context-chip { display:inline-flex; align-items:center; padding:5px 9px; border-radius:999px; font-size:11px; font-weight:600; background:rgba(34,211,238,.08); color:var(--accent); border:1px solid rgba(34,211,238,.18); }
+    .conn-row { display:flex; align-items:center; gap:14px; padding:14px 0; border-bottom:1px solid rgba(255,255,255,.04); }
+    .conn-row:last-child { border-bottom:none; }
+    .conn-icon { width:40px; height:40px; border-radius:10px; display:flex; align-items:center; justify-content:center; font-size:11px; font-weight:700; flex-shrink:0; border:1px solid; }
+    .conn-info { flex:1; min-width:0; }
+    .conn-name { font-size:14px; font-weight:600; }
+    .conn-detail { font-size:12px; color:var(--muted); margin-top:2px; line-height:1.45; overflow:hidden; text-overflow:ellipsis; }
+    .conn-actions { display:flex; align-items:center; gap:8px; flex-shrink:0; }
+    .conn-badge { font-size:11px; font-weight:700; padding:3px 10px; border-radius:20px; white-space:nowrap; }
+    .conn-badge.connected { background:rgba(16,185,129,.1); color:var(--green); border:1px solid rgba(16,185,129,.2); }
+    .conn-badge.disconnected { background:var(--bg); color:var(--muted); border:1px solid var(--border); }
 
     /* SKELETON */
     @keyframes shimmer { 0%{background-position:-200% 0} 100%{background-position:200% 0} }
@@ -674,38 +684,53 @@ function renderConnectionStatus() {
   var hasDomain = !!(currentProject?.domain || dashboardBrain?.project?.domain || dashboardBrain?.project?.gsc_site_url);
   var items = [
     {
+      code: 'GSC',
+      color: '#4285f4',
       label: 'GSC',
       connected: !!connections?.gsc?.connected,
       detail: connections?.gsc?.label || 'No conectado',
     },
     {
-      label: 'Analytics',
+      code: 'ADS',
+      color: '#fbbc04',
+      label: 'Google Ads',
+      connected: !!connections?.ads?.connected,
+      detail: connections?.ads?.connected ? 'Cuenta publicitaria conectada' : 'Aún no está conectado',
+    },
+    {
+      code: 'GA4',
+      color: '#e8710a',
+      label: 'Google Analytics 4',
       connected: !!connections?.ga4?.connected,
       detail: connections?.ga4?.label || 'No conectado',
     },
     {
+      code: 'SEM',
+      color: '#22d3ee',
       label: 'Semrush',
       connected: !!connections?.semrush?.connected,
       detail: connections?.semrush?.connected ? 'Fuente activa' : 'No conectado',
     },
     {
-      label: 'Web',
+      code: 'WEB',
+      color: '#8b5cf6',
+      label: 'Web monitorizada',
       connected: hasDomain,
       detail: currentProject?.domain || dashboardBrain?.project?.domain || dashboardBrain?.project?.gsc_site_url || 'Sin dominio',
     }
   ];
 
   if (platform === 'woocommerce') {
-    items.push({ label: 'WordPress', connected: true, detail: 'Base web declarada' });
-    items.push({ label: 'WooCommerce', connected: true, detail: 'Store conected' });
+    items.push({ code: 'WP', color: '#21759b', label: 'WordPress', connected: true, detail: 'Base web declarada' });
+    items.push({ code: 'WC', color: '#7f54b3', label: 'WooCommerce', connected: true, detail: 'Store conected' });
   } else if (platform === 'shopify') {
-    items.push({ label: 'Shopify', connected: true, detail: 'Store conected' });
+    items.push({ code: 'SHP', color: '#95bf47', label: 'Shopify', connected: true, detail: 'Store conected' });
   } else if (platform === 'wordpress') {
-    items.push({ label: 'WordPress', connected: true, detail: 'Base web declarada' });
+    items.push({ code: 'WP', color: '#21759b', label: 'WordPress', connected: true, detail: 'Base web declarada' });
   } else if (platform === 'prestashop' || platform === 'tiendanube' || platform === 'shopware' || platform === 'magento') {
-    items.push({ label: formatPlatformLabel(platform), connected: true, detail: 'Store conected' });
+    items.push({ code: 'ST', color: '#8b5cf6', label: formatPlatformLabel(platform), connected: true, detail: 'Store conected' });
   } else if (platform) {
-    items.push({ label: formatPlatformLabel(platform), connected: true, detail: 'Plataforma declarada' });
+    items.push({ code: 'PLT', color: '#8b5cf6', label: formatPlatformLabel(platform), connected: true, detail: 'Plataforma declarada' });
   }
 
   return `
@@ -714,9 +739,7 @@ function renderConnectionStatus() {
         <div class="card-title">Conexiones del proyecto</div>
         <span class="card-badge badge-muted">estado actual</span>
       </div>
-      <div class="context-grid">
-        ${items.map(renderConnectionItem).join('')}
-      </div>
+      ${items.map(renderConnectionItem).join('')}
     </div>`;
 }
 
@@ -792,16 +815,18 @@ function renderPhaseItem(item) {
 }
 
 function renderConnectionItem(item) {
-  var badgeClass = item.connected ? 'pill ok' : 'pill missing';
+  var badgeClass = item.connected ? 'conn-badge connected' : 'conn-badge disconnected';
   var badgeText = item.connected ? 'Conectado' : 'Pendiente';
   return `
-    <div class="context-item">
-      <div class="context-label">${item.label}</div>
-      <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:8px">
-        <div class="context-value">${item.connected ? 'Indicador en verde' : 'Falta conectar'}</div>
+    <div class="conn-row">
+      <div class="conn-icon" style="background:${item.color}20;border-color:${item.color}40;color:${item.color}">${escapeHtml(item.code || '')}</div>
+      <div class="conn-info">
+        <div class="conn-name">${escapeHtml(item.label || '')}</div>
+        <div class="conn-detail">${escapeHtml(item.detail || '')}</div>
+      </div>
+      <div class="conn-actions">
         <span class="${badgeClass}">${badgeText}</span>
       </div>
-      <div class="context-value muted" style="font-size:13px;line-height:1.5">${escapeHtml(item.detail || '')}</div>
     </div>`;
 }
 
