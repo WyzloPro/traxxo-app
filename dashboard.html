@@ -681,6 +681,7 @@ function renderConnectionStatus() {
   var connections = (dashboardBrain && dashboardBrain.connections) ? dashboardBrain.connections : {};
   var context = (dashboardBrain && dashboardBrain.context) ? dashboardBrain.context : {};
   var platformValue = context.platform || currentProject?.platform || currentProject?.intake_data?.wizard?.platform || '';
+  var webIntegrations = currentProject?.intake_data?.web_integrations || {};
   var hasDomain = !!(currentProject?.domain || dashboardBrain?.project?.domain || dashboardBrain?.project?.gsc_site_url);
   var items = [
     {
@@ -720,7 +721,7 @@ function renderConnectionStatus() {
     }
   ];
 
-  items = items.concat(buildPlatformConnectionItems(platformValue));
+  items = items.concat(buildPlatformConnectionItems(platformValue, webIntegrations));
 
   return `
     <div class="card" style="margin-bottom:16px">
@@ -842,7 +843,7 @@ function formatPlatformLabel(value) {
   return labels[value] || value || 'Plataforma';
 }
 
-function buildPlatformConnectionItems(platformValue) {
+function buildPlatformConnectionItems(platformValue, webIntegrations) {
   var values = normalizePlatformList(platformValue);
   if (!values.length) return [];
 
@@ -853,12 +854,13 @@ function buildPlatformConnectionItems(platformValue) {
 
   return Object.keys(counts).map(function(key) {
     var count = counts[key];
+    var integrationState = getPlatformIntegrationState(key, webIntegrations);
     return {
       code: getPlatformCode(key),
       color: getPlatformColor(key),
       label: formatPlatformLabel(key),
-      connected: true,
-      detail: formatPlatformConnectionDetail(key, count),
+      connected: integrationState.connected,
+      detail: formatPlatformConnectionDetail(key, count, integrationState),
     };
   });
 }
@@ -901,12 +903,60 @@ function getPlatformColor(value) {
   return map[value] || '#8b5cf6';
 }
 
-function formatPlatformConnectionDetail(value, count) {
+function formatPlatformConnectionDetail(value, count, integrationState) {
   if (count > 1) {
-    return count + ' conexiones activas';
+    return integrationState.connected ? count + ' conexiones activas' : count + ' conexiones declaradas';
   }
-  if (value === 'wordpress') return 'Base web conectada';
-  return 'Store conected';
+  if (integrationState.detail) return integrationState.detail;
+  if (value === 'wordpress') return 'Base web declarada';
+  return 'Store declarada';
+}
+
+function getPlatformIntegrationState(platform, webIntegrations) {
+  var data = webIntegrations && webIntegrations[platform] ? webIntegrations[platform] : null;
+  if (!data) {
+    return {
+      connected: false,
+      detail: platform === 'wordpress' ? 'Falta completar la conexión web' : 'Falta completar la conexión de la tienda',
+    };
+  }
+
+  if (platform === 'woocommerce') {
+    var wcReady = !!(data.url && data.key && data.secret);
+    return {
+      connected: wcReady,
+      detail: wcReady ? (data.url || 'Store conected') : 'Faltan credenciales REST API',
+    };
+  }
+
+  if (platform === 'shopify') {
+    var shReady = !!(data.domain && data.token);
+    return {
+      connected: shReady,
+      detail: shReady ? (data.domain || 'Store conected') : 'Falta dominio o Admin API token',
+    };
+  }
+
+  if (platform === 'wordpress') {
+    var wpReady = !!(data.url && data.username && data.app_password);
+    return {
+      connected: wpReady,
+      detail: wpReady ? (data.url || 'Base web conectada') : 'Falta usuario o Application Password',
+    };
+  }
+
+  if (platform === 'prestashop') {
+    var psReady = !!(data.url && data.key);
+    return {
+      connected: psReady,
+      detail: psReady ? (data.url || 'Store conected') : 'Falta URL o API key',
+    };
+  }
+
+  return {
+    connected: false,
+    detail: 'Conexión todavía no configurada',
+  };
 }
 
 function getPhaseRoleLabel(code, fallback) {
