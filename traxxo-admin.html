@@ -105,7 +105,10 @@
       try {
         const res = await fetch(`${SUPABASE_URL}/functions/v1/list-admin-projects`, {
           method: 'GET',
-          headers: { Authorization: 'Bearer ' + session.access_token }
+          headers: {
+            Authorization: 'Bearer ' + session.access_token,
+            apikey: SUPABASE_ANON
+          }
         });
 
         const raw = await res.text();
