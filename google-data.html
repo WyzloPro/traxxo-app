@@ -111,7 +111,7 @@
         </svg>
         Actualizar
       </button>
-      <a href="/dashboard.html" class="btn btn-ghost" id="analysis-link">← Dashboard análisis</a>
+      <a href="/traxxo-backend.html" class="btn btn-ghost" id="analysis-link">← Backend Traxxo</a>
     </div>
   </div>
 
@@ -170,7 +170,7 @@
 
       document.getElementById('header-domain').textContent = currentProject.domain || currentProject.gsc_site_url || 'Sin dominio';
       document.getElementById('header-plan').textContent = formatPlan(client?.plan || 'basic');
-      document.getElementById('analysis-link').href = getProjectPath(currentProject);
+      document.getElementById('analysis-link').href = getTraxxoProjectPath(currentProject);
 
       await loadSnapshots();
       await loadDetailData();
@@ -734,12 +734,21 @@
       return '/project/' + getProjectSlug(project);
     }
 
+    function isLocalPreview() {
+      return window.location.protocol === 'file:' || window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+    }
+
+    function getTraxxoProjectPath(project) {
+      if (isLocalPreview()) return '/traxxo-backend.html?project=' + encodeURIComponent(getProjectSlug(project));
+      return '/traxxo/project/' + getProjectSlug(project);
+    }
+
     function getGoogleDataPath(project) {
       return getProjectPath(project) + '/google';
     }
 
     function getRequestedProjectSlug() {
-      var match = window.location.pathname.match(/^\/project\/([^/]+)\/google$/);
+      var match = window.location.pathname.match(/^\/traxxo\/project\/([^/]+)\/google$/);
       if (match && match[1]) return decodeURIComponent(match[1]).toLowerCase();
       var params = new URLSearchParams(window.location.search);
       return (params.get('project') || '').toLowerCase() || null;
@@ -754,7 +763,9 @@
     }
 
     function syncProjectPath(project) {
-      var target = getGoogleDataPath(project);
+      var target = isLocalPreview()
+        ? '/google-data.html?project=' + encodeURIComponent(getProjectSlug(project))
+        : getTraxxoProjectPath(project) + '/google';
       if (window.location.pathname !== target) {
         window.history.replaceState({}, '', target);
       }

@@ -115,7 +115,7 @@
         Actualizar
       </button>
       <a href="/google-data.html" class="btn btn-ghost" id="gsc-link">Datos GSC</a>
-      <a href="/dashboard.html" class="btn btn-ghost" id="analysis-link">← Dashboard analisis</a>
+      <a href="/traxxo-backend.html" class="btn btn-ghost" id="analysis-link">← Backend Traxxo</a>
     </div>
   </div>
 
@@ -179,8 +179,8 @@
       var { data: client } = await sb.from('clients').select('plan').eq('id', session.user.id).single();
       document.getElementById('header-domain').textContent = currentProject.domain || currentProject.gsc_site_url || 'Sin dominio';
       document.getElementById('header-plan').textContent = formatPlan(client?.plan || 'basic');
-      document.getElementById('analysis-link').href = getProjectPath(currentProject);
-      document.getElementById('gsc-link').href = getGoogleDataPath(currentProject);
+      document.getElementById('analysis-link').href = getTraxxoProjectPath(currentProject);
+      document.getElementById('gsc-link').href = getTraxxoGoogleDataPath(currentProject);
 
       await loadSnapshots();
       await loadDetailData();
@@ -925,9 +925,20 @@
 
     function getProjectPath(project) { return '/project/' + getProjectSlug(project); }
     function getGoogleDataPath(project) { return getProjectPath(project) + '/google'; }
+    function isLocalPreview() {
+      return window.location.protocol === 'file:' || window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+    }
+    function getTraxxoProjectPath(project) {
+      if (isLocalPreview()) return '/traxxo-backend.html?project=' + encodeURIComponent(getProjectSlug(project));
+      return '/traxxo/project/' + getProjectSlug(project);
+    }
+    function getTraxxoGoogleDataPath(project) {
+      if (isLocalPreview()) return '/google-data.html?project=' + encodeURIComponent(getProjectSlug(project));
+      return '/traxxo/project/' + getProjectSlug(project) + '/google';
+    }
 
     function getRequestedProjectSlug() {
-      var match = window.location.pathname.match(/^\/project\/([^/]+)\/ga4$/);
+      var match = window.location.pathname.match(/^\/traxxo\/project\/([^/]+)\/ga4$/);
       if (match && match[1]) return decodeURIComponent(match[1]).toLowerCase();
       var params = new URLSearchParams(window.location.search);
       return (params.get('project') || '').toLowerCase() || null;
@@ -942,7 +953,9 @@
     }
 
     function syncProjectPath(project) {
-      var target = getProjectPath(project) + '/ga4';
+      var target = isLocalPreview()
+        ? '/ga4-data.html?project=' + encodeURIComponent(getProjectSlug(project))
+        : getTraxxoProjectPath(project) + '/ga4';
       if (window.location.pathname !== target) {
         window.history.replaceState({}, '', target);
       }

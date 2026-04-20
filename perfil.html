@@ -468,10 +468,18 @@
       provider: 'google',
       options: {
         scopes: 'email profile https://www.googleapis.com/auth/webmasters.readonly https://www.googleapis.com/auth/adwords https://www.googleapis.com/auth/analytics.readonly',
-        redirectTo: 'https://app.traxxo.ai/perfil.html',
+        redirectTo: getAuthRedirectUrl('/perfil.html'),
         queryParams: { access_type: 'offline', prompt: 'consent select_account' }
       }
     });
+  }
+
+  function getAuthRedirectUrl(path) {
+    var safePath = String(path || '/');
+    if (!safePath.startsWith('/')) safePath = '/' + safePath;
+    var origin = window.location.origin;
+    if (!origin || origin === 'null') return 'https://app.traxxo.ai' + safePath;
+    return origin + safePath;
   }
 
   async function disconnectGoogle(event) {

@@ -906,7 +906,7 @@
     var btn = document.querySelector('#reset-form .btn');
     btn.disabled = true; btn.textContent = 'Enviando...';
     var { error } = await sb.auth.resetPasswordForEmail(email, {
-      redirectTo: 'https://app.traxxo.ai'
+      redirectTo: getAuthRedirectUrl('/')
     });
     btn.disabled = false; btn.textContent = 'Enviar enlace';
     if (error) {
@@ -955,7 +955,7 @@
       password: pass,
       options: {
         data: { name, company },
-        emailRedirectTo: 'https://app.traxxo.ai/perfil.html'
+        emailRedirectTo: getAuthRedirectUrl('/perfil.html')
       }
     });
     btn.disabled = false; btn.textContent = 'Crear cuenta';
@@ -1242,10 +1242,18 @@
       provider: 'google',
       options: {
         scopes: scopeList,
-        redirectTo: 'https://app.traxxo.ai/perfil.html',
+        redirectTo: getAuthRedirectUrl('/perfil.html'),
         queryParams: { access_type: 'offline', prompt: isToolConnection ? 'consent' : 'select_account' }
       }
     });
+  }
+
+  function getAuthRedirectUrl(path) {
+    var safePath = String(path || '/');
+    if (!safePath.startsWith('/')) safePath = '/' + safePath;
+    var origin = window.location.origin;
+    if (!origin || origin === 'null') return 'https://app.traxxo.ai' + safePath;
+    return origin + safePath;
   }
 
   // ─── ONBOARDING ───────────────────────────────────────────

@@ -1,0 +1,501 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Traxxo — Backend interno</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --bg: #09090b;
+      --surface: #111113;
+      --surface-2: #0c0c10;
+      --border: #1f1f23;
+      --text: #fafafa;
+      --muted: #71717a;
+      --accent: #22d3ee;
+      --green: #10b981;
+      --amber: #f59e0b;
+      --red: #ef4444;
+      --font: 'Inter', system-ui, sans-serif;
+    }
+    body { background: var(--bg); color: var(--text); font-family: var(--font); min-height: 100vh; -webkit-font-smoothing: antialiased; }
+    .header { display:flex; align-items:center; justify-content:space-between; gap:16px; padding:12px 24px; border-bottom:1px solid var(--border); background:var(--surface); position:sticky; top:0; z-index:100; }
+    .header-left, .header-right { display:flex; align-items:center; gap:12px; }
+    .header-right { flex-wrap:wrap; justify-content:flex-end; }
+    .logo { display:flex; align-items:center; gap:8px; font-size:16px; font-weight:700; }
+    .divider { width:1px; height:20px; background:var(--border); }
+    .domain-badge, .pill { font-size:12px; color:var(--muted); background:var(--bg); border:1px solid var(--border); padding:5px 10px; border-radius:999px; }
+    .plan-badge { font-size:11px; font-weight:700; padding:4px 10px; border-radius:999px; background:rgba(34,211,238,.1); color:var(--accent); border:1px solid rgba(34,211,238,.2); }
+    .btn { padding:8px 14px; border-radius:10px; font-size:12px; font-weight:600; font-family:var(--font); text-decoration:none; cursor:pointer; border:none; white-space:nowrap; }
+    .btn-ghost { background:none; border:1px solid var(--border); color:var(--muted); }
+    .btn-ghost:hover { color:var(--text); border-color:var(--muted); }
+    .btn-accent { background:var(--accent); color:#000; }
+    .container { max-width:1180px; margin:0 auto; padding:24px; }
+    .card { background:var(--surface); border:1px solid var(--border); border-radius:18px; padding:22px; margin-bottom:16px; }
+    .section-kicker { display:flex; align-items:center; gap:8px; font-size:12px; color:#a1a1aa; text-transform:uppercase; letter-spacing:.08em; font-weight:700; margin-bottom:12px; }
+    .dot { width:8px; height:8px; border-radius:50%; background:var(--accent); }
+    .dot.green { background:var(--green); }
+    .dot.amber { background:var(--amber); }
+    .hero { display:flex; align-items:flex-start; justify-content:space-between; gap:20px; margin-bottom:18px; }
+    .hero h1 { font-size:34px; line-height:1.05; margin-bottom:8px; }
+    .hero p { color:#a1a1aa; line-height:1.7; max-width:760px; }
+    .status-chip { display:inline-flex; align-items:center; padding:7px 12px; border-radius:999px; font-size:12px; font-weight:700; border:1px solid var(--border); background:var(--surface-2); color:#d4d4d8; }
+    .status-chip.good { color:var(--green); background:rgba(16,185,129,.08); border-color:rgba(16,185,129,.22); }
+    .status-chip.warn { color:var(--amber); background:rgba(245,158,11,.08); border-color:rgba(245,158,11,.22); }
+    .grid-2 { display:grid; grid-template-columns:1.1fr .9fr; gap:16px; margin-bottom:16px; }
+    .grid-3 { display:grid; grid-template-columns:repeat(3,1fr); gap:16px; margin-bottom:16px; }
+    .grid-4 { display:grid; grid-template-columns:repeat(4,1fr); gap:12px; }
+    .phase-card, .info-card, .task-card, .source-card, .context-item { background:var(--surface-2); border:1px solid var(--border); border-radius:14px; padding:16px; }
+    .phase-name, .mini-label, .source-title, .context-label { font-size:11px; color:var(--muted); text-transform:uppercase; letter-spacing:.06em; font-weight:700; margin-bottom:10px; }
+    .phase-role, .info-title, .source-big { font-size:28px; font-weight:700; line-height:1.1; margin-bottom:8px; }
+    .phase-detail, .info-copy, .source-copy, .task-reason, .context-value { color:#a1a1aa; line-height:1.6; }
+    .phase-status { display:inline-flex; align-items:center; padding:4px 10px; border-radius:999px; font-size:11px; font-weight:700; margin-bottom:12px; }
+    .phase-status.completed { color:var(--green); background:rgba(16,185,129,.1); border:1px solid rgba(16,185,129,.2); }
+    .phase-status.in_progress { color:var(--amber); background:rgba(245,158,11,.1); border:1px solid rgba(245,158,11,.2); }
+    .phase-status.pending { color:#a1a1aa; background:#0a0a0d; border:1px solid var(--border); }
+    .list-stack { display:flex; flex-direction:column; gap:12px; }
+    .source-actions { display:flex; gap:10px; margin-top:14px; flex-wrap:wrap; }
+    .conn-row { display:flex; align-items:center; gap:14px; padding:14px 0; border-bottom:1px solid rgba(255,255,255,.05); }
+    .conn-row:last-child { border-bottom:none; padding-bottom:0; }
+    .conn-icon { width:42px; height:42px; border-radius:12px; display:flex; align-items:center; justify-content:center; font-size:13px; font-weight:700; border:1px solid transparent; flex-shrink:0; }
+    .conn-info { flex:1; min-width:0; }
+    .conn-name { font-size:16px; font-weight:700; margin-bottom:4px; }
+    .conn-detail { color:var(--muted); font-size:14px; }
+    .conn-badge { padding:6px 12px; border-radius:999px; font-size:12px; font-weight:700; border:1px solid var(--border); }
+    .conn-badge.connected { color:var(--green); background:rgba(16,185,129,.08); border-color:rgba(16,185,129,.22); }
+    .conn-badge.disconnected { color:#d4d4d8; background:#0a0a0d; }
+    .context-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:12px; }
+    .context-label { margin-bottom:10px; }
+    .context-value { font-size:18px; }
+    .context-value.muted { color:#a1a1aa; }
+    .chips { display:flex; gap:8px; flex-wrap:wrap; }
+    .chip { background:rgba(34,211,238,.08); color:var(--accent); border:1px solid rgba(34,211,238,.18); border-radius:999px; padding:5px 10px; font-size:12px; font-weight:600; }
+    .empty-state { color:var(--muted); text-align:center; padding:70px 24px; }
+    @media (max-width: 980px) {
+      .container { padding:16px; }
+      .hero, .grid-2, .grid-3, .grid-4, .context-grid { grid-template-columns:1fr; display:grid; }
+      .hero { gap:12px; }
+      .header { padding:12px 16px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <div class="header-left">
+      <div class="logo">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
+          <rect width="24" height="24" rx="7" fill="#22d3ee" fill-opacity=".12"/>
+          <path d="M5 12h4l2-5 2 10 2-5h2" stroke="#22d3ee" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        traxxo
+      </div>
+      <div class="divider"></div>
+      <div class="domain-badge" id="header-domain">Cargando...</div>
+    </div>
+    <div class="header-right">
+      <span class="plan-badge" id="header-plan">Starter</span>
+      <a href="#" class="btn btn-ghost" id="gsc-link">Datos GSC</a>
+      <a href="#" class="btn btn-ghost" id="ga4-link">Datos GA4</a>
+      <a href="#" class="btn btn-ghost" id="semrush-link">Datos Semrush</a>
+      <a href="#" class="btn btn-ghost" id="client-dashboard-link">Dashboard cliente</a>
+      <a href="/perfil.html" class="btn btn-ghost">Mi cuenta</a>
+    </div>
+  </div>
+
+  <div class="container" id="main-container">
+    <div class="empty-state">Cargando backend interno de Traxxo...</div>
+  </div>
+
+  <script>
+    const SUPABASE_URL = 'https://ghqttckqvjptxhihojey.supabase.co';
+    const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJnaHF0dGNrcXZqcHR4aGlob2pleSIsInJlZiI6ImdocXR0Y2txdmpwdHhoaWhvamV5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU2NDU1OTYsImV4cCI6MjA5MTIyMTU5Nn0.KlPDplMIIWQwx5oafvkfxbsm0dzPb0cbTJpCM83cqK4';
+    const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
+
+    let currentProject = null;
+    let dashboardBrain = null;
+
+    sb.auth.getSession().then(async function({ data: { session } }) {
+      if (!session) { window.location.href = '/'; return; }
+
+      var requestedProjectSlug = getRequestedProjectSlug();
+      var { data: projects } = await sb.from('projects').select('*').eq('client_id', session.user.id).eq('active', true);
+      if (!projects || !projects.length) return renderNoProject();
+
+      currentProject = resolveProject(projects, requestedProjectSlug);
+      if (!currentProject) return renderNoProject('No se ha encontrado ese proyecto.');
+
+      syncProjectPath(currentProject);
+      bindHeader();
+
+      var { data: client } = await sb.from('clients').select('plan').eq('id', session.user.id).single();
+      document.getElementById('header-plan').textContent = formatPlan(client?.plan || 'basic');
+      document.getElementById('header-domain').textContent = currentProject.domain || currentProject.gsc_site_url || 'Sin dominio';
+
+      dashboardBrain = await loadDashboardBrain(currentProject.id);
+      renderBackend();
+    });
+
+    async function loadDashboardBrain(projectId) {
+      try {
+        var res = await fetch(`${SUPABASE_URL}/functions/v1/build-dashboard-snapshot`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': 'Bearer ' + SUPABASE_ANON
+          },
+          body: JSON.stringify({ project_id: projectId })
+        });
+        if (!res.ok) return null;
+        return await res.json();
+      } catch (e) {
+        console.error(e);
+        return null;
+      }
+    }
+
+    function bindHeader() {
+      document.getElementById('gsc-link').href = getTraxxoGooglePath(currentProject);
+      document.getElementById('ga4-link').href = getTraxxoGa4Path(currentProject);
+      document.getElementById('semrush-link').href = getTraxxoSemrushPath(currentProject);
+      document.getElementById('client-dashboard-link').href = getClientProjectPath(currentProject);
+    }
+
+    function renderBackend() {
+      if (!dashboardBrain) {
+        document.getElementById('main-container').innerHTML = '<div class="empty-state">No se pudo cargar la lectura interna de Traxxo.</div>';
+        return;
+      }
+
+      var systemStatus = dashboardBrain.system_status || {};
+      var analysis = dashboardBrain.internal_analysis || {};
+      var context = dashboardBrain.context || {};
+
+      document.getElementById('main-container').innerHTML = `
+        <div class="card">
+          <div class="hero">
+            <div>
+              <div class="section-kicker"><span class="dot"></span>Backend interno Traxxo</div>
+              <h1>${escapeHtml(systemStatus.headline || 'Fase 1 completada')}</h1>
+              <p>${escapeHtml(systemStatus.summary || 'La capa de recoleccion ya esta cerrada y Traxxo puede usar estas fuentes como base operativa.')}</p>
+            </div>
+            <span class="status-chip ${(analysis.status === 'blocked') ? 'warn' : 'good'}">${escapeHtml((analysis.status === 'blocked') ? 'Analisis bloqueado' : 'Base operativa lista')}</span>
+          </div>
+          <div class="grid-4">
+            ${Array.isArray(systemStatus.phases) ? systemStatus.phases.map(renderPhaseItem).join('') : ''}
+          </div>
+        </div>
+
+        <div class="grid-2">
+          <div class="card">
+            <div class="section-kicker"><span class="dot amber"></span>Analisis interno</div>
+            <div class="grid-3" style="margin-bottom:0">
+              ${renderInfoCard('Foco principal', analysis.focus_primary?.title || 'Pendiente', analysis.focus_primary?.reason || 'Todavia no hay lectura interna lista.')}
+              ${renderInfoCard('Riesgo dominante', analysis.risk_primary?.title || 'Pendiente', analysis.risk_primary?.reason || 'Todavia no hay riesgo priorizado.')}
+              ${renderInfoCard('Oportunidad inmediata', analysis.opportunity_primary?.title || 'Pendiente', analysis.opportunity_primary?.reason || 'Todavia no hay oportunidad priorizada.')}
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="section-kicker"><span class="dot green"></span>Fuentes del cerebro</div>
+            <div class="list-stack">
+              ${renderSourceCard('Google Search Console', 'GSC', 'Cobertura organica, queries, pages, countries, devices y search appearance.', getTraxxoGooglePath(currentProject))}
+              ${renderSourceCard('Google Analytics 4', 'GA4', 'Sesiones, usuarios, canales, landing pages, source medium, campañas y eventos clave.', getTraxxoGa4Path(currentProject))}
+              ${renderSourceCard('Semrush', 'SEM', 'Keywords, top 3, top 10, auditoria tecnica y cobertura SEO de mercado.', getTraxxoSemrushPath(currentProject))}
+            </div>
+          </div>
+        </div>
+
+        <div class="grid-2">
+          <div class="card">
+            <div class="section-kicker"><span class="dot green"></span>Conexiones operativas</div>
+            ${buildConnectionItems(dashboardBrain.connections || {}, context).map(renderConnectionItem).join('')}
+          </div>
+
+          <div class="card">
+            <div class="section-kicker"><span class="dot amber"></span>Siguiente trabajo</div>
+            <div class="list-stack">
+              ${renderTaskList(analysis.next_tasks, 'Sin tareas inmediatas registradas.')}
+              ${renderBlockerList(analysis.blockers)}
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="section-kicker"><span class="dot"></span>Contexto operativo del proyecto</div>
+          <div class="context-grid">
+            ${renderContextItem('Tipo de web', formatContextValue(context.site_type, { ecommerce: 'E-commerce', services: 'Servicios', blog: 'Blog', saas: 'SaaS / App' }))}
+            ${renderContextItem('Modelo', formatContextValue(context.business_model, { b2b: 'B2B', b2c: 'B2C', b2b2c: 'Ambos' }))}
+            ${renderContextItem('Mercado principal', formatMarket(context.main_market))}
+            ${renderContextItem('Plataforma', context.platform || 'Sin definir')}
+            ${renderContextItem('Foco prioritario', context.priority_focus || 'Sin foco declarado')}
+            ${renderContextItem('Picos estacionales', context.seasonal_peaks || 'No indicados')}
+            ${renderContextItem('Inversion SEO', formatBudget(context.monthly_seo_budget))}
+            ${renderCompetitorsItem(Array.isArray(context.known_competitors) ? context.known_competitors : [])}
+          </div>
+        </div>
+      `;
+    }
+
+    function renderPhaseItem(item) {
+      var status = item.status || 'pending';
+      var badge = status === 'completed' ? 'Completada' : status === 'in_progress' ? 'En curso' : 'Pendiente';
+      return `
+        <div class="phase-card">
+          <div class="phase-name">${escapeHtml(item.label || 'Fase')}</div>
+          <span class="phase-status ${status}">${escapeHtml(badge)}</span>
+          <div class="phase-role">${escapeHtml(getPhaseRoleLabel(item.code, item.label))}</div>
+          <div class="phase-detail">${escapeHtml(item.detail || '')}</div>
+        </div>`;
+    }
+
+    function renderInfoCard(label, title, copy) {
+      return `
+        <div class="info-card">
+          <div class="mini-label">${escapeHtml(label)}</div>
+          <div class="info-title">${escapeHtml(title)}</div>
+          <div class="info-copy">${escapeHtml(copy)}</div>
+        </div>`;
+    }
+
+    function renderSourceCard(label, big, copy, href) {
+      return `
+        <div class="source-card">
+          <div class="source-title">${escapeHtml(label)}</div>
+          <div class="source-big">${escapeHtml(big)}</div>
+          <div class="source-copy">${escapeHtml(copy)}</div>
+          <div class="source-actions">
+            <a class="btn btn-accent" href="${href}">Abrir fuente</a>
+          </div>
+        </div>`;
+    }
+
+    function renderConnectionItem(item) {
+      var badgeClass = item.connected ? 'conn-badge connected' : 'conn-badge disconnected';
+      var badgeText = item.connected ? 'Conectado' : 'Pendiente';
+      return `
+        <div class="conn-row">
+          <div class="conn-icon" style="background:${item.color}20;border-color:${item.color}40;color:${item.color}">${escapeHtml(item.code || '')}</div>
+          <div class="conn-info">
+            <div class="conn-name">${escapeHtml(item.label || '')}</div>
+            <div class="conn-detail">${escapeHtml(item.detail || '')}</div>
+          </div>
+          <span class="${badgeClass}">${escapeHtml(badgeText)}</span>
+        </div>`;
+    }
+
+    function renderTaskList(tasks, emptyLabel) {
+      if (!Array.isArray(tasks) || !tasks.length) {
+        return `<div class="task-card"><div class="mini-label">Tareas</div><div class="task-reason">${escapeHtml(emptyLabel)}</div></div>`;
+      }
+      return tasks.map(function(item) {
+        return `<div class="task-card"><div class="mini-label">${escapeHtml(item.title || 'Tarea')}</div><div class="task-reason">${escapeHtml(item.reason || '')}</div></div>`;
+      }).join('');
+    }
+
+    function renderBlockerList(blockers) {
+      if (!Array.isArray(blockers) || !blockers.length) return '';
+      return blockers.map(function(item) {
+        return `<div class="task-card"><div class="mini-label">${escapeHtml(item.title || 'Bloqueo')}</div><div class="task-reason">${escapeHtml(item.detail || '')}</div></div>`;
+      }).join('');
+    }
+
+    function renderContextItem(label, value) {
+      var isMuted = !value || value === 'Sin definir' || value === 'No indicados' || value === 'Sin foco declarado' || value === 'Sin competidores declarados';
+      return `
+        <div class="context-item">
+          <div class="context-label">${escapeHtml(label)}</div>
+          <div class="context-value ${isMuted ? 'muted' : ''}">${escapeHtml(value || '—')}</div>
+        </div>`;
+    }
+
+    function renderCompetitorsItem(items) {
+      if (!items.length) return renderContextItem('Competidores conocidos', 'Sin competidores declarados');
+      return `
+        <div class="context-item">
+          <div class="context-label">Competidores conocidos</div>
+          <div class="chips">${items.map(function(item) { return '<span class="chip">' + escapeHtml(item) + '</span>'; }).join('')}</div>
+        </div>`;
+    }
+
+    function buildConnectionItems(connections, context) {
+      var platformValue = context.platform || currentProject?.platform || currentProject?.intake_data?.wizard?.platform || '';
+      var webIntegrations = currentProject?.intake_data?.web_integrations || {};
+      var items = [
+        { code: 'GSC', color: '#4285f4', label: 'Google Search Console', connected: !!connections?.gsc?.connected, detail: connections?.gsc?.label || 'No conectado' },
+        { code: 'GA4', color: '#e8710a', label: 'Google Analytics 4', connected: !!connections?.ga4?.connected, detail: connections?.ga4?.label || 'No conectado' },
+        { code: 'SEM', color: '#22d3ee', label: 'Semrush', connected: !!connections?.semrush?.connected, detail: connections?.semrush?.connected ? 'Fuente activa' : 'No conectado' },
+        { code: 'WEB', color: '#8b5cf6', label: 'Web monitorizada', connected: !!(currentProject?.domain || dashboardBrain?.project?.domain || dashboardBrain?.project?.gsc_site_url), detail: currentProject?.domain || dashboardBrain?.project?.domain || dashboardBrain?.project?.gsc_site_url || 'Sin dominio' }
+      ];
+      return items.concat(buildPlatformConnectionItems(platformValue, webIntegrations));
+    }
+
+    function normalizeProjectDomain(project) {
+      var raw = project?.domain || project?.gsc_site_url || project?.intake_data?.url || '';
+      return String(raw || '').trim().toLowerCase().replace(/^https?:\/\//, '').replace(/^www\./, '').replace(/\/$/, '');
+    }
+
+    function getProjectSlug(project) {
+      var hostname = normalizeProjectDomain(project);
+      if (!hostname) return 'project';
+      var first = hostname.split('.')[0] || hostname;
+      return first.normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '') || 'project';
+    }
+
+    function isLocalPreview() {
+      return window.location.protocol === 'file:' || window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+    }
+
+    function getClientProjectPath(project) {
+      if (isLocalPreview()) return '/dashboard.html?project=' + encodeURIComponent(getProjectSlug(project));
+      return '/project/' + getProjectSlug(project);
+    }
+
+    function getTraxxoProjectPath(project) {
+      if (isLocalPreview()) return '/traxxo-backend.html?project=' + encodeURIComponent(getProjectSlug(project));
+      return '/traxxo/project/' + getProjectSlug(project);
+    }
+
+    function getTraxxoGooglePath(project) {
+      if (isLocalPreview()) return '/google-data.html?project=' + encodeURIComponent(getProjectSlug(project));
+      return '/traxxo/project/' + getProjectSlug(project) + '/google';
+    }
+
+    function getTraxxoGa4Path(project) {
+      if (isLocalPreview()) return '/ga4-data.html?project=' + encodeURIComponent(getProjectSlug(project));
+      return '/traxxo/project/' + getProjectSlug(project) + '/ga4';
+    }
+
+    function getTraxxoSemrushPath(project) {
+      if (isLocalPreview()) return '/semrush-data.html?project=' + encodeURIComponent(getProjectSlug(project));
+      return '/traxxo/project/' + getProjectSlug(project) + '/semrush';
+    }
+
+    function getRequestedProjectSlug() {
+      var match = window.location.pathname.match(/^\/traxxo\/project\/([^/]+)$/);
+      if (match && match[1]) return decodeURIComponent(match[1]).toLowerCase();
+      var params = new URLSearchParams(window.location.search);
+      return (params.get('project') || '').toLowerCase() || null;
+    }
+
+    function resolveProject(projects, requestedSlug) {
+      if (!projects || !projects.length) return null;
+      if (!requestedSlug) return projects[0];
+      return projects.find(function(project) {
+        return getProjectSlug(project) === requestedSlug || String(project.id).toLowerCase() === requestedSlug;
+      }) || null;
+    }
+
+    function syncProjectPath(project) {
+      var target = getTraxxoProjectPath(project);
+      if (window.location.pathname !== target) window.history.replaceState({}, '', target);
+    }
+
+    function formatPlan(plan) {
+      var value = String(plan || 'basic').toLowerCase();
+      if (value === 'early_access') return 'Starter';
+      return value.charAt(0).toUpperCase() + value.slice(1);
+    }
+
+    function formatContextValue(value, labels) {
+      if (!value) return 'Sin definir';
+      return labels[value] || value;
+    }
+
+    function formatMarket(value) {
+      if (!value) return 'Sin definir';
+      try {
+        var label = new Intl.DisplayNames(['es'], { type: 'region' }).of(String(value).toUpperCase());
+        return label ? label + ' (' + String(value).toUpperCase() + ')' : String(value).toUpperCase();
+      } catch (e) {
+        return String(value).toUpperCase();
+      }
+    }
+
+    function formatBudget(value) {
+      if (!value) return 'Sin definir';
+      var map = { '0': 'No invierte todavia', '500': 'Menos de 500€', '1000': '500€ - 1.000€', '3000': '1.000€ - 3.000€', '3000+': 'Mas de 3.000€' };
+      return map[value] || value;
+    }
+
+    function normalizePlatform(value) { return String(value || '').trim().toLowerCase(); }
+
+    function normalizePlatformList(value) {
+      if (Array.isArray(value)) return value.map(normalizePlatform).filter(Boolean);
+      if (!String(value || '').trim()) return [];
+      return String(value).split(',').map(function(item) { return normalizePlatform(item); }).filter(Boolean);
+    }
+
+    function getPlatformCode(value) {
+      var map = { woocommerce: 'WC', wordpress: 'WP', shopify: 'SHP', prestashop: 'PS', shopware: 'SWR', magento: 'MAG', tiendanube: 'TN' };
+      return map[value] || 'PLT';
+    }
+
+    function getPlatformColor(value) {
+      var map = { woocommerce: '#7f54b3', wordpress: '#21759b', shopify: '#95bf47', prestashop: '#df0067', shopware: '#189eff', magento: '#f26322', tiendanube: '#00a8ff' };
+      return map[value] || '#8b5cf6';
+    }
+
+    function formatPlatformLabel(value) {
+      var labels = { woocommerce: 'WooCommerce', wordpress: 'WordPress', shopify: 'Shopify', prestashop: 'PrestaShop', shopware: 'Shopware', magento: 'Magento', tiendanube: 'Tienda Nube' };
+      return labels[value] || value || 'Plataforma';
+    }
+
+    function getPlatformIntegrationState(platform, webIntegrations) {
+      var data = webIntegrations && webIntegrations[platform] ? webIntegrations[platform] : null;
+      if (!data) {
+        return { connected: false, detail: platform === 'wordpress' ? 'Falta completar la conexión web' : 'Falta completar la conexión de la tienda' };
+      }
+      if (platform === 'woocommerce') return { connected: !!(data.url && data.key && data.secret), detail: data.url || 'Store conected' };
+      if (platform === 'shopify') return { connected: !!(data.domain && data.token), detail: data.domain || 'Store conected' };
+      if (platform === 'wordpress') return { connected: !!(data.url && data.username && data.app_password), detail: data.url || 'Base web conectada' };
+      if (platform === 'prestashop') return { connected: !!(data.url && data.key), detail: data.url || 'Store conected' };
+      return { connected: false, detail: 'Conexión todavía no configurada' };
+    }
+
+    function formatPlatformConnectionDetail(value, count, state) {
+      if (count > 1) return state.connected ? count + ' conexiones activas' : count + ' conexiones declaradas';
+      if (state.detail) return state.detail;
+      if (value === 'wordpress') return 'Base web declarada';
+      return 'Store declarada';
+    }
+
+    function buildPlatformConnectionItems(platformValue, webIntegrations) {
+      var values = normalizePlatformList(platformValue);
+      if (!values.length) return [];
+      var counts = {};
+      values.forEach(function(item) { counts[item] = (counts[item] || 0) + 1; });
+      return Object.keys(counts).map(function(key) {
+        var state = getPlatformIntegrationState(key, webIntegrations);
+        return {
+          code: getPlatformCode(key),
+          color: getPlatformColor(key),
+          label: formatPlatformLabel(key),
+          connected: state.connected,
+          detail: formatPlatformConnectionDetail(key, counts[key], state)
+        };
+      });
+    }
+
+    function getPhaseRoleLabel(code, fallback) {
+      var map = { '0.5.2': 'Recolector', '2': 'Analisis interno', '3': 'Analisis competitivo', '4': 'The Thinker' };
+      return map[String(code || '')] || fallback || 'Fase';
+    }
+
+    function escapeHtml(value) {
+      return String(value == null ? '' : value)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+    }
+
+    function renderNoProject(message) {
+      document.getElementById('main-container').innerHTML = `<div class="empty-state">${escapeHtml(message || 'No hay proyectos configurados para este cliente.')}</div>`;
+    }
+  </script>
+</body>
+</html>

@@ -110,7 +110,7 @@
       </button>
       <a href="/google-data.html" class="btn btn-ghost" id="gsc-link">Datos GSC</a>
       <a href="/ga4-data.html" class="btn btn-ghost" id="ga4-link">Datos GA4</a>
-      <a href="/dashboard.html" class="btn btn-ghost" id="analysis-link">← Dashboard analisis</a>
+      <a href="/traxxo-backend.html" class="btn btn-ghost" id="analysis-link">← Backend Traxxo</a>
     </div>
   </div>
 
@@ -152,9 +152,9 @@
       var { data: client } = await sb.from('clients').select('plan').eq('id', session.user.id).single();
       document.getElementById('header-domain').textContent = currentProject.domain || currentProject.gsc_site_url || 'Sin dominio';
       document.getElementById('header-plan').textContent = formatPlan(client?.plan || 'basic');
-      document.getElementById('analysis-link').href = getProjectPath(currentProject);
-      document.getElementById('gsc-link').href = getProjectPath(currentProject) + '/google';
-      document.getElementById('ga4-link').href = getProjectPath(currentProject) + '/ga4';
+      document.getElementById('analysis-link').href = getTraxxoProjectPath(currentProject);
+      document.getElementById('gsc-link').href = getTraxxoGooglePath(currentProject);
+      document.getElementById('ga4-link').href = getTraxxoGa4Path(currentProject);
 
       await loadSnapshots();
       await loadDetailData();
@@ -627,8 +627,23 @@
       return first.normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '') || 'project';
     }
     function getProjectPath(project) { return '/project/' + getProjectSlug(project); }
+    function isLocalPreview() {
+      return window.location.protocol === 'file:' || window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+    }
+    function getTraxxoProjectPath(project) {
+      if (isLocalPreview()) return '/traxxo-backend.html?project=' + encodeURIComponent(getProjectSlug(project));
+      return '/traxxo/project/' + getProjectSlug(project);
+    }
+    function getTraxxoGooglePath(project) {
+      if (isLocalPreview()) return '/google-data.html?project=' + encodeURIComponent(getProjectSlug(project));
+      return '/traxxo/project/' + getProjectSlug(project) + '/google';
+    }
+    function getTraxxoGa4Path(project) {
+      if (isLocalPreview()) return '/ga4-data.html?project=' + encodeURIComponent(getProjectSlug(project));
+      return '/traxxo/project/' + getProjectSlug(project) + '/ga4';
+    }
     function getRequestedProjectSlug() {
-      var match = window.location.pathname.match(/^\/project\/([^/]+)\/semrush$/);
+      var match = window.location.pathname.match(/^\/traxxo\/project\/([^/]+)\/semrush$/);
       if (match && match[1]) return decodeURIComponent(match[1]).toLowerCase();
       var params = new URLSearchParams(window.location.search);
       return (params.get('project') || '').toLowerCase() || null;
@@ -641,7 +656,9 @@
       }) || null;
     }
     function syncProjectPath(project) {
-      var target = getProjectPath(project) + '/semrush';
+      var target = isLocalPreview()
+        ? '/semrush-data.html?project=' + encodeURIComponent(getProjectSlug(project))
+        : getTraxxoProjectPath(project) + '/semrush';
       if (window.location.pathname !== target) window.history.replaceState({}, '', target);
     }
     function fmtNum(n) {
