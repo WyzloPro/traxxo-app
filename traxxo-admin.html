@@ -102,17 +102,35 @@
         return;
       }
 
-      const res = await fetch(`${SUPABASE_URL}/functions/v1/list-admin-projects`, {
-        method: 'GET',
-        headers: { Authorization: 'Bearer ' + session.access_token }
-      });
-      const data = await res.json();
-      if (!res.ok || data.error) {
-        document.getElementById('main-container').innerHTML = '<div class="empty-state">' + escapeHtml(data.error || 'No se pudo cargar la vista admin.') + '</div>';
-        return;
-      }
+      try {
+        const res = await fetch(`${SUPABASE_URL}/functions/v1/list-admin-projects`, {
+          method: 'GET',
+          headers: { Authorization: 'Bearer ' + session.access_token }
+        });
 
-      renderAdmin(data);
+        const raw = await res.text();
+        let data = null;
+        try {
+          data = raw ? JSON.parse(raw) : {};
+        } catch (_) {
+          data = { error: raw || 'Respuesta no JSON del endpoint admin' };
+        }
+
+        if (!res.ok || data.error) {
+          document.getElementById('main-container').innerHTML =
+            '<div class="empty-state">' +
+            escapeHtml(data.error || ('Error admin · HTTP ' + res.status)) +
+            '<br><br><span style="font-size:12px">Sesión actual: ' + escapeHtml(email) + '</span></div>';
+          return;
+        }
+
+        renderAdmin(data);
+      } catch (error) {
+        document.getElementById('main-container').innerHTML =
+          '<div class="empty-state">No se pudo conectar con la vista admin.<br><br><span style="font-size:12px">' +
+          escapeHtml(String(error && error.message ? error.message : error || 'Error desconocido')) +
+          '</span></div>';
+      }
     });
 
     function renderAdmin(data) {
