@@ -112,6 +112,7 @@
   <script>
     const SUPABASE_URL = 'https://ghqttckqvjptxhihojey.supabase.co';
     const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJnaHF0dGNrcXZqcHR4aGlob2pleSIsInJlZiI6ImdocXR0Y2txdmpwdHhoaWhvamV5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU2NDU1OTYsImV4cCI6MjA5MTIyMTU5Nn0.KlPDplMIIWQwx5oafvkfxbsm0dzPb0cbTJpCM83cqK4';
+    const ADMIN_EMAILS = ['danielpetermanns@gmail.com'];
     const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
 
     let currentProject = null;
@@ -119,6 +120,27 @@
 
     sb.auth.getSession().then(async function({ data: { session } }) {
       if (!session) { window.location.href = '/'; return; }
+      const isAdmin = ADMIN_EMAILS.includes(String(session.user.email || '').toLowerCase());
+      const params = new URLSearchParams(window.location.search);
+      const adminProjectId = params.get('project_id');
+
+      if (isAdmin && adminProjectId) {
+        dashboardBrain = await loadDashboardBrain(adminProjectId);
+        if (!dashboardBrain) return renderNoProject('No se pudo cargar ese proyecto del backend interno.');
+        currentProject = {
+          id: adminProjectId,
+          domain: dashboardBrain.project?.domain || null,
+          gsc_site_url: dashboardBrain.project?.gsc_site_url || null,
+          platform: dashboardBrain.context?.platform || null,
+          intake_data: {}
+        };
+        syncProjectPath(currentProject);
+        bindHeader();
+        document.getElementById('header-plan').textContent = dashboardBrain.header?.plan_label || 'Starter';
+        document.getElementById('header-domain').textContent = currentProject.domain || currentProject.gsc_site_url || 'Sin dominio';
+        renderBackend();
+        return;
+      }
 
       var requestedProjectSlug = getRequestedProjectSlug();
       var { data: projects } = await sb.from('projects').select('*').eq('client_id', session.user.id).eq('active', true);

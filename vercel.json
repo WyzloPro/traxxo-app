@@ -1,6 +1,10 @@
 {
   "rewrites": [
     {
+      "source": "/traxxo/admin",
+      "destination": "/traxxo-admin.html"
+    },
+    {
       "source": "/traxxo/project/:slug",
       "destination": "/traxxo-backend.html"
     },

@@ -142,6 +142,7 @@
   
   <div class="header-buttons">
     <a href="/dashboard.html" class="btn btn-ghost" id="dashboard-link">Dashboard</a>
+    <a href="/traxxo/admin" class="btn btn-ghost" id="traxxo-admin-link" style="display:none">Admin Traxxo</a>
     <button type="button" class="btn btn-ghost" onclick="logout()">Cerrar sesión</button>
   </div>
 </div>
@@ -342,6 +343,7 @@
   let _gscSiteUrl = null;
   let _signedInWithGoogle = false;
   const GOOGLE_TOOLS_AUTH_FLAG = 'traxxo_google_tools_auth';
+  const TRAXXO_ADMIN_EMAILS = ['danielpetermanns@gmail.com'];
 
   async function syncGoogleTokensFromSession(session) {
     const toolsAuthStarted = localStorage.getItem(GOOGLE_TOOLS_AUTH_FLAG) === '1';
@@ -393,6 +395,10 @@
 
     // Email
     document.getElementById('profile-email').textContent = session.user.email || '—';
+    const adminLink = document.getElementById('traxxo-admin-link');
+    if (adminLink && TRAXXO_ADMIN_EMAILS.includes(String(session.user.email || '').toLowerCase())) {
+      adminLink.style.display = 'inline-flex';
+    }
 
     // Cargar datos del usuario
     const { data: client } = await sb.from('clients').select('*').eq('id', _userId).single();
