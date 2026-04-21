@@ -1,6 +1,31 @@
 {
   "redirects": [
     {
+      "source": "/traxxo-admin.html",
+      "destination": "https://admin.traxxo.ai",
+      "permanent": true
+    },
+    {
+      "source": "/traxxo-backend.html",
+      "destination": "https://admin.traxxo.ai",
+      "permanent": true
+    },
+    {
+      "source": "/google-data.html",
+      "destination": "https://admin.traxxo.ai",
+      "permanent": true
+    },
+    {
+      "source": "/ga4-data.html",
+      "destination": "https://admin.traxxo.ai",
+      "permanent": true
+    },
+    {
+      "source": "/semrush-data.html",
+      "destination": "https://admin.traxxo.ai",
+      "permanent": true
+    },
+    {
       "source": "/traxxo/admin",
       "destination": "https://admin.traxxo.ai",
       "permanent": true
@@ -24,24 +49,27 @@
       "source": "/traxxo/project/:slug/semrush",
       "destination": "https://admin.traxxo.ai/project/:slug/semrush",
       "permanent": true
+    },
+    {
+      "source": "/project/:slug/google",
+      "destination": "https://admin.traxxo.ai/project/:slug/google",
+      "permanent": true
+    },
+    {
+      "source": "/project/:slug/ga4",
+      "destination": "https://admin.traxxo.ai/project/:slug/ga4",
+      "permanent": true
+    },
+    {
+      "source": "/project/:slug/semrush",
+      "destination": "https://admin.traxxo.ai/project/:slug/semrush",
+      "permanent": true
     }
   ],
   "rewrites": [
     {
       "source": "/project/:slug",
       "destination": "/dashboard.html"
-    },
-    {
-      "source": "/project/:slug/google",
-      "destination": "/google-data.html"
-    },
-    {
-      "source": "/project/:slug/ga4",
-      "destination": "/ga4-data.html"
-    },
-    {
-      "source": "/project/:slug/semrush",
-      "destination": "/semrush-data.html"
     }
   ]
 }
