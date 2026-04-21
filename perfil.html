@@ -142,7 +142,7 @@
   
   <div class="header-buttons">
     <a href="/dashboard.html" class="btn btn-ghost" id="dashboard-link">Dashboard</a>
-    <a href="/traxxo/admin" class="btn btn-ghost" id="traxxo-admin-link" style="display:none">Admin Traxxo</a>
+    <a href="https://admin.traxxo.ai" class="btn btn-ghost" id="traxxo-admin-link" onclick="openTraxxoAdmin(event)" style="display:none">Admin Traxxo</a>
     <button type="button" class="btn btn-ghost" onclick="logout()">Cerrar sesión</button>
   </div>
 </div>
@@ -701,6 +701,15 @@
     if (session?.access_token) params.set('access_token', session.access_token);
     if (session?.refresh_token) params.set('refresh_token', session.refresh_token);
     return TRAXXO_ADMIN_BASE_URL + '/?' + params.toString();
+  }
+
+  async function openTraxxoAdmin(event) {
+    if (event) event.preventDefault();
+    const adminLink = document.getElementById('traxxo-admin-link');
+    const { data: { session } } = await sb.auth.getSession();
+    const target = buildAdminHandoffUrl(session);
+    if (adminLink) adminLink.href = target;
+    window.location.href = target;
   }
 
   function getProjectSlug(project) {
