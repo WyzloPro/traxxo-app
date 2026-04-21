@@ -332,6 +332,7 @@
   const SUPABASE_URL = 'https://ghqttckqvjptxhihojey.supabase.co';
   const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdocXR0Y2txdmpwdHhoaWhvamV5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU2NDU1OTYsImV4cCI6MjA5MTIyMTU5Nn0.KlPDplMIIWQwx5oafvkfxbsm0dzPb0cbTJpCM83cqK4';
   const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
+  const TRAXXO_ADMIN_BASE_URL = 'https://admin.traxxo.ai';
 
   let _userId = null;
   let _projectId = null;
@@ -397,6 +398,7 @@
     document.getElementById('profile-email').textContent = session.user.email || '—';
     const adminLink = document.getElementById('traxxo-admin-link');
     if (adminLink && TRAXXO_ADMIN_EMAILS.includes(String(session.user.email || '').toLowerCase())) {
+      adminLink.href = buildAdminHandoffUrl(session);
       adminLink.style.display = 'inline-flex';
     }
 
@@ -692,6 +694,13 @@
       .replace(/^https?:\/\//, '')
       .replace(/^www\./, '')
       .replace(/\/$/, '');
+  }
+
+  function buildAdminHandoffUrl(session) {
+    const params = new URLSearchParams();
+    if (session?.access_token) params.set('access_token', session.access_token);
+    if (session?.refresh_token) params.set('refresh_token', session.refresh_token);
+    return TRAXXO_ADMIN_BASE_URL + '/?' + params.toString();
   }
 
   function getProjectSlug(project) {
