@@ -1,25 +1,32 @@
 {
-  "rewrites": [
+  "redirects": [
     {
       "source": "/traxxo/admin",
-      "destination": "/traxxo-admin.html"
+      "destination": "https://admin.traxxo.ai",
+      "permanent": true
     },
     {
       "source": "/traxxo/project/:slug",
-      "destination": "/traxxo-backend.html"
+      "destination": "https://admin.traxxo.ai/project/:slug",
+      "permanent": true
     },
     {
       "source": "/traxxo/project/:slug/google",
-      "destination": "/google-data.html"
+      "destination": "https://admin.traxxo.ai/project/:slug/google",
+      "permanent": true
     },
     {
       "source": "/traxxo/project/:slug/ga4",
-      "destination": "/ga4-data.html"
+      "destination": "https://admin.traxxo.ai/project/:slug/ga4",
+      "permanent": true
     },
     {
       "source": "/traxxo/project/:slug/semrush",
-      "destination": "/semrush-data.html"
-    },
+      "destination": "https://admin.traxxo.ai/project/:slug/semrush",
+      "permanent": true
+    }
+  ],
+  "rewrites": [
     {
       "source": "/project/:slug",
       "destination": "/dashboard.html"
