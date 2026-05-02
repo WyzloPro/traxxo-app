@@ -92,8 +92,8 @@
     const ADMIN_EMAILS = ['danielpetermanns@gmail.com', 'marianneroche80@gmail.com'];
     const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
 
-    sb.auth.getSession().then(async function({ data: { session } }) {
-      if (!session) { window.location.href = '/'; return; }
+   sb.auth.getSession().then(async function({ data: { session } }) {
+  if (!session) { window.location.href = '/'; return; }
       const email = String(session.user.email || '').toLowerCase();
       document.getElementById('admin-email').textContent = email || 'Admin';
 
