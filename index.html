@@ -163,9 +163,15 @@
       traxxo
     </div>
 
-    <div class="tabs">
+    <!-- Registro público cerrado durante private beta. Reactivar este bloque cuando se abra la fase comercial. -->
+    <div class="tabs" style="display:none">
       <button class="tab-btn active" onclick="switchTab('login')" data-i18n="login"><span>Entrar</span></button>
       <button class="tab-btn" onclick="switchTab('register')" data-i18n="register"><span>Registro</span></button>
+    </div>
+
+    <div style="margin-bottom:24px;padding:14px 16px;border-radius:12px;border:1px solid rgba(245,158,11,.18);background:rgba(245,158,11,.06);font-size:13px;color:#fbbf24;line-height:1.5">
+      <strong>Private beta</strong> · El registro público está cerrado.<br>
+      <span style="color:#c4c4cb">Solicita acceso desde <a href="https://www.traxxo.ai/#waitlist" style="color:var(--accent);text-decoration:none">traxxo.ai</a>.</span>
     </div>
 
     <!-- LOGIN -->
