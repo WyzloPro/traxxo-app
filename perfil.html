@@ -142,7 +142,7 @@
   
   <div class="header-buttons">
     <a href="/dashboard.html" class="btn btn-ghost" id="dashboard-link">Dashboard</a>
-    <a href="https://admin.traxxo.ai" class="btn btn-ghost" id="traxxo-admin-link" onclick="openTraxxoAdmin(event)" style="display:none">Admin Traxxo</a>
+    <a href="#" class="btn btn-ghost" id="traxxo-admin-link" onclick="openTraxxoAdmin(event)" style="display:none">Admin Traxxo</a>
     <button type="button" class="btn btn-ghost" onclick="logout()">Cerrar sesión</button>
   </div>
 </div>
@@ -697,19 +697,39 @@
   }
 
   function buildAdminHandoffUrl(session) {
+    if (!session?.access_token) return null;
     const params = new URLSearchParams();
-    if (session?.access_token) params.set('access_token', session.access_token);
-    if (session?.refresh_token) params.set('refresh_token', session.refresh_token);
+    params.set('access_token', session.access_token);
+    if (session.refresh_token) params.set('refresh_token', session.refresh_token);
     return TRAXXO_ADMIN_BASE_URL + '/?' + params.toString();
   }
 
   async function openTraxxoAdmin(event) {
     if (event) event.preventDefault();
     const adminLink = document.getElementById('traxxo-admin-link');
-    const { data: { session } } = await sb.auth.getSession();
-    const target = buildAdminHandoffUrl(session);
-    if (adminLink) adminLink.href = target;
-    window.location.href = target;
+
+    // 1. Intentar usar el href ya pre-construido en initProfilePage (sesión fresca)
+    const preBuilt = adminLink?.getAttribute('href') || '';
+    if (preBuilt.includes('access_token=eyJ')) {
+      window.location.href = preBuilt;
+      return;
+    }
+
+    // 2. Fallback: pedir sesión a Supabase ahora
+    try {
+      const { data: { session }, error } = await sb.auth.getSession();
+      if (error) throw error;
+      const target = buildAdminHandoffUrl(session);
+      if (!target) {
+        alert('No hay sesión activa. Vuelve a iniciar sesión y reintenta.');
+        return;
+      }
+      if (adminLink) adminLink.href = target;
+      window.location.href = target;
+    } catch (err) {
+      console.error('openTraxxoAdmin error:', err);
+      alert('No se pudo abrir Admin Traxxo: ' + (err?.message || err));
+    }
   }
 
   function getProjectSlug(project) {
