@@ -743,8 +743,10 @@
     return first || 'project';
   }
 
+  // Ruta canónica del dashboard cliente: /dashboard.html?project=<slug>
+  // (el legacy /project/<slug> ya no resuelve en Vercel — vercel.json rewrites eliminados)
   function getProjectPath(project) {
-    return '/project/' + getProjectSlug(project);
+    return '/dashboard.html?project=' + encodeURIComponent(getProjectSlug(project));
   }
 
   function normalizePlatformValue(value) {

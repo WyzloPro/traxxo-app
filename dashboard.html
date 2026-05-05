@@ -1190,20 +1190,24 @@ function getProjectSlug(project) {
     .replace(/^-+|-+$/g, '') || 'project';
 }
 
+// Ruta canónica del dashboard cliente: /dashboard.html?project=<slug>
+// (el legacy /project/<slug> ya no resuelve en Vercel — vercel.json rewrites eliminados)
 function getProjectPath(project) {
-  return '/project/' + getProjectSlug(project);
+  return '/dashboard.html?project=' + encodeURIComponent(getProjectSlug(project));
 }
 
+// Las rutas a las páginas de detalle (Google/GA4/Semrush) viven en el panel admin
+// (admin.traxxo.ai). Se mantienen como helpers internos sin uso externo en este archivo.
 function getGoogleDataPath(project) {
-  return getProjectPath(project) + '/google';
+  return getProjectPath(project) + '&view=google';
 }
 
 function getGa4DataPath(project) {
-  return getProjectPath(project) + '/ga4';
+  return getProjectPath(project) + '&view=ga4';
 }
 
 function getSemrushDataPath(project) {
-  return getProjectPath(project) + '/semrush';
+  return getProjectPath(project) + '&view=semrush';
 }
 
 function escapeHtml(value) {
@@ -1231,10 +1235,15 @@ function resolveProject(projects, requestedSlug) {
 }
 
 function syncProjectPath(project) {
-  var target = getProjectPath(project);
-  if (window.location.pathname !== target) {
-    window.history.replaceState({}, '', target);
-  }
+  // La página cliente vive en /dashboard.html?project=<slug>. Solo se reescribe
+  // la URL si el slug en la query no coincide con el del proyecto activo.
+  var slug = getProjectSlug(project);
+  var currentParams = new URLSearchParams(window.location.search);
+  if (currentParams.get('project') === slug) return;
+  currentParams.set('project', slug);
+  var qs = currentParams.toString();
+  var target = window.location.pathname + (qs ? '?' + qs : '');
+  window.history.replaceState({}, '', target);
 }
 
 // ── HELPERS ───────────────────────────────────────────────────
